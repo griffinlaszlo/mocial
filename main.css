@@ -1,0 +1,341 @@
+
+
+.headshot {
+    /* Place the image to the right side of the container */
+    float: right; 
+    /* Set a decent size for the image */
+    width: 300px; /* Adjust the width as needed */
+    height: auto; /* This keeps the aspect ratio of the image */
+    margin: 0 550px 10px 5px; /* Adds some space around the image */
+    border: 2px solid black
+}
+
+.center-container {
+    display: flex; /* Use flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100%; /* Take full height of the viewport */
+}
+
+.popup {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top of other content */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black with opacity */
+    border-width: 20ch;
+}
+
+
+.popup-content {
+    position: absolute; /* Changed from 'margin' to 'position' */
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px; /* Fixed width */
+    /* Remove margin and add initial top and left values */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: red;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+
+body {
+    font-family: 'W95FA', sans-serif;
+   /* font-family: 'courier-prime.regular'; */
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #;
+    background-color: #008080;
+}
+
+header {
+    font-family: 'W95FA', sans-serif;
+    /*font-family: 'Courier New', Courier, monospace; */
+    background: rgb(0, 0, 0);
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+
+nav ul {
+    list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 20px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+
+main {
+    font-family: 'Courier New', Courier, monospace;
+    padding: 20px;
+}
+
+footer {
+
+        font-family: 'W95FA', sans-serif;
+    /*font-family: 'Courier New', Courier, monospace; */
+    background: rgb(0, 0, 0);
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    text-align: center;
+    padding: 1px 0; /* Reduced padding for closer text */
+    background: #C0C0C0;
+    color: #ffffff;
+    position: fixed; /* Stick to the bottom */
+    bottom: 0; /* At the very bottom */
+    width: 100%; /* Full width */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* for virgil icon in footer */
+.small-image {
+    width: 200px;
+}
+
+#computer-icon {
+    position: absolute;
+    top: 150px;  /* Adjust as needed for padding from the top */
+    right: 10px; /* Adjust as needed for padding from the right */
+    width: 100px; /* Adjust as needed */
+    height: auto; /* Maintain aspect ratio */
+}
+
+#folder-icon {
+    position: absolute;
+    top: 215px;  /* Adjust as needed for padding from the top */
+    right: 10px; /* Adjust as needed for padding from the right */
+    width: 100px; /* Adjust as needed */
+    height: auto; /* Maintain aspect ratio */
+}
+
+#google-icon {
+    cursor: pointer; /* Indicates the icon is clickable */
+    position: absolute;
+    top: 300px;  /* Adjust as needed for padding from the top */
+    right: 38px; /* Adjust as needed for padding from the right */
+    width: 40px; /* Adjust as needed */
+    height: auto; /* Maintain aspect ratio */
+
+
+}
+
+
+
+
+#projects-by-me, #about-me {
+    font-family: 'Courier New', Courier, monospace;
+    white-space: pre-wrap; /* Preserves spaces and line breaks */
+    /* Other styling as needed */
+    width: 40vw; /* 50% of the viewport width */
+    color: 0000000;
+    border-color: #888;
+    border-width: 2;
+    background-color: #ffffff;
+
+    padding: 0px; /* Optional padding for better spacing */
+    box-sizing: border-box; /* Include padding in the width calculation */
+    /* Add other styling as needed */
+}
+
+
+
+
+body {
+    font-family: 'courier-prime.regular';
+	font-size: var(--main-fontsize);
+    line-height: var(--main-lineheight);
+    overflow: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.clearafter:after{
+    content: '';
+    display: block;
+    clear: both;
+}
+
+
+/* WINDOWS
+*********************************************************/
+.windows-header-wrapper {
+    padding: 2px;
+    background: rgb(51,78,165);
+    background: linear-gradient(90deg, rgba(51,78,165,1) 0%, rgba(76,127,193,1) 100%);
+    position: relative;
+}
+.window-title {
+    font-size: 0.75vw;
+    line-height: 1.2vw;
+    color: #fff;
+    width: calc(75%);
+    float: left;
+    text-align: left;
+}
+.window-icons {
+    text-align: right;
+    float: left;
+    width: 25%;
+}
+.window-icons img {
+    height: 0.8vw;
+    margin-top: 0.1vw;
+    margin-left: 3px;
+    border: 1px outset #dad7d2;
+    cursor: pointer;
+}
+
+
+
+/* GENERAL POPUP
+*********************************************************/
+.popup-window {
+    text-align: right;
+    width: 32vw;
+    position: absolute;
+    z-index: 10000;
+    border: 4px ridge #d8d8d8;
+}
+
+.popup-window.iconize .popup-inner-wrapper {
+    display: none;
+}
+/*
+.popup-window.resize {
+    width: 50vw;
+    left: 50vw;
+    top: 0;
+    margin-top: 0;
+    height: calc(100vh);
+    background-color: #fff;
+}
+.popup-window.resize .popup-inner-wrapper {
+    margin-top: 14vh;
+}
+*/
+
+
+.popup-window .windows-header-wrapper {
+    top: 0;
+}
+.popup-inner-wrapper {
+    padding: 0;
+    background-color: #fff;
+}
+.popup-inner-wrapper .inner-title {
+    text-align: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 13px;
+}
+.popup-close-wrapper span {
+    cursor: pointer;
+}
+.popup-window .popup-inner-wrapper img {
+    width: 100%;
+    display: block;
+}
+
+/* CANARY YELLOW
+*********************************************************/
+#canary-yellow-wrapper {
+    text-align: right;
+    margin-bottom: 2vw;
+    width: 28vw;
+    position: absolute;
+    z-index: 10000;
+    left: 5vw;
+    top: 40vw;
+    border: 4px ridge #d8d8d8;
+}
+
+
+/* TWITTERBOT YT VIDEO
+*********************************************************/
+#postmodern-wrapper {
+    text-align: right;
+    margin-bottom: 2vw;
+    width: 32vw;
+    position: absolute;
+    z-index: 10000;
+    right: 10vw;
+    top: 30vw;
+    border: 4px ridge #d8d8d8;
+}
+
+
+
+
+
+
+
+
+@media screen and (max-width: 960px) {
+.popup-window {
+    position: inherit !important;
+    width: calc(100% - 20px) !important;
+    margin-left: 10px !important;
+}
+.window-title {
+    font-size: 13px;
+    line-height: 16px;
+}
+.window-icons img {
+    height: 13px;
+    margin-top: 0.1vw;
+    vertical-align: middle;
+}
+
+}
+
+@media screen and (max-width: 600px) {
+    #about-me, #projects {
+        width: 90vw; /* Wider on small screens */
+    }
+}
+
+
+
+.pill-postmodern {
+    border-radius: 5vw;
+    border: 1px solid #f00;
+    color: #f00;
+    font-size: 13px;
+    line-height: 20px;
+    display: inline-block;
+    padding: 0 5px;
+}
+.pill-postmodern:hover {
+    color: #f00;
+}
