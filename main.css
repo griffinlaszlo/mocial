@@ -294,6 +294,19 @@ body {
     border: 4px ridge #d8d8d8;
 }
 
+/* SNAPCHAT NOW PLAYING
+*********************************************************/
+#snapmap-wrapper {
+    text-align: right;
+    margin-bottom: 2vw;
+    width: 32vw;
+    position: absolute;
+    z-index: 10000;
+    left: 5vw;
+    top: 5vw;
+    border: 4px ridge #d8d8d8;
+}
+
 
 
 

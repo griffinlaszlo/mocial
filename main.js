@@ -85,6 +85,9 @@ $(document).ready(function() {
 $(document).ready(function() {
     $("#postmodern-wrapper").draggable();
 });
+$(document).ready(function() {
+    $("#snapmap-wrapper").draggable();
+});
 
 
 
@@ -147,21 +150,6 @@ function typeWriter(text, elementId, speed, callback) {
     typing();
 }
 
-"I was born in London on July 1st, 2002. "
-
-
 const title = "mocial"
-//const aboutMeH = "You've come to the right place."
-// const aboutMeText = "ah blah blah bla.";
-const projectsH = "Projects"
-const projectsText = "My professional journey is marked by a series of exciting projects that showcase my expertise in social media and content creation. Notably, as a founding member of Chipotle's inaugural Creator Class, I played a pivotal role in shaping the brand's future through exclusive partnerships and content creation. My work with Snap Inc. involved advising on UX and UI improvements, significantly impacting how creators engage with the platform. One of my unique projects was the development of a fully automated Twitter bot, a venture that deepened my understanding of web development and the integration of social media with advanced programming concepts. Additionally, my role as the Head of Content at YOKE saw me managing content across various social media platforms, connecting with brands, and strategizing on content development. My freelance work as a Video Editor for RapTV further allowed me to hone my skills in trend identification and accessible content creation. These sections provide a succinct yet comprehensive overview of your professional background and highlight your key skills and experiences.";
 
-typeWriter(title, 'title', 40, function() {
-    typeWriter(aboutMeH, 'aboutMeH', 1, function() {
-        typeWriter(aboutMeText, 'about-me',1, function() {
-            typeWriter(projectsH, 'projectsH', 100, function() {
-                typeWriter(projectsText, 'projects-by-me', 5); // No callback needed for the last call
-            });
-        });
-    });
-});
+typeWriter(title, 'title', 40);

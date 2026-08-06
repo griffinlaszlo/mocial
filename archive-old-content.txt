@@ -1,0 +1,17 @@
+Archived copy that used to be referenced (but never rendered, due to a JS bug) in main.js.
+Kept here for reference in case any of it is useful for future bio/copy writing.
+
+---
+
+title (still in use, unaffected):
+mocial
+
+---
+
+projectsH (was: heading for a "Projects" section):
+Projects
+
+---
+
+projectsText (was: Griffin's solo bio/career copy):
+My professional journey is marked by a series of exciting projects that showcase my expertise in social media and content creation. Notably, as a founding member of Chipotle's inaugural Creator Class, I played a pivotal role in shaping the brand's future through exclusive partnerships and content creation. My work with Snap Inc. involved advising on UX and UI improvements, significantly impacting how creators engage with the platform. One of my unique projects was the development of a fully automated Twitter bot, a venture that deepened my understanding of web development and the integration of social media with advanced programming concepts. Additionally, my role as the Head of Content at YOKE saw me managing content across various social media platforms, connecting with brands, and strategizing on content development. My freelance work as a Video Editor for RapTV further allowed me to hone my skills in trend identification and accessible content creation. These sections provide a succinct yet comprehensive overview of your professional background and highlight your key skills and experiences.
