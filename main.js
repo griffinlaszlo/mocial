@@ -218,8 +218,68 @@ function setHomeIconVisual(asSettings) {
 // animates in from that icon's position instead of just snapping into view.
 var POPUP_FLY_IN = true;
 
+// Below 960px the floating-window layout can't work - windows stack in
+// document flow and the icon column sits on top of them. Two treatments are
+// built so they can be compared on a real phone:
+//
+//   "stacked"    - icon column stays as the desktop, windows stack below it,
+//                  opening one scrolls you to it
+//   "fullscreen" - one window at a time covering the viewport, close to return
+//
+// Override per visit with ?mobile=stacked or ?mobile=fullscreen.
+var MOBILE_TREATMENT = "stacked";
+(function() {
+    var choice = new URLSearchParams(window.location.search).get("mobile");
+    if (choice === "stacked" || choice === "fullscreen") MOBILE_TREATMENT = choice;
+    document.body.classList.add("mobile-" + MOBILE_TREATMENT);
+})();
+
+function isMobileLayout() {
+    return window.matchMedia("(max-width: 960px)").matches;
+}
+
+// Stacked mode reserves room for the icon column, but only while a window is
+// actually open - otherwise an untouched page carries a screenful of dead
+// scroll. Windows are hidden through several paths (hidePopup, the title-bar
+// close buttons' inline onclick, applyPopupChoices), so rather than routing
+// them all through one function, watch the elements themselves.
+function syncOpenWindowClass() {
+    var anyOpen = [].some.call(document.querySelectorAll(".popup-window"), function(el) {
+        return window.getComputedStyle(el).display !== "none";
+    });
+    document.body.classList.toggle("has-open-window", anyOpen);
+}
+$(document).ready(function() {
+    var observer = new MutationObserver(syncOpenWindowClass);
+    document.querySelectorAll(".popup-window").forEach(function(el) {
+        observer.observe(el, { attributes: true, attributeFilter: ["style", "class"] });
+    });
+    syncOpenWindowClass();
+});
+
+// Rising z-index so the most recently opened fullscreen window sits on top,
+// and closing it reveals whatever was under it
+var mobileTopZ = 20000;
+
+// Bring a just-opened stacked window up to the top of the screen.
+//
+// Deliberately a plain scrollTo paired with `scroll-behavior: smooth` in the
+// mobile media query, rather than scrollIntoView({behavior:"smooth"}) or a
+// requestAnimationFrame tween. Both of those silently do nothing in webviews
+// that throttle animation frames, whereas this degrades to an instant jump -
+// still landing in the right place, just without the glide.
+function scrollWindowIntoView(popupEl) {
+    var maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    var targetY = popupEl.getBoundingClientRect().top + window.scrollY - 8;
+    window.scrollTo(0, Math.max(0, Math.min(targetY, maxY)));
+}
+
 function flyPopupIn(popupEl, originEl) {
     if (!POPUP_FLY_IN || !originEl) return;
+    // Stacked windows can land a thousand-plus pixels from the icon, which
+    // makes the fly-in a long meaningless swoop. Fullscreen keeps it - zooming
+    // out of the tapped icon to fill the screen reads well.
+    if (isMobileLayout() && MOBILE_TREATMENT === "stacked") return;
     var popupRect = popupEl.getBoundingClientRect();
     var originRect = originEl.getBoundingClientRect();
     var dx = (originRect.left + originRect.width / 2) - (popupRect.left + popupRect.width / 2);
@@ -243,7 +303,8 @@ function flyPopupIn(popupEl, originEl) {
 // Reverse of flyPopupIn: shrink the popup back down into the icon it came
 // from, then hide it once the animation finishes.
 function flyPopupOut(popupEl, originEl) {
-    if (!POPUP_FLY_IN || !originEl) {
+    if (!POPUP_FLY_IN || !originEl ||
+        (isMobileLayout() && MOBILE_TREATMENT === "stacked")) {
         $(popupEl).hide();
         return;
     }
@@ -269,7 +330,21 @@ function showPopup(popupId, originEl) {
     var popup = document.getElementById(popupId);
     if (!popup) return;
     $(popup).show();
+
+    if (isMobileLayout() && MOBILE_TREATMENT === "fullscreen") {
+        popup.style.zIndex = ++mobileTopZ;
+        flyPopupIn(popup, originEl);
+        return;
+    }
+
     flyPopupIn(popup, originEl);
+
+    // Stacked windows open below the fold, so a tap would otherwise look like
+    // it did nothing. Scroll to whatever just opened. Deferred a frame so the
+    // has-open-window padding has landed and the page is tall enough to scroll.
+    if (isMobileLayout()) {
+        setTimeout(function() { scrollWindowIntoView(popup); }, 40);
+    }
 }
 
 // Hide a popup by id, flying it back into originEl (an icon element) if enabled
@@ -535,7 +610,10 @@ function toggleDesktopFolder(folderKey) {
     }
 
     showPopup(folder.windowId, origin);
-    if (!folder.spilled) {
+    // On a phone, spilling five full-width windows at once is a wall to
+    // scroll past. The folder window is the index - let them tap through it.
+    // Left unmarked so the same session still gets the spill on a desktop.
+    if (!folder.spilled && !isMobileLayout()) {
         folder.spilled = true;
         folder.items.forEach(function(item) {
             var popup = document.getElementById(item.popup);

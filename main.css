@@ -809,11 +809,71 @@ body.dark-mode .popup-inner-wrapper {
 
 
 @media screen and (max-width: 960px) {
-.popup-window {
-    position: inherit !important;
+
+/* Two mobile treatments, switchable with ?mobile=stacked / ?mobile=fullscreen
+   so they can be compared on a real phone. See MOBILE_TREATMENT in main.js. */
+
+/* Deliberately NOT setting `scroll-behavior: smooth` here. It reroutes
+   scrollWindowIntoView's scrollTo through the browser's animation pipeline,
+   which means the scroll silently does nothing wherever animation frames are
+   throttled - exactly the case the instant scroll is there to survive. An
+   abrupt jump that always happens beats a glide that sometimes doesn't. */
+
+/* --- stacked: the icon column stays as the "desktop" and windows stack
+       underneath it, full width, in the order they were opened --- */
+body.mobile-stacked .popup-window {
+    position: static !important;
     width: calc(100% - 20px) !important;
-    margin-left: 10px !important;
+    margin: 0 10px 16px !important;
 }
+/* Clear the absolutely-positioned icon column so windows stack below the
+   desktop rather than behind it. The lowest icons (college/random) bottom
+   out around 668px in document coords and <main> starts at 136px, hence
+   ~545px. Only applied while something is open, so an untouched page
+   doesn't carry a screenful of dead scroll. */
+body.mobile-stacked.has-open-window main {
+    padding-top: 545px;
+    /* The footer is position:fixed and would clip the last window. The extra
+       room also makes the page tall enough that scrollIntoView can actually
+       bring a newly opened window up to the top rather than stalling partway. */
+    padding-bottom: 65vh;
+}
+
+/* --- fullscreen: one window at a time, covering the viewport, title bar
+       pinned so the close button is always reachable --- */
+body.mobile-fullscreen .popup-window {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-width: 0 !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+body.mobile-fullscreen .popup-window .windows-header-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+/* The inner wrapper is only as tall as its content, so without this the
+   desktop shows through below short content even though the window element
+   itself fills the viewport. Mirrors .popup-inner-wrapper's own colors. */
+body.mobile-fullscreen .popup-window {
+    background-color: #fff;
+}
+body.dark-mode.mobile-fullscreen .popup-window {
+    background-color: #d3d3d3;
+}
+/* iconize/resize are desktop window gestures - they have no meaning when the
+   window already fills the screen, and iconize would hide all the content */
+body.mobile-fullscreen .popup-window.iconize .popup-inner-wrapper {
+    display: block;
+}
+
 .window-title {
     font-size: 13px;
     line-height: 16px;
