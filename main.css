@@ -55,10 +55,20 @@
 .close-btn:focus {
     color: red;
     text-decoration: none;
-    cursor: pointer;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
 }
 
 
+
+html {
+    min-height: 100%;
+    /* cursor: url('cursor-arrow.png') 1 0, auto; */
+    cursor: url('cursor2-arrow.png') 0 0, auto;
+}
+
+a {
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
 
 body {
     font-family: 'W95FA', sans-serif;
@@ -66,19 +76,61 @@ body {
     line-height: 1.6;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
     color: #;
     background-color: #008080;
+    transition: background-color 0.5s ease;
+    /* cursor: url('cursor-arrow.png') 1 0, auto; */
+    cursor: url('cursor2-arrow.png') 0 0, auto;
 }
 
 header {
     font-family: 'W95FA', sans-serif;
     /*font-family: 'Courier New', Courier, monospace; */
-    background: rgb(0, 0, 0);
+    background: #008080;
     color: #fff;
     padding: 1rem 0;
     text-align: center;
+    transition: background-color 0.5s ease, opacity 0.2s ease;
+    position: relative;
 }
 
+#site-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 60px;
+    width: auto;
+    z-index: 0;
+}
+
+#title {
+    position: relative;
+    z-index: 1;
+}
+
+#title.has-logo-behind {
+    margin-top: 12px;
+}
+
+body.header-hidden nav {
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.dark-mode {
+    background-color: #000;
+}
+
+body.dark-mode header {
+    background: #000;
+}
+
+
+nav {
+    transition: opacity 0.2s ease;
+}
 
 nav ul {
     list-style: none;
@@ -116,6 +168,7 @@ footer {
     bottom: 0; /* At the very bottom */
     width: 100%; /* Full width */
     box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    transition: background-color 0.5s ease;
 }
 
 /* for virgil icon in footer */
@@ -123,31 +176,185 @@ footer {
     width: 200px;
 }
 
-#computer-icon {
+.desktop-icon-group {
     position: absolute;
-    top: 150px;  /* Adjust as needed for padding from the top */
-    right: 10px; /* Adjust as needed for padding from the right */
-    width: 100px; /* Adjust as needed */
+    width: 100px;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+
+#settings-icon-group {
+    top: 17px;
+    right: 10px;
+}
+
+#computer-icon-group {
+    top: 74px;
+    right: 10px;
+}
+
+#folder-icon-group {
+    top: 181px;
+    right: 10px;
+}
+
+#files-icon-group {
+    top: 555px;
+    right: 10px;
+}
+
+#college-icon-group {
+    top: 555px;
+    right: 120px;
+}
+
+#google-icon-group {
+    top: 264px;
+    right: 8px;
+}
+
+#dancing-icon-group {
+    top: 339px;
+    right: 10px;
+}
+
+#moon-icon-group {
+    top: 419px;
+    right: 10px;
+}
+
+#dino-icon-group {
+    top: 501px;
+    right: 10px;
+}
+
+#computer-icon,
+#folder-icon,
+#files-icon,
+#google-icon,
+#dancing-icon,
+#moon-icon,
+#dino-icon,
+#settings-icon,
+#college-icon {
+    -webkit-user-drag: none;
+    user-drag: none;
+    user-select: none;
+    position: absolute;
+    top: 0;
     height: auto; /* Maintain aspect ratio */
+}
+
+#computer-icon,
+#files-icon,
+#college-icon {
+    right: 0;
+    width: 100px;
 }
 
 #folder-icon {
-    position: absolute;
-    top: 215px;  /* Adjust as needed for padding from the top */
-    right: 10px; /* Adjust as needed for padding from the right */
-    width: 100px; /* Adjust as needed */
-    height: auto; /* Maintain aspect ratio */
+    right: 28px; /* centers the 44px icon within the 100px group */
+    width: 44px;
 }
 
 #google-icon {
-    cursor: pointer; /* Indicates the icon is clickable */
+    right: 30px; /* centers the narrower icon within the 100px group */
+    width: 40px;
+}
+
+#dancing-icon {
+    right: 29px; /* centers the 42px icon within the 100px group */
+    width: 42px;
+}
+
+#moon-icon {
+    right: 28px; /* centers the 44px icon within the 100px group */
+    width: 44px;
+}
+
+#dino-icon {
+    right: 28px; /* centers the 44px icon within the 100px group */
+    width: 44px;
+}
+
+#settings-icon {
+    right: 28px; /* centers the 44px icon within the 100px group */
+    width: 44px;
+}
+
+#computer-icon.as-settings-icon {
+    right: 28px; /* match #settings-icon's actual size while previewing it */
+    width: 44px;
+}
+
+#computer-icon-label,
+#folder-icon-label,
+#files-icon-label,
+#google-icon-label,
+#dancing-icon-label,
+#moon-icon-label,
+#dino-icon-label,
+#settings-icon-label,
+#college-icon-label {
     position: absolute;
-    top: 300px;  /* Adjust as needed for padding from the top */
-    right: 38px; /* Adjust as needed for padding from the right */
-    width: 40px; /* Adjust as needed */
-    height: auto; /* Maintain aspect ratio */
+    right: 0;
+    width: 100px;
+    text-align: center;
+    font-family: 'W95FA', sans-serif;
+    font-size: 13px;
+    line-height: 1.2;
+}
 
+#computer-icon-label a,
+#folder-icon-label a,
+#files-icon-label a,
+#google-icon-label a,
+#dancing-icon-label a,
+#moon-icon-label a,
+#dino-icon-label a,
+#settings-icon-label a,
+#college-icon-label a {
+    color: #fff;
+    text-decoration: none;
+}
 
+#computer-icon-label {
+    top: 78px; /* 118px original - 40px group top */
+}
+
+#dancing-icon-label {
+    top: 45px;
+}
+
+#moon-icon-label {
+    top: 48px;
+}
+
+#dino-icon-label {
+    top: 48px;
+}
+
+#settings-icon-label {
+    top: 43px;
+}
+
+#college-icon-label {
+    top: 70px;
+}
+
+#computer-icon-label.as-settings-label {
+    top: 43px; /* match #settings-icon-label's tighter spacing while previewing it */
+}
+
+#folder-icon-label {
+    top: 48px;
+}
+
+#files-icon-label {
+    top: 70px;
+}
+
+#google-icon-label {
+    top: 41px; /* 341px original - 300px group top */
 }
 
 
@@ -192,12 +399,28 @@ body {
 .windows-header-wrapper {
     padding: 2px;
     background: rgb(51,78,165);
-    background: linear-gradient(90deg, rgba(51,78,165,1) 0%, rgba(76,127,193,1) 100%);
+    background: var(--popup-header-light-bg, linear-gradient(90deg, rgba(51,78,165,1) 0%, rgba(76,127,193,1) 100%));
     position: relative;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+    cursor: url('cursor2-arrow.png') 0 0, auto !important;
+    transition: background 0.5s ease;
+}
+body.pointer-red .windows-header-wrapper {
+    cursor: url('cursor-arrow.png') 1 0, auto !important;
+}
+body.dark-mode .windows-header-wrapper {
+    background: var(--popup-header-dark-bg, #4a4a4a);
+}
+body.dark-mode.footer-dark footer {
+    background: #333333;
 }
 .window-title {
     font-size: 0.75vw;
     line-height: 1.2vw;
+    font-weight: bold;
     color: #fff;
     width: calc(75%);
     float: left;
@@ -213,7 +436,50 @@ body {
     margin-top: 0.1vw;
     margin-left: 3px;
     border: 1px outset #dad7d2;
-    cursor: pointer;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+
+.window-icons .win-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    box-sizing: content-box;
+    height: 1.1vw;
+    min-width: 1.1vw;
+    margin-top: 0.1vw;
+    margin-left: 1px;
+    padding: 0;
+    border: 1px outset #dad7d2;
+    background: #d8d8d8;
+    color: #000;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-weight: bold;
+    font-size: 0.85vw;
+    line-height: normal;
+    text-align: center;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+    user-select: none;
+}
+.window-icons .win-btn:active {
+    border-style: inset;
+}
+.win-btn .glyph {
+    display: block;
+}
+.win-btn .glyph-min {
+    width: 60%;
+    height: 2px;
+    background: #000;
+    align-self: flex-end;
+    margin-bottom: 0.1vw;
+}
+.win-btn .glyph-max {
+    width: 72%;
+    height: 68%;
+    border: 2px solid #000;
+    border-top-width: 3px;
+    box-sizing: border-box;
 }
 
 
@@ -226,6 +492,7 @@ body {
     position: absolute;
     z-index: 10000;
     border: 4px ridge #d8d8d8;
+    font-family: Tahoma, Geneva, sans-serif;
 }
 
 .popup-window.iconize .popup-inner-wrapper {
@@ -252,17 +519,23 @@ body {
 .popup-inner-wrapper {
     padding: 0;
     background-color: #fff;
+    transition: background-color 0.5s ease;
+}
+body.dark-mode .popup-inner-wrapper {
+    background-color: #d3d3d3;
 }
 .popup-inner-wrapper .inner-title {
     text-align: center;
     padding-top: 5px;
     padding-bottom: 5px;
     font-size: 13px;
+    font-weight: bold;
 }
 .popup-close-wrapper span {
-    cursor: pointer;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
 }
-.popup-window .popup-inner-wrapper img {
+.popup-window .popup-inner-wrapper img,
+.popup-window .popup-inner-wrapper video {
     width: 100%;
     display: block;
 }
@@ -275,9 +548,10 @@ body {
     width: 28vw;
     position: absolute;
     z-index: 10000;
-    left: 5vw;
-    top: 40vw;
+    left: 16vw;
+    top: 30vw;
     border: 4px ridge #d8d8d8;
+    display: none;
 }
 
 
@@ -292,6 +566,19 @@ body {
     right: 10vw;
     top: 30vw;
     border: 4px ridge #d8d8d8;
+    display: none;
+}
+
+#under-ghost-wrapper {
+    text-align: right;
+    margin-bottom: 2vw;
+    width: 20vw;
+    position: absolute;
+    z-index: 9999;
+    left: 40vw;
+    top: 26vw;
+    border: 4px ridge #d8d8d8;
+    display: none;
 }
 
 /* SNAPCHAT NOW PLAYING
@@ -305,6 +592,213 @@ body {
     left: 5vw;
     top: 5vw;
     border: 4px ridge #d8d8d8;
+    display: none;
+}
+#snapmap-wrapper .inner-title {
+    text-align: left;
+    padding-left: 8px;
+}
+
+/* FILES WINDOW (MVP)
+*********************************************************/
+#patent-figures-window {
+    text-align: right;
+    width: 21vw;
+    position: absolute;
+    z-index: 10000;
+    left: 40vw;
+    top: 12vw;
+    border: 4px ridge #d8d8d8;
+}
+
+#s13688-window {
+    text-align: right;
+    width: 27vw;
+    position: absolute;
+    z-index: 10001;
+    left: 63vw;
+    top: 4vw;
+    border: 4px ridge #d8d8d8;
+}
+
+#ambient-streaming-window {
+    text-align: right;
+    width: 46vw;
+    position: absolute;
+    z-index: 10000;
+    left: 10vw;
+    top: 60vw;
+    border: 4px ridge #d8d8d8;
+}
+
+#ambient-streaming-window .window-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pdf-viewer {
+    width: 100%;
+    height: 460px;
+    display: block;
+    border: none;
+}
+
+#patent-figures-window .pdf-viewer {
+    height: 300px;
+}
+
+#files-window {
+    text-align: left;
+    width: 26vw;
+    position: absolute;
+    z-index: 10000;
+    left: 40vw;
+    top: 8vw;
+    border: 4px ridge #d8d8d8;
+    display: none;
+}
+
+#folder-contents-window {
+    text-align: left;
+    width: 26vw;
+    position: absolute;
+    z-index: 10001;
+    left: 68vw;
+    top: 8vw;
+    border: 4px ridge #d8d8d8;
+    display: none;
+}
+
+#random-window {
+    text-align: left;
+    width: 26vw;
+    position: absolute;
+    z-index: 10000;
+    left: 12vw;
+    top: 8vw;
+    border: 4px ridge #d8d8d8;
+    display: none;
+}
+
+#settings-window {
+    text-align: left;
+    width: 52vw;
+    position: absolute;
+    z-index: 10002;
+    left: 24vw;
+    top: 8vw;
+    border: 4px ridge #d8d8d8;
+    display: none;
+}
+
+.settings-inner {
+    padding: 14px;
+    font-family: Tahoma, Geneva, sans-serif;
+    max-height: 80vh;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 24px;
+    align-items: start;
+}
+
+.settings-section {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #ccc;
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.settings-section-title {
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #334ea5;
+    margin-bottom: 10px;
+}
+
+.settings-row {
+    margin-bottom: 14px;
+}
+
+.settings-row:last-child {
+    margin-bottom: 0;
+}
+
+.settings-label {
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #000;
+}
+
+.settings-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #000;
+    margin-right: 14px;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+
+.settings-button {
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 12px;
+    padding: 4px 10px;
+    border: 1px outset #dad7d2;
+    background: #d8d8d8;
+    color: #000;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+
+.settings-button:active {
+    border-style: inset;
+}
+
+.files-inner {
+    padding: 14px;
+}
+
+.files-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.file-item {
+    width: 64px;
+    text-align: center;
+    font-family: 'W95FA', sans-serif;
+    font-size: 12px;
+    color: #000;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+
+.file-item img {
+    width: 48px;
+    height: auto;
+    display: block;
+    margin: 0 auto 4px;
+    -webkit-user-drag: none;
+    user-drag: none;
+    user-select: none;
+}
+
+.file-item img.file-type-icon {
+    width: 30px;
+}
+
+.file-item img.back-icon {
+    width: 38px;
+    margin-bottom: 11px; /* tomato.gif shrunk down, compensate to keep "back" label aligned with file labels */
 }
 
 
@@ -328,6 +822,18 @@ body {
     height: 13px;
     margin-top: 0.1vw;
     vertical-align: middle;
+}
+.window-icons .win-btn {
+    height: 18px;
+    min-width: 18px;
+    font-size: 13px;
+    font-weight: bold;
+    margin-top: 0.1vw;
+    margin-left: 1px;
+    vertical-align: middle;
+}
+.win-btn .glyph-min {
+    margin-bottom: 2px;
 }
 
 }

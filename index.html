@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>website</title>
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="main.css?v=9">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -16,16 +16,18 @@
     
     
 </head>
-<body>
+<body class="footer-dark header-hidden dark-mode">
 
     
     
     <header>
+        <img id="site-logo" src="notes.png" alt="Logo">
         <h1 id="title"></h1>
         <nav>
 
             <ul>
-                <li><a href="dinasour.html">experience</a></li>
+                <li><a href="dinasour.html">our competition</a></li>
+                <li><a href="#about">about us</a></li>
                 <!--<li><a href="#about">tiktok</a></li>
                 <li><a href="#projects">snapchat</a></li>
                 <li><a href="https://www.instagram.com/griffinlaszlo" target="_blank">instagram</a></li>
@@ -37,10 +39,44 @@
         
     </header>
     <main>
-        <img src="computer-icon.png" id="computer-icon" alt="Computer Icon">
-        <img src="folder-icon.png" id="folder-icon" alt="Folder Icon">
-        <img src="google-icon.png" id="google-icon" alt="Google Icon">
-        
+        <div id="computer-icon-group" class="desktop-icon-group">
+            <img src="computer-icon.png" id="computer-icon" alt="Computer Icon" draggable="false">
+            <div id="computer-icon-label"><a href="#">home</a></div>
+        </div>
+        <div id="college-icon-group" class="desktop-icon-group">
+            <img src="folder-icon.png" id="college-icon" alt="College Icon" draggable="false">
+            <div id="college-icon-label"><a href="#">college</a></div>
+        </div>
+        <div id="files-icon-group" class="desktop-icon-group">
+            <img src="folder-icon.png" id="files-icon" alt="Files Icon" draggable="false">
+            <div id="files-icon-label"><a href="#">random</a></div>
+        </div>
+        <div id="folder-icon-group" class="desktop-icon-group">
+            <img src="cd1.png" id="folder-icon" alt="Now Playing Icon" draggable="false">
+            <div id="folder-icon-label"><a href="#">now playing</a></div>
+        </div>
+        <div id="google-icon-group" class="desktop-icon-group">
+            <img src="google-icon.png" id="google-icon" alt="Google Icon" draggable="false">
+            <div id="google-icon-label"><a href="https://google.com">google</a></div>
+        </div>
+        <div id="dancing-icon-group" class="desktop-icon-group">
+            <img src="dancing.png" id="dancing-icon" alt="Dancing Icon" draggable="false">
+            <div id="dancing-icon-label"><a href="#">dance</a></div>
+            <audio id="dancing-audio" src="Howl%20(like%20monkey).mp3" preload="none"></audio>
+        </div>
+        <div id="moon-icon-group" class="desktop-icon-group">
+            <img src="sun.gif" id="moon-icon" alt="Moon Icon" draggable="false">
+            <div id="moon-icon-label"><a href="#">lightness</a></div>
+        </div>
+        <div id="dino-icon-group" class="desktop-icon-group">
+            <img src="dino.png" id="dino-icon" alt="Dino Icon" draggable="false">
+            <div id="dino-icon-label"><a href="dinasour.html">dino</a></div>
+        </div>
+        <div id="settings-icon-group" class="desktop-icon-group" style="display:none;">
+            <img src="settings-icon.png" id="settings-icon" alt="Settings Icon" draggable="false">
+            <div id="settings-icon-label"><a href="#">settings</a></div>
+        </div>
+
         <div class = "center-container"></div>
           <!--<img src="headshot.jpg" class="headshot">  -->
     </div>
@@ -76,19 +112,16 @@
     -->
     <div id="canary-yellow-wrapper" class="popup-window">
         <div class="windows-header-wrapper clearafter">
-            <div class="window-title"><br></div>
-            <div class="window-icons">
-                <img src="https://canary---yellow.com/wp-content/themes/virgilabloh/images/icon-iconize.jpg" onclick="$('#canary-yellow-wrapper').toggleClass('iconize'); $('#canary-yellow-wrapper').removeClass('resize');">
-                <img src="https://canary---yellow.com/wp-content/themes/virgilabloh/images/icon-resize.jpg" onclick="$('#canary-yellow-wrapper').toggleClass('resize'); $('#canary-yellow-wrapper').removeClass('iconize');">
-                <img src="https://canary---yellow.com/wp-content/themes/virgilabloh/images/icon-close.jpg" onclick="$('#canary-yellow-wrapper').hide();">
-            </div>
+            <div class="window-title">WHERE'S WEST?</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#canary-yellow-wrapper').toggleClass('iconize'); $('#canary-yellow-wrapper').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#canary-yellow-wrapper').toggleClass('resize'); $('#canary-yellow-wrapper').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#canary-yellow-wrapper').hide();">&#10005;</span></div>
         </div>
 
         <div class="popup-inner-wrapper">
-            <div class="inner-title">
-                WHERE'S WEST?       </div>
-            <a href="https://canary---yellow.com/" target="_blank">
-                <img src="whereswest1.png">
+            <a href="https://whereswestmusic.com/" target="_blank">
+                <video autoplay loop muted playsinline>
+                    <source src="https://whereswestmusic.com/wp-content/uploads/2026/02/Wheres-West-Final-Video.mp4" type="video/mp4">
+                    <source src="https://whereswestmusic.com/wp-content/uploads/2026/02/Wheres-West-Final-Video.webm" type="video/webm">
+                </video>
             </a>
         </div>
     </div>
@@ -96,29 +129,192 @@
     <div id="postmodern-wrapper" class="popup-window">
         <div class="windows-header-wrapper clearafter">
             <div class="window-title">WARM LECHE</div>
-            <div class="window-icons"><img src="https://canary---yellow.com/wp-content/themes/virgilabloh/images/icon-iconize.jpg" onclick="$('#postmodern-wrapper').toggleClass('iconize'); $('#postmodern-wrapper').removeClass('resize');"><img src="https://canary---yellow.com/wp-content/themes/virgilabloh/images/icon-resize.jpg" onclick="$('#postmodern-wrapper').toggleClass('resize'); $('#postmodern-wrapper').removeClass('iconize');"><img src="https://canary---yellow.com/wp-content/themes/virgilabloh/images/icon-close.jpg" onclick="$('#postmodern-wrapper').hide();"></div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#postmodern-wrapper').toggleClass('iconize'); $('#postmodern-wrapper').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#postmodern-wrapper').toggleClass('resize'); $('#postmodern-wrapper').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#postmodern-wrapper').hide();">&#10005;</span></div>
         </div>
 
         <div class="popup-inner-wrapper"><a href="https://www.youtube.com/watch?v=jN8mYxR6cBs" target="_blank"><img src="tbot.png"></a></div>
     </div>
 
+    <div id="under-ghost-wrapper" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">Kid Cudi - Snapchat “Under the Ghost”</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#under-ghost-wrapper').toggleClass('iconize'); $('#under-ghost-wrapper').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#under-ghost-wrapper').toggleClass('resize'); $('#under-ghost-wrapper').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#under-ghost-wrapper').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper"><a href="https://www.youtube.com/watch?v=bBHMlHAITI0" target="_blank"><img src="under-the-ghost.jpg"></a></div>
+    </div>
+
     <div id="snapmap-wrapper" class="popup-window">
         <div class="windows-header-wrapper clearafter">
-            <div class="window-title">SNAPCHAT</div>
-            <div class="window-icons">
-                <img src="https://canary---yellow.com/wp-content/themes/virgilabloh/images/icon-iconize.jpg" onclick="$('#snapmap-wrapper').toggleClass('iconize'); $('#snapmap-wrapper').removeClass('resize');">
-                <img src="https://canary---yellow.com/wp-content/themes/virgilabloh/images/icon-resize.jpg" onclick="$('#snapmap-wrapper').toggleClass('resize'); $('#snapmap-wrapper').removeClass('iconize');">
-                <img src="https://canary---yellow.com/wp-content/themes/virgilabloh/images/icon-close.jpg" onclick="$('#snapmap-wrapper').hide();">
-            </div>
+            <div class="window-title">TECH CRUNCH</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#snapmap-wrapper').toggleClass('iconize'); $('#snapmap-wrapper').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#snapmap-wrapper').toggleClass('resize'); $('#snapmap-wrapper').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#snapmap-wrapper').hide();">&#10005;</span></div>
         </div>
 
         <div class="popup-inner-wrapper">
             <div class="inner-title">
-                NOW PLAYING
+                Snapchat now lets you share what you’re listening to in real time
             </div>
             <a href="https://techcrunch.com/2026/07/27/snapchat-now-lets-you-share-what-youre-listening-to-in-real-time/" target="_blank">
                 <img src="snapmap.png">
             </a>
+        </div>
+    </div>
+
+    <div id="patent-figures-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">4218.Q05PRV</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#patent-figures-window').toggleClass('iconize'); $('#patent-figures-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#patent-figures-window').toggleClass('resize'); $('#patent-figures-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#patent-figures-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper">
+            <iframe src="4218.Q05PRV%20Figures.pdf#toolbar=0&navpanes=0&statusbar=0&view=FitH" class="pdf-viewer"></iframe>
+        </div>
+    </div>
+
+    <div id="s13688-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">S13688-025-00552-Y</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#s13688-window').toggleClass('iconize'); $('#s13688-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#s13688-window').toggleClass('resize'); $('#s13688-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#s13688-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper">
+            <iframe src="s13688-025-00552-y.pdf#toolbar=0&navpanes=0&statusbar=0&view=FitH" class="pdf-viewer"></iframe>
+        </div>
+    </div>
+
+    <div id="ambient-streaming-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">AMBIENT STREAMING ACTIVITY SHARING ON SOCIAL NETWORKS</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#ambient-streaming-window').toggleClass('iconize'); $('#ambient-streaming-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#ambient-streaming-window').toggleClass('resize'); $('#ambient-streaming-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#ambient-streaming-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper">
+            <iframe src="Patent_Application_Filed.pdf#toolbar=0&navpanes=0&statusbar=0&view=FitH" class="pdf-viewer"></iframe>
+        </div>
+    </div>
+
+    <div id="files-window" class="popup-window files-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">NOW PLAYING</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#files-window').toggleClass('iconize'); $('#files-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#files-window').toggleClass('resize'); $('#files-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#files-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper files-inner">
+            <div class="files-grid" id="files-grid"></div>
+        </div>
+    </div>
+
+    <div id="folder-contents-window" class="popup-window files-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title" id="folder-contents-title">NOW PLAYING</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#folder-contents-window').toggleClass('iconize'); $('#folder-contents-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#folder-contents-window').toggleClass('resize'); $('#folder-contents-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#folder-contents-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper files-inner">
+            <div class="files-grid" id="folder-contents-grid"></div>
+        </div>
+    </div>
+
+    <div id="random-window" class="popup-window files-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">RANDOM</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#random-window').toggleClass('iconize'); $('#random-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#random-window').toggleClass('resize'); $('#random-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#random-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper files-inner">
+            <div class="files-grid" id="random-grid"></div>
+        </div>
+    </div>
+
+    <div id="settings-window" class="popup-window files-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">SETTINGS</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#settings-window').toggleClass('iconize'); $('#settings-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#settings-window').toggleClass('resize'); $('#settings-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#settings-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper settings-inner">
+            <div class="settings-section">
+                <div class="settings-section-title">Core</div>
+                <div class="settings-row">
+                    <div class="settings-label">Layout</div>
+                    <button type="button" class="settings-button" id="copy-layout-btn">Copy Layout</button>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">Popup fly-in animation</div>
+                    <label class="settings-option"><input type="radio" name="fly-in" id="fly-in-on" checked> On</label>
+                    <label class="settings-option"><input type="radio" name="fly-in" id="fly-in-off"> Off</label>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">Now playing folders</div>
+                    <label class="settings-option"><input type="radio" name="files-treatment" id="nav-inline"> Back button</label>
+                    <label class="settings-option"><input type="radio" name="files-treatment" id="nav-popup" checked> New popup</label>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">Popups on open</div>
+                    <label class="settings-option"><input type="radio" name="popups-on-open" id="popups-on-open-off" checked> Off</label>
+                    <label class="settings-option"><input type="radio" name="popups-on-open" id="popups-on-open-on"> On</label>
+                </div>
+                <div class="settings-row" id="popups-on-open-choices" style="display:none;">
+                    <div class="settings-label">Which popups</div>
+                    <label class="settings-option"><input type="checkbox" id="popup-choice-wheres-west" checked> Where's West</label>
+                    <label class="settings-option"><input type="checkbox" id="popup-choice-warm-leche" checked> Warm Leche</label>
+                    <label class="settings-option"><input type="checkbox" id="popup-choice-snapmap" checked> Tech Crunch</label>
+                    <label class="settings-option"><input type="checkbox" id="popup-choice-patent-figures" checked> 4218.Q05PRV</label>
+                    <label class="settings-option"><input type="checkbox" id="popup-choice-s13688" checked> S13688-025-00552-Y</label>
+                    <label class="settings-option"><input type="checkbox" id="popup-choice-ambient"> Ambient Streaming</label>
+                    <label class="settings-option"><input type="checkbox" id="popup-choice-under-ghost" checked> Under the Ghost</label>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">Stack layout</div>
+                    <label class="settings-option"><input type="radio" name="stack-layout" id="stack-layout-right" checked> Right</label>
+                    <label class="settings-option"><input type="radio" name="stack-layout" id="stack-layout-left"> Left</label>
+                    <label class="settings-option"><input type="radio" name="stack-layout" id="stack-layout-top"> Top</label>
+                    <label class="settings-option"><input type="radio" name="stack-layout" id="stack-layout-bottom"> Bottom</label>
+                    <label class="settings-option"><input type="radio" name="stack-layout" id="stack-layout-random"> Random</label>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">Header Options</div>
+                <div class="settings-row">
+                    <div class="settings-label">Show secondary subheaders</div>
+                    <label class="settings-option"><input type="radio" name="show-header" id="show-header-off" checked> Off</label>
+                    <label class="settings-option"><input type="radio" name="show-header" id="show-header-on"> On</label>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">Logo option</div>
+                    <label class="settings-option"><input type="radio" name="site-logo" id="logo-original" checked> Original (just mocial)</label>
+                    <label class="settings-option"><input type="radio" name="site-logo" id="logo-notes"> Notes</label>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">Light Mode</div>
+                <div class="settings-row">
+                    <div class="settings-label">Pointer</div>
+                    <label class="settings-option"><input type="radio" name="pointer-color" id="pointer-white" checked> White</label>
+                    <label class="settings-option"><input type="radio" name="pointer-color" id="pointer-red"> Red</label>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">Popup headers</div>
+                    <label class="settings-option"><input type="radio" name="light-headers" id="light-headers-blue" checked> Blue</label>
+                    <label class="settings-option"><input type="radio" name="light-headers" id="light-headers-gray"> Gray</label>
+                    <label class="settings-option"><input type="radio" name="light-headers" id="light-headers-black"> Black</label>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="settings-section-title">Dark Mode</div>
+                <div class="settings-row">
+                    <div class="settings-label">Popup headers</div>
+                    <label class="settings-option"><input type="radio" name="dark-headers" id="dark-headers-gray" checked> Gray</label>
+                    <label class="settings-option"><input type="radio" name="dark-headers" id="dark-headers-black"> Black</label>
+                    <label class="settings-option"><input type="radio" name="dark-headers" id="dark-headers-blue"> Blue</label>
+                    <label class="settings-option"><input type="radio" name="dark-headers" id="dark-headers-darkblue"> Dark Blue</label>
+                </div>
+                <div class="settings-row">
+                    <div class="settings-label">Footer</div>
+                    <label class="settings-option"><input type="radio" name="dark-footer" id="dark-footer-on" checked> Darker gray</label>
+                    <label class="settings-option"><input type="radio" name="dark-footer" id="dark-footer-off"> Stay light gray</label>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -127,7 +323,7 @@
         <p>© 2025 mocial.org</p>
 
     </footer>
-    <script src="main.js"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=13"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>

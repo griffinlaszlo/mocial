@@ -1,2 +1,14 @@
 .DS_Store
 remote-mocial/
+
+# Not referenced by any page, and this repo publishes to mocial.org via
+# GitHub Pages - anything committed here is fetchable at mocial.org/<file>.
+# Delete a line to start tracking that file again.
+Letter.pdf
+PHD_purpose_of_intent.pdf
+IMG_6959.heic
+Patent_Application_Filed.DOCX
+
+# Unreferenced and heavy - not worth the repo weight until something uses them
+snaplogoglitch.MOV
+twitterbot/
