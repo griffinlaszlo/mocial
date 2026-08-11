@@ -261,18 +261,12 @@ $(document).ready(function() {
 // and closing it reveals whatever was under it
 var mobileTopZ = 20000;
 
-// Bring a just-opened stacked window up to the top of the screen.
-//
-// Deliberately a plain scrollTo paired with `scroll-behavior: smooth` in the
-// mobile media query, rather than scrollIntoView({behavior:"smooth"}) or a
-// requestAnimationFrame tween. Both of those silently do nothing in webviews
-// that throttle animation frames, whereas this degrades to an instant jump -
-// still landing in the right place, just without the glide.
-function scrollWindowIntoView(popupEl) {
-    var maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-    var targetY = popupEl.getBoundingClientRect().top + window.scrollY - 8;
-    window.scrollTo(0, Math.max(0, Math.min(targetY, maxY)));
-}
+// Stacked windows are laid out in a flex column so they can be ordered by when
+// they were opened rather than by their order in the HTML - otherwise opening
+// the random folder and then Tech Crunch would put Tech Crunch above it, since
+// that's how they sit in index.html. Each newly opened window gets the next
+// order value, so it lands at the bottom of the stack.
+var stackedOrder = 0;
 
 function flyPopupIn(popupEl, originEl) {
     if (!POPUP_FLY_IN || !originEl) return;
@@ -337,14 +331,14 @@ function showPopup(popupId, originEl) {
         return;
     }
 
-    flyPopupIn(popup, originEl);
-
-    // Stacked windows open below the fold, so a tap would otherwise look like
-    // it did nothing. Scroll to whatever just opened. Deferred a frame so the
-    // has-open-window padding has landed and the page is tall enough to scroll.
+    // Stacked: append to the bottom of the column. No scrolling - the stack
+    // sits high enough to overlap the lower icons, so the first window is
+    // already on screen and the page doesn't lurch under you.
     if (isMobileLayout()) {
-        setTimeout(function() { scrollWindowIntoView(popup); }, 40);
+        popup.style.order = ++stackedOrder;
     }
+
+    flyPopupIn(popup, originEl);
 }
 
 // Hide a popup by id, flying it back into originEl (an icon element) if enabled

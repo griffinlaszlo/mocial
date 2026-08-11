@@ -826,17 +826,29 @@ body.mobile-stacked .popup-window {
     width: calc(100% - 20px) !important;
     margin: 0 10px 16px !important;
 }
-/* Clear the absolutely-positioned icon column so windows stack below the
-   desktop rather than behind it. The lowest icons (college/random) bottom
-   out around 668px in document coords and <main> starts at 136px, hence
-   ~545px. Only applied while something is open, so an untouched page
-   doesn't carry a screenful of dead scroll. */
+/* Flex column purely so windows can be ordered by when they were opened
+   rather than by their position in the HTML - see stackedOrder in main.js.
+   Reordering via `order` rather than moving nodes matters: several windows
+   hold PDF iframes, and moving an iframe in the DOM reloads it. */
+body.mobile-stacked main {
+    display: flex;
+    flex-direction: column;
+}
+/* Where the first window lands. Deliberately short of clearing the icon
+   column (which bottoms out around 668px in document coords, with <main>
+   starting at 136px) so the window rides up over the lower icons and is
+   fully on screen without the page having to scroll to meet it.
+   Only applied while something is open, so an untouched page keeps the
+   whole desktop to itself. */
 body.mobile-stacked.has-open-window main {
-    padding-top: 545px;
-    /* The footer is position:fixed and would clip the last window. The extra
-       room also makes the page tall enough that scrollIntoView can actually
-       bring a newly opened window up to the top rather than stalling partway. */
-    padding-bottom: 65vh;
+    padding-top: 335px;
+    padding-bottom: 24px;
+}
+/* The footer is position:fixed, so on a phone it permanently eats ~50px off
+   the bottom of the screen and clips whatever window is lowest. There's no
+   room to spare here - let it sit at the end of the content instead. */
+body.mobile-stacked footer {
+    position: static;
 }
 
 /* --- fullscreen: one window at a time, covering the viewport, title bar
