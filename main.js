@@ -113,10 +113,10 @@ $(document).ready(function() {
     $("#college-window").draggable();
 });
 $(document).ready(function() {
-    $("#phd-window").draggable();
+    $("#letter-of-intent-window").draggable();
 });
 $(document).ready(function() {
-    $("#letter-window").draggable();
+    $("#phd-acceptance-window").draggable();
 });
 $(document).ready(function() {
     $("#random-window").draggable();
@@ -766,8 +766,8 @@ var desktopFolders = {
         windowId: "college-window",
         gridId: "college-grid",
         items: [
-            { name: "phd",         popup: "phd-window" },
-            { name: "letter",      popup: "letter-window" },
+            { name: "letter_of_intent", popup: "letter-of-intent-window" },
+            { name: "phd_acceptance",  popup: "phd-acceptance-window" },
             // Same window the random folder's "dsresearch" opens - one file
             // showing up in two folders, not two copies of it
             { name: "ds research", popup: "s13688-window" }

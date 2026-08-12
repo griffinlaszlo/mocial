@@ -711,7 +711,7 @@ body.dark-mode .popup-inner-wrapper {
     display: none;
 }
 
-#phd-window {
+#letter-of-intent-window {
     width: 30vw;
     position: absolute;
     z-index: 10000;
@@ -720,7 +720,7 @@ body.dark-mode .popup-inner-wrapper {
     display: none;
 }
 
-#letter-window {
+#phd-acceptance-window {
     width: 30vw;
     position: absolute;
     z-index: 10000;
