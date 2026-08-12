@@ -267,6 +267,45 @@ function hashPassword(str) {
     input.focus();
 })();
 
+// The icon each window carries at the left of its own title bar, the way a
+// Win95 window shows the icon of what it's displaying.
+//
+// A window that shows content is a file and gets the plain file icon. A window
+// that shows a folder's contents carries a mini version of the desktop icon
+// that opens it - the random folder's folder, Now Playing's CD - so the icon
+// on the desktop and the one in the title bar are the same thing at two sizes.
+var windowIcons = {
+    // Files
+    "snapmap-wrapper":          "fileicon.png",
+    "postmodern-wrapper":       "fileicon.png",
+    "under-ghost-wrapper":      "fileicon.png",
+    "canary-yellow-wrapper":    "fileicon.png",
+    "patent-figures-window":    "fileicon.png",
+    "s13688-window":            "fileicon.png",
+    "ambient-streaming-window": "fileicon.png",
+    // Folders
+    "random-window":            "folder-icon.png",
+    "files-window":             "cd1.png",
+    "folder-contents-window":   "folder-icon.png",
+    "settings-window":          "settings-icon.png"
+};
+
+$(document).ready(function() {
+    Object.keys(windowIcons).forEach(function(windowId) {
+        var win = document.getElementById(windowId);
+        if (!win) return;
+        var title = win.querySelector(".window-title");
+        if (!title || title.querySelector(".window-title-icon")) return;
+
+        var img = document.createElement("img");
+        img.src = windowIcons[windowId];
+        img.className = "window-title-icon";
+        img.draggable = false;
+        img.alt = "";
+        title.insertBefore(img, title.firstChild);
+    });
+});
+
 // Popup fly-in animation: when a popup opens from an icon click, it
 // animates in from that icon's position instead of just snapping into view.
 var POPUP_FLY_IN = true;
@@ -628,9 +667,10 @@ function renderDesktopFolder(folderKey) {
     grid.innerHTML = "";
 
     folder.items.forEach(function(item) {
+        // Every entry here opens a popup, so every entry is a file
         var el = document.createElement("div");
         el.className = "file-item";
-        el.innerHTML = '<img src="folder-icon.png" draggable="false"><span>' + item.name + "</span>";
+        el.innerHTML = '<img src="fileicon.png" class="file-type-icon" draggable="false"><span>' + item.name + "</span>";
         el.onclick = function() {
             var popup = document.getElementById(item.popup);
             if (popup && $(popup).is(":hidden")) showPopup(item.popup, el);

@@ -426,6 +426,17 @@ body.dark-mode.footer-dark footer {
     float: left;
     text-align: left;
 }
+/* Small icon sat at the left of a window's title bar, the way a Win95 window
+   carries the icon of whatever it's showing. Sized in em so it tracks the
+   title text at every breakpoint. */
+.window-title-icon {
+    height: 1.15em;
+    width: auto;
+    margin-right: 5px;
+    vertical-align: -0.2em;
+    image-rendering: pixelated;
+}
+
 .window-icons {
     text-align: right;
     float: left;
