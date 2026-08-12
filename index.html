@@ -24,6 +24,13 @@
     <script>
         window.REQUIRE_PASSWORD = true;
         window.SITE_PASSWORD_HASH = "e32065a";   // "mocial" - change this
+
+        // ?lock forgets this session's unlock so the gate can be revisited
+        // without opening a private window. It can only ever re-lock.
+        if (location.search.indexOf("lock") !== -1) {
+            sessionStorage.removeItem("mocial-unlocked");
+        }
+
         if (window.REQUIRE_PASSWORD && sessionStorage.getItem("mocial-unlocked") !== "1") {
             document.documentElement.className += " gated";
         }
