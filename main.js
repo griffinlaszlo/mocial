@@ -549,27 +549,22 @@ function openFolderContents(folderKey) {
 renderFilesGrid("root");
 
 // Desktop folders that open a window listing their contents as folder icons.
-//
-// Items marked spill:true also fly out on their own the FIRST time the folder
-// is ever opened - that's the "here's everything at once" moment for someone
-// landing on the site. After that the folder only opens its own window, so a
-// returning visitor gets the index instead of a screenful of popups and can
-// open whatever they want from there. Add more folders here with the same
-// shape; toggleDesktopFolder/renderDesktopFolder are not random-specific.
+// Clicking the icon opens just that window; its contents open individually
+// from the grid inside. Add more folders here with the same shape -
+// toggleDesktopFolder/renderDesktopFolder are not random-specific.
 var desktopFolders = {
     random: {
         iconId: "files-icon-group",
         windowId: "random-window",
         gridId: "random-grid",
-        spilled: false,
         items: [
-            { name: "techcrunch",    popup: "snapmap-wrapper",          spill: true },
-            { name: "patent",        popup: "patent-figures-window",    spill: true },
+            { name: "techcrunch",    popup: "snapmap-wrapper" },
+            { name: "patent",        popup: "patent-figures-window" },
             { name: "application",   popup: "ambient-streaming-window" },
-            { name: "ww",            popup: "canary-yellow-wrapper",    spill: true },
-            { name: "warmleche",     popup: "postmodern-wrapper",       spill: true },
+            { name: "ww",            popup: "canary-yellow-wrapper" },
+            { name: "warmleche",     popup: "postmodern-wrapper" },
             { name: "undertheghost", popup: "under-ghost-wrapper" },
-            { name: "dsresearch",    popup: "s13688-window",            spill: true }
+            { name: "dsresearch",    popup: "s13688-window" }
         ]
     }
 };
@@ -596,7 +591,7 @@ function toggleDesktopFolder(folderKey) {
     var origin = document.getElementById(folder.iconId);
     var win = document.getElementById(folder.windowId);
 
-    // Window already up: pull it, and anything it spilled, back into the icon
+    // Window already up: pull it, and anything opened from it, back into the icon
     if (!$(win).is(":hidden")) {
         folder.items.forEach(function(item) { hidePopup(item.popup, origin); });
         flyPopupOut(win, origin);
@@ -604,18 +599,6 @@ function toggleDesktopFolder(folderKey) {
     }
 
     showPopup(folder.windowId, origin);
-    // On a phone, spilling five full-width windows at once is a wall to
-    // scroll past. The folder window is the index - let them tap through it.
-    // Left unmarked so the same session still gets the spill on a desktop.
-    if (!folder.spilled && !isMobileLayout()) {
-        folder.spilled = true;
-        folder.items.forEach(function(item) {
-            var popup = document.getElementById(item.popup);
-            if (item.spill && popup && $(popup).is(":hidden")) {
-                showPopup(item.popup, origin);
-            }
-        });
-    }
 }
 
 renderDesktopFolder("random");
