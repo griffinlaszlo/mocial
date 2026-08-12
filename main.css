@@ -925,10 +925,21 @@ body.mobile-fullscreen .popup-window.iconize .popup-inner-wrapper {
 
 /* html.gated is set by the inline script in index.html's <head>, before any
    paint, so the site never flashes into view behind the dialog */
-html.gated body > header,
 html.gated body > main,
 html.gated body > footer {
     display: none;
+}
+
+/* The header stays up while the gate is showing, so "mocial" still types
+   itself in above the dialog. Raised above the overlay, which would cover it
+   otherwise, and forced to the gate's teal - the header's own background is
+   #008080 already, but body.dark-mode paints it black, which reads as a band
+   sitting on the gate rather than part of it. The nav is separately hidden by
+   body.header-hidden, so no links into the site are exposed. */
+html.gated body > header,
+html.gated body.dark-mode > header {
+    z-index: 100001;
+    background: #008080;
 }
 
 #password-gate {
