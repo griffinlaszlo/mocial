@@ -8,8 +8,14 @@
     <title>website</title>
 
     <!-- ==== PASSWORD GATE =========================================
-         Set REQUIRE_PASSWORD to false to open the site up while
-         developing. That single flag is the whole switch.
+         REQUIRE_PASSWORD controls whether every visitor meets the
+         dialog on arrival. It is off for now, so the site opens
+         straight up. Set it to true when you want the gate on for
+         real - at launch, or whenever the site should be shut.
+
+         The gate is still reachable while it's off: the Lock button
+         in Settings (and the ?lock URL it uses) always brings it up,
+         so it can be checked without switching it on for everyone.
 
          To change the password, open the browser console on the site
          and run:   hashPassword("your new password")
@@ -22,21 +28,21 @@
          while you build; it does not protect anything secret.
          ========================================================== -->
     <script>
-        window.REQUIRE_PASSWORD = true;
+        window.REQUIRE_PASSWORD = false;
         window.SITE_PASSWORD_HASH = "e32065a";   // "mocial" - change this
 
-        // ?lock forgets this session's unlock so the gate can be revisited
-        // without opening a private window. It can only ever re-lock.
-        if (location.search.indexOf("lock") !== -1) {
-            sessionStorage.removeItem("mocial-unlocked");
-        }
+        // ?lock forgets this session's unlock and forces the gate up even
+        // when REQUIRE_PASSWORD is off. It can only ever re-lock.
+        window.FORCE_LOCK = location.search.indexOf("lock") !== -1;
+        if (window.FORCE_LOCK) sessionStorage.removeItem("mocial-unlocked");
 
-        if (window.REQUIRE_PASSWORD && sessionStorage.getItem("mocial-unlocked") !== "1") {
+        if ((window.REQUIRE_PASSWORD || window.FORCE_LOCK) &&
+            sessionStorage.getItem("mocial-unlocked") !== "1") {
             document.documentElement.className += " gated";
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=21">
+    <link rel="stylesheet" href="main.css?v=22">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -100,7 +106,7 @@
         </div>
         <div id="dino-icon-group" class="desktop-icon-group">
             <img src="dino.png" id="dino-icon" alt="Dino Icon" draggable="false">
-            <div id="dino-icon-label"><a href="dinasour.html">dino</a></div>
+            <div id="dino-icon-label"><a href="#">dino</a></div>
         </div>
         <div id="settings-icon-group" class="desktop-icon-group" style="display:none;">
             <img src="settings-icon.png" id="settings-icon" alt="Settings Icon" draggable="false">
@@ -245,6 +251,17 @@
         </div>
     </div>
 
+    <div id="dino-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">DINO</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#dino-window').toggleClass('iconize'); $('#dino-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#dino-window').toggleClass('resize'); $('#dino-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#dino-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper">
+            <iframe id="dino-frame" class="dino-viewer" title="Dino game"></iframe>
+        </div>
+    </div>
+
     <div id="random-window" class="popup-window files-window">
         <div class="windows-header-wrapper clearafter">
             <div class="window-title">RANDOM</div>
@@ -384,7 +401,7 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=23"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=25"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>

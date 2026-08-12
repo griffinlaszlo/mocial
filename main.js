@@ -107,6 +107,9 @@ $(document).ready(function() {
     $("#folder-contents-window").draggable();
 });
 $(document).ready(function() {
+    $("#dino-window").draggable({ handle: ".windows-header-wrapper" });
+});
+$(document).ready(function() {
     $("#random-window").draggable();
 });
 $(document).ready(function() {
@@ -164,26 +167,6 @@ function makeElementDraggable(elementId, onClick, onDragEnd, onDragMove) {
         }
     }
 }
-
-// Restore the home icon's dragged position, but only when the reload was
-// triggered by clicking the home icon itself (not a normal browser refresh)
-(function() {
-    var restoreIntent = localStorage.getItem("homeIconRestoreOnLoad");
-    localStorage.removeItem("homeIconRestoreOnLoad");
-    if (restoreIntent) {
-        var saved = localStorage.getItem("homeIconPos");
-        if (saved) {
-            try {
-                var pos = JSON.parse(saved);
-                var el = document.getElementById("computer-icon-group");
-                if (el && pos.top && pos.left) {
-                    el.style.top = pos.top;
-                    el.style.left = pos.left;
-                }
-            } catch (e) {}
-        }
-    }
-})();
 
 // Secret gesture: drag "home" into the header to reveal + open settings
 function isOverlappingHeader(el) {
@@ -251,6 +234,12 @@ function hashPassword(str) {
         // closing the browser asks again rather than remembering forever
         sessionStorage.setItem("mocial-unlocked", "1");
         document.documentElement.classList.remove("gated");
+
+        // Drop ?lock off the URL, or reloading would re-lock immediately and
+        // leave you unable to get in without editing the address bar
+        if (window.FORCE_LOCK && window.history.replaceState) {
+            window.history.replaceState({}, "", window.location.pathname);
+        }
     }
 
     document.getElementById("password-ok").addEventListener("click", unlock);
@@ -287,6 +276,8 @@ var windowIcons = {
     "patent-figures-window":    "fileicon.png",
     "s13688-window":            "fileicon.png",
     "ambient-streaming-window": "fileicon.png",
+    // Application window - shows its own icon, the way a Win95 app window does
+    "dino-window":              { src: "dino.png", size: "1.5em" },
     // Folders
     "random-window":            { src: "folder-icon.png",   size: "1.9em" },
     "folder-contents-window":   { src: "folder-icon.png",   size: "1.9em" },
@@ -463,18 +454,12 @@ function openSettingsWindow(originEl) {
     flyPopupIn(popup, originEl);
 }
 
-// Initialize the draggable function
-makeElementDraggable("computer-icon-group", function() {
-    var el = document.getElementById("computer-icon-group");
-    if (el.style.top && el.style.left) {
-        localStorage.setItem("homeIconPos", JSON.stringify({
-            top: el.style.top,
-            left: el.style.left
-        }));
-        localStorage.setItem("homeIconRestoreOnLoad", "1");
-    }
-    window.location.reload();
-}, function() {
+// Initialize the draggable function.
+//
+// No click handler: clicking home used to save its position and reload the
+// page, which read as the site closing and reopening under you. Dragging it
+// into the header to reveal settings is unaffected - that's onDragEnd below.
+makeElementDraggable("computer-icon-group", null, function() {
     // onDragEnd
     var el = document.getElementById("computer-icon-group");
     var overlaps = isOverlappingHeader(el);
@@ -530,7 +515,27 @@ makeElementDraggable("moon-icon-group", function() {
     }
 });
 makeElementDraggable("dino-icon-group", function() {
-    window.location.href = "dinasour.html";
+    var win = document.getElementById("dino-window");
+    var frame = document.getElementById("dino-frame");
+    var origin = document.getElementById("dino-icon-group");
+
+    if (!$(win).is(":hidden")) {
+        hidePopup("dino-window", origin);
+        return;
+    }
+
+    // Point the iframe at the game the first time it's opened rather than on
+    // every page load - it's a standalone 118KB page that would otherwise sit
+    // there running behind a hidden window
+    if (!frame.getAttribute("src")) frame.src = "dinasour.html";
+
+    showPopup("dino-window", origin);
+    // The game listens for space and arrow keys, so hand it the keyboard
+    // instead of making you click into the frame first
+    setTimeout(function() {
+        frame.focus();
+        try { frame.contentWindow.focus(); } catch (e) {}
+    }, 60);
 });
 makeElementDraggable("settings-icon-group", function() {
     var popup = document.getElementById("settings-window");
@@ -830,23 +835,12 @@ document.getElementById("copy-layout-btn").addEventListener("click", function() 
     }
 });
 
-// Settings: lock the site back up behind the password gate
-(function() {
-    var lockBtn = document.getElementById("lock-site-btn");
-
-    // Nothing to lock if the gate is switched off - say so on the button
-    // rather than reloading to no visible effect
-    if (!window.REQUIRE_PASSWORD) {
-        lockBtn.disabled = true;
-        lockBtn.textContent = "Gate is off";
-        lockBtn.title = "Set REQUIRE_PASSWORD to true in index.html to enable it";
-        return;
-    }
-
-    lockBtn.addEventListener("click", function() {
-        window.location.href = "index.html?lock";
-    });
-})();
+// Settings: lock the site back up behind the password gate. Works whether or
+// not REQUIRE_PASSWORD is on - ?lock forces the gate either way, so the dialog
+// can be brought up on demand without turning it on for every visitor.
+document.getElementById("lock-site-btn").addEventListener("click", function() {
+    window.location.href = "index.html?lock";
+});
 
 // Settings: stack layout
 var stackOrder = [
