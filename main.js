@@ -214,6 +214,59 @@ function setHomeIconVisual(asSettings) {
     }
 }
 
+// ===== Password gate ========================================================
+// The flag and the hash live in index.html's <head> so the gate can hide the
+// page before it paints. This is only the dialog's behaviour.
+//
+// Worth being clear about what this is: the site is a static file, so its
+// markup reaches every visitor regardless of the dialog. Someone who opens
+// View Source can read straight past it. This keeps casual visitors out while
+// the site is being built - it is not protection for anything secret.
+//
+// The hash isn't security either, just a way to keep the literal password out
+// of a public repo so it can't be read at a glance (or harvested, if you reuse
+// it somewhere that matters). Generate a new one from the console with
+// hashPassword("...").
+function hashPassword(str) {
+    var h = 5381;
+    for (var i = 0; i < str.length; i++) {
+        h = ((h << 5) + h + str.charCodeAt(i)) >>> 0;
+    }
+    return h.toString(16);
+}
+
+(function setUpPasswordGate() {
+    if (!document.documentElement.classList.contains("gated")) return;
+
+    var input = document.getElementById("site-password");
+    var error = document.getElementById("password-error");
+
+    function unlock() {
+        if (hashPassword(input.value) !== window.SITE_PASSWORD_HASH) {
+            error.textContent = "The password is incorrect. Try again.";
+            input.select();
+            return;
+        }
+        // sessionStorage, not localStorage: unlocked for this tab session, so
+        // closing the browser asks again rather than remembering forever
+        sessionStorage.setItem("mocial-unlocked", "1");
+        document.documentElement.classList.remove("gated");
+    }
+
+    document.getElementById("password-ok").addEventListener("click", unlock);
+    input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") unlock();
+        else error.textContent = "";
+    });
+    document.getElementById("password-cancel").addEventListener("click", function() {
+        input.value = "";
+        error.textContent = "";
+        input.focus();
+    });
+
+    input.focus();
+})();
+
 // Popup fly-in animation: when a popup opens from an icon click, it
 // animates in from that icon's position instead of just snapping into view.
 var POPUP_FLY_IN = true;

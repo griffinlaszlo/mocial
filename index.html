@@ -6,7 +6,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>website</title>
-    <link rel="stylesheet" href="main.css?v=16">
+
+    <!-- ==== PASSWORD GATE =========================================
+         Set REQUIRE_PASSWORD to false to open the site up while
+         developing. That single flag is the whole switch.
+
+         To change the password, open the browser console on the site
+         and run:   hashPassword("your new password")
+         then paste the result in as SITE_PASSWORD_HASH below.
+
+         NOTE: this is a doorman, not a lock. The page is a static
+         file, so its markup ships to every visitor whether or not
+         they get past the dialog - anyone who opens View Source can
+         read the content behind it. It keeps casual visitors out
+         while you build; it does not protect anything secret.
+         ========================================================== -->
+    <script>
+        window.REQUIRE_PASSWORD = true;
+        window.SITE_PASSWORD_HASH = "e32065a";   // "mocial" - change this
+        if (window.REQUIRE_PASSWORD && sessionStorage.getItem("mocial-unlocked") !== "1") {
+            document.documentElement.className += " gated";
+        }
+    </script>
+
+    <link rel="stylesheet" href="main.css?v=18">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -323,7 +346,34 @@
         <p>© 2025 mocial.org</p>
 
     </footer>
-    <script src="main.js?v=18"></script> <!-- Link to your JavaScript file -->
+
+    <div id="password-gate">
+        <div id="password-dialog" class="popup-window">
+            <div class="windows-header-wrapper clearafter">
+                <div class="window-title">Enter Network Password</div>
+                <div class="window-icons"><span class="win-btn">?</span><span class="win-btn">&#10005;</span></div>
+            </div>
+
+            <div class="popup-inner-wrapper password-inner">
+                <img src="music_note_spinning.gif" class="password-icon" alt="" draggable="false">
+
+                <div class="password-body">
+                    <div class="password-message">Enter your network password for mocial.</div>
+                    <div class="password-row">
+                        <label for="site-password">Password:</label>
+                        <input type="password" id="site-password" autocomplete="current-password" spellcheck="false">
+                    </div>
+                    <div class="password-error" id="password-error"></div>
+                </div>
+
+                <div class="password-buttons">
+                    <button type="button" id="password-ok">OK</button>
+                    <button type="button" id="password-cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="main.js?v=19"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>

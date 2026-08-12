@@ -918,6 +918,134 @@ body.mobile-fullscreen .popup-window.iconize .popup-inner-wrapper {
 
 
 
+/* ===== Password gate =======================================================
+   Modelled on the Win95 "Enter Network Password" dialog: icon on the left,
+   message and field in the middle, OK/Cancel stacked at the right. Reuses the
+   existing .popup-window chrome so it matches the rest of the site. */
+
+/* html.gated is set by the inline script in index.html's <head>, before any
+   paint, so the site never flashes into view behind the dialog */
+html.gated body > header,
+html.gated body > main,
+html.gated body > footer {
+    display: none;
+}
+
+#password-gate {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100000;
+    background: #008080;   /* the classic desktop teal */
+    padding: 20px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+}
+html.gated #password-gate {
+    display: flex;
+}
+
+#password-dialog {
+    position: static;
+    width: 100%;
+    max-width: 560px;
+    text-align: left;
+}
+
+.password-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 20px 18px;
+    box-sizing: border-box;
+}
+
+/* Selector has to out-specify `.popup-window .popup-inner-wrapper img`, which
+   stretches window images to 100% - correct for the content windows, very
+   wrong for a 56px dialog icon */
+#password-dialog .popup-inner-wrapper img.password-icon {
+    width: 56px;
+    flex: 0 0 auto;
+    margin-top: 2px;
+}
+
+.password-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.password-message {
+    font-size: 14px;
+    margin-bottom: 22px;
+}
+
+.password-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.password-row label {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.password-row input {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 14px;
+    padding: 3px 4px;
+    background: #fff;
+    border: 2px inset #d8d8d8;
+    border-radius: 0;
+}
+
+.password-error {
+    min-height: 16px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #a00000;
+}
+
+.password-buttons {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.password-buttons button {
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 14px;
+    min-width: 96px;
+    padding: 5px 12px;
+    background: #d8d8d8;
+    border: 2px outset #f0f0f0;
+    border-radius: 0;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+.password-buttons button:active {
+    border-style: inset;
+}
+
+/* Stack the buttons under the field once there's no room beside it */
+@media screen and (max-width: 600px) {
+    .password-inner {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .password-buttons {
+        flex-direction: row;
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
 .pill-postmodern {
     border-radius: 5vw;
     border: 1px solid #f00;

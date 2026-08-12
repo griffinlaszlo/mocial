@@ -12,3 +12,7 @@ Patent_Application_Filed.DOCX
 # Unreferenced and heavy - not worth the repo weight until something uses them
 snaplogoglitch.MOV
 twitterbot/
+
+# Design reference only (the Win95 dialog the password gate is modelled on).
+# Nothing on the site loads these - delete this line if something starts to.
+windows-95-app-icons/
