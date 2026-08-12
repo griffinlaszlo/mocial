@@ -110,6 +110,15 @@ $(document).ready(function() {
     $("#dino-window").draggable({ handle: ".windows-header-wrapper" });
 });
 $(document).ready(function() {
+    $("#college-window").draggable();
+});
+$(document).ready(function() {
+    $("#phd-window").draggable();
+});
+$(document).ready(function() {
+    $("#letter-window").draggable();
+});
+$(document).ready(function() {
     $("#random-window").draggable();
 });
 $(document).ready(function() {
@@ -272,10 +281,13 @@ var windowIcons = {
     "patent-figures-window":    "fileicon.png",
     "s13688-window":            "fileicon.png",
     "ambient-streaming-window": "fileicon.png",
+    "phd-window":               "fileicon.png",
+    "letter-window":            "fileicon.png",
     // Application window - shows its own icon, the way a Win95 app window does
     "dino-window":              "dino.png",
     // Folders
     "random-window":            "folder-icon.png",
+    "college-window":           "folder-icon.png",
     "folder-contents-window":   "folder-icon.png",
     "files-window":             "cd1.png",
     "settings-window":          "settings-icon.png"
@@ -566,7 +578,9 @@ makeElementDraggable("folder-icon-group", function() {
 makeElementDraggable("files-icon-group", function() {
     toggleDesktopFolder("random");
 });
-makeElementDraggable("college-icon-group");
+makeElementDraggable("college-icon-group", function() {
+    toggleDesktopFolder("college");
+});
 makeElementDraggable("google-icon-group", function() {
     window.location.href = "https://google.com";
 });
@@ -751,6 +765,18 @@ var desktopFolders = {
             { name: "undertheghost", popup: "under-ghost-wrapper" },
             { name: "dsresearch",    popup: "s13688-window" }
         ]
+    },
+    college: {
+        iconId: "college-icon-group",
+        windowId: "college-window",
+        gridId: "college-grid",
+        items: [
+            { name: "phd",         popup: "phd-window" },
+            { name: "letter",      popup: "letter-window" },
+            // Same window the random folder's "dsresearch" opens - one file
+            // showing up in two folders, not two copies of it
+            { name: "ds research", popup: "s13688-window" }
+        ]
     }
 };
 
@@ -788,6 +814,7 @@ function toggleDesktopFolder(folderKey) {
 }
 
 renderDesktopFolder("random");
+renderDesktopFolder("college");
 
 // Settings: pointer color
 function setPointerColor(color) {

@@ -685,6 +685,35 @@ body.dark-mode .popup-inner-wrapper {
     display: none;
 }
 
+#college-window {
+    text-align: left;
+    width: 26vw;
+    position: absolute;
+    z-index: 10000;
+    left: 8vw;
+    top: 20vw;
+    border: 4px ridge #d8d8d8;
+    display: none;
+}
+
+#phd-window {
+    width: 30vw;
+    position: absolute;
+    z-index: 10000;
+    left: 34vw;
+    top: 18vw;
+    display: none;
+}
+
+#letter-window {
+    width: 30vw;
+    position: absolute;
+    z-index: 10000;
+    left: 40vw;
+    top: 24vw;
+    display: none;
+}
+
 #dino-window {
     text-align: left;
     width: 46vw;

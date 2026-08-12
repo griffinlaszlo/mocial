@@ -42,7 +42,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=24">
+    <link rel="stylesheet" href="main.css?v=25">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -251,6 +251,39 @@
         </div>
     </div>
 
+    <div id="phd-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">PURPOSE OF INTENT</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#phd-window').toggleClass('iconize'); $('#phd-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#phd-window').toggleClass('resize'); $('#phd-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#phd-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper">
+            <iframe src="PHD_purpose_of_intent.pdf#toolbar=0&navpanes=0&statusbar=0&view=FitH" class="pdf-viewer"></iframe>
+        </div>
+    </div>
+
+    <div id="letter-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">LETTER</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#letter-window').toggleClass('iconize'); $('#letter-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#letter-window').toggleClass('resize'); $('#letter-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#letter-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper">
+            <iframe src="Letter.pdf#toolbar=0&navpanes=0&statusbar=0&view=FitH" class="pdf-viewer"></iframe>
+        </div>
+    </div>
+
+    <div id="college-window" class="popup-window files-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">COLLEGE</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#college-window').toggleClass('iconize'); $('#college-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#college-window').toggleClass('resize'); $('#college-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#college-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper files-inner">
+            <div class="files-grid" id="college-grid"></div>
+        </div>
+    </div>
+
     <div id="dino-window" class="popup-window">
         <div class="windows-header-wrapper clearafter">
             <div class="window-title">DINO</div>
@@ -410,7 +443,7 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=28"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=29"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>
