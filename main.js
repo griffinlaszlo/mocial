@@ -548,7 +548,22 @@ function openSettingsWindow(originEl) {
 // No click handler: clicking home used to save its position and reload the
 // page, which read as the site closing and reopening under you. Dragging it
 // into the header to reveal settings is unaffected - that's onDragEnd below.
-makeElementDraggable("computer-icon-group", null, function() {
+makeElementDraggable("computer-icon-group", function() {
+    // "Show desktop": clear everything out of the way, and put it all back on
+    // a second click. Windows are minimised rather than closed, so they stay
+    // in the taskbar and nothing is lost. This replaced the old behaviour of
+    // saving the icon's position and reloading, which read as the site
+    // closing and reopening under you.
+    var open = [].filter.call(document.querySelectorAll(".popup-window"), isWindowOnScreen);
+    if (!open.length) return;
+
+    var allMinimised = open.every(function(win) {
+        return win.classList.contains("iconize");
+    });
+    open.forEach(function(win) {
+        $(win).toggleClass("iconize", !allMinimised).removeClass("resize");
+    });
+}, function() {
     // onDragEnd
     var el = document.getElementById("computer-icon-group");
     var overlaps = isOverlappingHeader(el);
