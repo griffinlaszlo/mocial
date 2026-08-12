@@ -429,11 +429,15 @@ body.dark-mode.footer-dark footer {
 /* Small icon sat at the left of a window's title bar, the way a Win95 window
    carries the icon of whatever it's showing. Sized in em so it tracks the
    title text at every breakpoint. */
+/* vertical-align: middle rather than a fixed em offset - it centres the icon
+   on the text's own midline whatever height the icon is, so the per-icon
+   sizes in main.js can change without knocking anything out of line. A fixed
+   offset only lines up at one size, and grew upward as icons got bigger. */
 .window-title-icon {
     height: 1.15em;
     width: auto;
     margin-right: 5px;
-    vertical-align: -0.2em;
+    vertical-align: middle;
     image-rendering: pixelated;
 }
 
@@ -947,6 +951,102 @@ body.mobile-fullscreen .popup-window.iconize .popup-inner-wrapper {
 }
 
 
+
+/* ===== Taskbar =============================================================
+   The footer is a Win95 taskbar: a raised bar carrying a button per open
+   window plus the page's own permanently-pressed button, and a sunken tray
+   on the right. */
+.taskbar {
+    display: flex;
+    align-items: stretch;
+    gap: 5px;
+    padding: 3px 4px;
+    border-top: 2px solid #fff;   /* the raised lip along the top edge */
+    box-sizing: border-box;
+}
+
+.taskbar-tasks {
+    display: flex;
+    gap: 3px;
+    flex: 1 1 auto;
+    min-width: 0;      /* lets the buttons shrink instead of overflowing */
+    overflow: hidden;
+}
+
+.task-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 200px;
+    padding: 3px 8px;
+    font-family: 'W95FA', Tahoma, Geneva, sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: left;
+    color: #000;
+    background: #c0c0c0;
+    border: 2px outset #f0f0f0;
+    border-radius: 0;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+.task-button:active {
+    border-style: inset;
+}
+.task-button span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.task-button img {
+    height: 15px;
+    width: auto;
+    flex: 0 0 auto;
+    image-rendering: pixelated;
+}
+
+/* The pressed task - the page you're actually on */
+.task-button-active {
+    border-style: inset;
+    font-weight: bold;
+}
+
+/* A window that's been minimised still has a task, just not a pressed one */
+.task-button-window.is-minimised {
+    font-weight: normal;
+}
+.task-button-window {
+    font-weight: bold;
+}
+
+.taskbar-tray {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 2px 9px;
+    border: 2px inset #f0f0f0;
+    font-family: 'W95FA', Tahoma, Geneva, sans-serif;
+    font-size: 12px;
+    line-height: 18px;
+    color: #000;
+}
+.tray-icon {
+    height: 14px;
+    width: auto;
+    image-rendering: pixelated;
+}
+
+@media screen and (max-width: 600px) {
+    /* No room for window titles next to a clock on a phone - keep the tray */
+    .task-button {
+        max-width: 130px;
+    }
+    .taskbar-tray .tray-icon {
+        display: none;
+    }
+}
 
 /* ===== Password gate =======================================================
    Modelled on the Win95 "Enter Network Password" dialog: icon on the left,

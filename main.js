@@ -263,10 +263,6 @@ function hashPassword(str) {
 // that shows a folder's contents carries a mini version of the desktop icon
 // that opens it - the random folder's folder, Now Playing's CD - so the icon
 // on the desktop and the one in the title bar are the same thing at two sizes.
-// An entry is either a filename, or {src, size} where size overrides the
-// default height. The art isn't drawn to a common scale - the folder and CD
-// carry a lot of empty margin, so at one shared height they read much smaller
-// than the file icon does. Sizes are per-icon by eye rather than uniform.
 var windowIcons = {
     // Files
     "snapmap-wrapper":          "fileicon.png",
@@ -277,12 +273,27 @@ var windowIcons = {
     "s13688-window":            "fileicon.png",
     "ambient-streaming-window": "fileicon.png",
     // Application window - shows its own icon, the way a Win95 app window does
-    "dino-window":              { src: "dino.png", size: "1.5em" },
+    "dino-window":              "dino.png",
     // Folders
-    "random-window":            { src: "folder-icon.png",   size: "1.9em" },
-    "folder-contents-window":   { src: "folder-icon.png",   size: "1.9em" },
-    "files-window":             { src: "cd1.png",           size: "1.5em" },
-    "settings-window":          { src: "settings-icon.png", size: "1.4em" }
+    "random-window":            "folder-icon.png",
+    "folder-contents-window":   "folder-icon.png",
+    "files-window":             "cd1.png",
+    "settings-window":          "settings-icon.png"
+};
+
+// Height is keyed to the ARTWORK, not to the window, so any window that uses
+// the folder icon in future is sized the same without being re-tuned.
+//
+// The art isn't drawn to a common scale: the folder and CD carry a lot of
+// empty margin inside their own bounds, so they need more height than the
+// file icon to read as the same size. Anything not listed uses the CSS
+// default. Vertical centring is handled in CSS and is size-independent, so
+// changing a number here can't knock an icon out of line with the text.
+var iconSizes = {
+    "folder-icon.png":   "2.2em",
+    "cd1.png":           "1.6em",
+    "dino.png":          "1.6em",
+    "settings-icon.png": "1.5em"
 };
 
 $(document).ready(function() {
@@ -292,11 +303,11 @@ $(document).ready(function() {
         var title = win.querySelector(".window-title");
         if (!title || title.querySelector(".window-title-icon")) return;
 
-        var entry = windowIcons[windowId];
+        var src = windowIcons[windowId];
         var img = document.createElement("img");
-        img.src = entry.src || entry;
+        img.src = src;
         img.className = "window-title-icon";
-        if (entry.size) img.style.height = entry.size;
+        if (iconSizes[src]) img.style.height = iconSizes[src];
         img.draggable = false;
         img.alt = "";
         title.insertBefore(img, title.firstChild);
@@ -332,12 +343,83 @@ function isMobileLayout() {
 // scroll. Windows are hidden through several paths (hidePopup, the title-bar
 // close buttons' inline onclick, applyPopupChoices), so rather than routing
 // them all through one function, watch the elements themselves.
-function syncOpenWindowClass() {
-    var anyOpen = [].some.call(document.querySelectorAll(".popup-window"), function(el) {
-        return window.getComputedStyle(el).display !== "none";
-    });
-    document.body.classList.toggle("has-open-window", anyOpen);
+// A window counts as on screen only if it's actually rendered. Testing its own
+// computed display isn't enough: the password dialog is display:block inside a
+// hidden gate wrapper, so it reads as open when the gate is down. getClientRects
+// comes back empty whenever the element or any ancestor is hidden.
+function isWindowOnScreen(el) {
+    return el.id !== "password-dialog" && el.getClientRects().length > 0;
 }
+
+function syncOpenWindowClass() {
+    var anyOpen = [].some.call(document.querySelectorAll(".popup-window"), isWindowOnScreen);
+    document.body.classList.toggle("has-open-window", anyOpen);
+    renderTaskbar();
+}
+
+// The footer is a Win95 taskbar. Every open window gets a button carrying the
+// same icon its title bar does; clicking one minimises or restores it. The
+// page's own button sits at the left and stays pressed.
+//
+// Rebuilt from scratch on every change rather than diffed - there are only
+// ever a handful of windows, and the same MutationObserver that tracks
+// has-open-window drives it, so every path that opens or closes a window is
+// already covered without routing them through one function.
+function renderTaskbar() {
+    var tasks = document.getElementById("taskbar-tasks");
+    if (!tasks) return;
+
+    [].slice.call(tasks.querySelectorAll(".task-button-window")).forEach(function(btn) {
+        btn.parentNode.removeChild(btn);
+    });
+
+    [].slice.call(document.querySelectorAll(".popup-window")).forEach(function(win) {
+        if (!win.id || !isWindowOnScreen(win)) return;
+        var titleEl = win.querySelector(".window-title");
+        if (!titleEl) return;
+
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "task-button task-button-window" +
+                        (win.classList.contains("iconize") ? " is-minimised" : "");
+
+        var src = windowIcons[win.id];
+        if (src) {
+            var img = document.createElement("img");
+            img.src = src;
+            img.alt = "";
+            img.draggable = false;
+            btn.appendChild(img);
+        }
+
+        var label = document.createElement("span");
+        label.textContent = titleEl.textContent.trim();
+        btn.appendChild(label);
+
+        btn.addEventListener("click", function() {
+            $(win).toggleClass("iconize").removeClass("resize");
+        });
+
+        tasks.appendChild(btn);
+    });
+}
+
+// Tray clock. setInterval rather than an animation-frame loop, so it keeps
+// ticking in webviews that throttle frames.
+$(document).ready(function() {
+    var clock = document.getElementById("tray-clock");
+    if (!clock) return;
+    function tick() {
+        var now = new Date();
+        var hours = now.getHours();
+        var minutes = now.getMinutes();
+        var suffix = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+        clock.textContent = hours + ":" + (minutes < 10 ? "0" : "") + minutes + " " + suffix;
+    }
+    tick();
+    setInterval(tick, 20000);
+});
 $(document).ready(function() {
     var observer = new MutationObserver(syncOpenWindowClass);
     document.querySelectorAll(".popup-window").forEach(function(el) {

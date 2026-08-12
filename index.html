@@ -42,7 +42,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=22">
+    <link rel="stylesheet" href="main.css?v=24">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -371,8 +371,17 @@
 
     </main>
     <footer>
-        <p>© 2025 mocial.org</p>
-
+        <div class="taskbar">
+            <div class="taskbar-tasks" id="taskbar-tasks">
+                <button type="button" class="task-button task-button-active" id="task-button-home">
+                    <img src="notes.png" alt="" draggable="false"><span>© 2025 mocial.org</span>
+                </button>
+            </div>
+            <div class="taskbar-tray">
+                <img src="speaker.png" alt="" class="tray-icon" draggable="false">
+                <span class="tray-clock" id="tray-clock"></span>
+            </div>
+        </div>
     </footer>
 
     <div id="password-gate">
@@ -401,7 +410,7 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=25"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=28"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>
