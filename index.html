@@ -42,7 +42,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=25">
+    <link rel="stylesheet" href="main.css?v=26">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -324,6 +324,11 @@
                     <button type="button" class="settings-button" id="lock-site-btn">Lock</button>
                 </div>
                 <div class="settings-row">
+                    <div class="settings-label">Bottom bar</div>
+                    <label class="settings-option"><input type="radio" name="bottom-bar" id="bottom-bar-taskbar" checked> Taskbar</label>
+                    <label class="settings-option"><input type="radio" name="bottom-bar" id="bottom-bar-classic"> Original</label>
+                </div>
+                <div class="settings-row">
                     <div class="settings-label">Popup fly-in animation</div>
                     <label class="settings-option"><input type="radio" name="fly-in" id="fly-in-on" checked> On</label>
                     <label class="settings-option"><input type="radio" name="fly-in" id="fly-in-off"> Off</label>
@@ -404,6 +409,7 @@
 
     </main>
     <footer>
+        <p class="footer-classic">© 2025 mocial.org</p>
         <div class="taskbar">
             <div class="taskbar-tasks" id="taskbar-tasks">
                 <button type="button" class="task-button task-button-active" id="task-button-home">
@@ -443,7 +449,7 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=29"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=31"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>

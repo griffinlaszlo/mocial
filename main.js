@@ -272,26 +272,24 @@ function hashPassword(str) {
 // that shows a folder's contents carries a mini version of the desktop icon
 // that opens it - the random folder's folder, Now Playing's CD - so the icon
 // on the desktop and the one in the title bar are the same thing at two sizes.
+// Only folders and applications get an icon in their title bar. A window
+// showing a file - a PDF, an image, a video - gets none: the file icon in the
+// bar told you nothing the title didn't, and repeated on every window it just
+// added noise. Anything absent from this map has no title-bar icon.
 var windowIcons = {
-    // Files
-    "snapmap-wrapper":          "fileicon.png",
-    "postmodern-wrapper":       "fileicon.png",
-    "under-ghost-wrapper":      "fileicon.png",
-    "canary-yellow-wrapper":    "fileicon.png",
-    "patent-figures-window":    "fileicon.png",
-    "s13688-window":            "fileicon.png",
-    "ambient-streaming-window": "fileicon.png",
-    "phd-window":               "fileicon.png",
-    "letter-window":            "fileicon.png",
-    // Application window - shows its own icon, the way a Win95 app window does
-    "dino-window":              "dino.png",
-    // Folders
-    "random-window":            "folder-icon.png",
-    "college-window":           "folder-icon.png",
-    "folder-contents-window":   "folder-icon.png",
-    "files-window":             "cd1.png",
-    "settings-window":          "settings-icon.png"
+    // Folders - a mini version of the desktop icon that opens them
+    "random-window":          "folder-icon.png",
+    "college-window":         "folder-icon.png",
+    "folder-contents-window": "folder-icon.png",
+    "files-window":           "cd1.png",
+    // Applications - their own icon, the way a Win95 app window does
+    "dino-window":            "dino.png",
+    "settings-window":        "settings-icon.png"
 };
+
+// The taskbar still wants an icon on every button - a real taskbar never has a
+// bare one - so windows with no title-bar icon fall back to the file icon there.
+var TASKBAR_FALLBACK_ICON = "fileicon.png";
 
 // Height is keyed to the ARTWORK, not to the window, so any window that uses
 // the folder icon in future is sized the same without being re-tuned.
@@ -395,14 +393,11 @@ function renderTaskbar() {
         btn.className = "task-button task-button-window" +
                         (win.classList.contains("iconize") ? " is-minimised" : "");
 
-        var src = windowIcons[win.id];
-        if (src) {
-            var img = document.createElement("img");
-            img.src = src;
-            img.alt = "";
-            img.draggable = false;
-            btn.appendChild(img);
-        }
+        var img = document.createElement("img");
+        img.src = windowIcons[win.id] || TASKBAR_FALLBACK_ICON;
+        img.alt = "";
+        img.draggable = false;
+        btn.appendChild(img);
 
         var label = document.createElement("span");
         label.textContent = titleEl.textContent.trim();
@@ -949,6 +944,14 @@ document.getElementById("copy-layout-btn").addEventListener("click", function() 
 // can be brought up on demand without turning it on for every visitor.
 document.getElementById("lock-site-btn").addEventListener("click", function() {
     window.location.href = "index.html?lock";
+});
+
+// Settings: bottom bar - Win95 taskbar, or the original centred copyright line
+document.getElementById("bottom-bar-taskbar").addEventListener("change", function() {
+    if (this.checked) document.body.classList.remove("bottom-bar-classic");
+});
+document.getElementById("bottom-bar-classic").addEventListener("change", function() {
+    if (this.checked) document.body.classList.add("bottom-bar-classic");
 });
 
 // Settings: stack layout

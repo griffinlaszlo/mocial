@@ -414,8 +414,23 @@ body.pointer-red .windows-header-wrapper {
 body.dark-mode .windows-header-wrapper {
     background: var(--popup-header-dark-bg, #4a4a4a);
 }
-body.dark-mode.footer-dark footer {
+/* Only the original bar darkens. The taskbar is Win95 chrome and keeps its
+   grey in both modes - a dark taskbar reads as a different UI rather than the
+   same one at night. Scoped so the Dark Mode > Footer setting still works for
+   whoever switches back to the original bar. */
+body.dark-mode.footer-dark.bottom-bar-classic footer {
     background: #333333;
+}
+
+/* Bottom bar: taskbar by default, original centred line as an option */
+.footer-classic {
+    display: none;
+}
+body.bottom-bar-classic .footer-classic {
+    display: block;
+}
+body.bottom-bar-classic .taskbar {
+    display: none;
 }
 .window-title {
     font-size: 0.75vw;
