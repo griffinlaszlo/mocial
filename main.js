@@ -274,6 +274,10 @@ function hashPassword(str) {
 // that shows a folder's contents carries a mini version of the desktop icon
 // that opens it - the random folder's folder, Now Playing's CD - so the icon
 // on the desktop and the one in the title bar are the same thing at two sizes.
+// An entry is either a filename, or {src, size} where size overrides the
+// default height. The art isn't drawn to a common scale - the folder and CD
+// carry a lot of empty margin, so at one shared height they read much smaller
+// than the file icon does. Sizes are per-icon by eye rather than uniform.
 var windowIcons = {
     // Files
     "snapmap-wrapper":          "fileicon.png",
@@ -284,10 +288,10 @@ var windowIcons = {
     "s13688-window":            "fileicon.png",
     "ambient-streaming-window": "fileicon.png",
     // Folders
-    "random-window":            "folder-icon.png",
-    "files-window":             "cd1.png",
-    "folder-contents-window":   "folder-icon.png",
-    "settings-window":          "settings-icon.png"
+    "random-window":            { src: "folder-icon.png",   size: "1.9em" },
+    "folder-contents-window":   { src: "folder-icon.png",   size: "1.9em" },
+    "files-window":             { src: "cd1.png",           size: "1.5em" },
+    "settings-window":          { src: "settings-icon.png", size: "1.4em" }
 };
 
 $(document).ready(function() {
@@ -297,9 +301,11 @@ $(document).ready(function() {
         var title = win.querySelector(".window-title");
         if (!title || title.querySelector(".window-title-icon")) return;
 
+        var entry = windowIcons[windowId];
         var img = document.createElement("img");
-        img.src = windowIcons[windowId];
+        img.src = entry.src || entry;
         img.className = "window-title-icon";
+        if (entry.size) img.style.height = entry.size;
         img.draggable = false;
         img.alt = "";
         title.insertBefore(img, title.firstChild);
@@ -823,6 +829,24 @@ document.getElementById("copy-layout-btn").addEventListener("click", function() 
         prompt("Copy this manually:", output);
     }
 });
+
+// Settings: lock the site back up behind the password gate
+(function() {
+    var lockBtn = document.getElementById("lock-site-btn");
+
+    // Nothing to lock if the gate is switched off - say so on the button
+    // rather than reloading to no visible effect
+    if (!window.REQUIRE_PASSWORD) {
+        lockBtn.disabled = true;
+        lockBtn.textContent = "Gate is off";
+        lockBtn.title = "Set REQUIRE_PASSWORD to true in index.html to enable it";
+        return;
+    }
+
+    lockBtn.addEventListener("click", function() {
+        window.location.href = "index.html?lock";
+    });
+})();
 
 // Settings: stack layout
 var stackOrder = [
