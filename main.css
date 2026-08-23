@@ -924,9 +924,28 @@ body.mobile-stacked.has-open-window main {
 }
 /* The footer is position:fixed, so on a phone it permanently eats ~50px off
    the bottom of the screen and clips whatever window is lowest. There's no
-   room to spare here - let it sit at the end of the content instead. */
+   room to spare here - let it sit at the end of the content instead.
+
+   Dropping it to `position: static` alone isn't enough though: with nothing
+   open the page is far shorter than the viewport, so the taskbar flows right
+   after <main> and ends up floating partway up the screen. Making <body> a
+   flex column and handing the footer `margin-top: auto` covers both cases -
+   the auto margin swallows the leftover space and holds the bar against the
+   bottom while the page is short, then collapses to nothing once the stacked
+   windows outgrow the viewport and the footer trails the content as intended. */
+body.mobile-stacked {
+    display: flex;
+    flex-direction: column;
+}
+/* Flex items default to flex-shrink:1; without this the icon column and the
+   stacked windows would get squeezed instead of scrolling. */
+body.mobile-stacked > header,
+body.mobile-stacked > main {
+    flex-shrink: 0;
+}
 body.mobile-stacked footer {
     position: static;
+    margin-top: auto;
 }
 
 /* --- fullscreen: one window at a time, covering the viewport, title bar
@@ -1067,9 +1086,9 @@ body.mobile-fullscreen .popup-window.iconize .popup-inner-wrapper {
 .taskbar-tray {
     flex: 0 0 auto;
     display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 2px 9px;
+    align-items: stretch;
+    /* Padding lives on .tray-button, not here, so the button covers the whole
+       inside of the sunken box and every part of the tray is clickable. */
     border: 2px inset #f0f0f0;
     font-family: 'W95FA', Tahoma, Geneva, sans-serif;
     font-size: 12px;
@@ -1080,6 +1099,85 @@ body.mobile-fullscreen .popup-window.iconize .popup-inner-wrapper {
     height: 14px;
     width: auto;
     image-rendering: pixelated;
+}
+
+/* The whole tray opens the world clocks, so the button - not the clock text -
+   is the control. It has to keep reading as plain tray contents though: no
+   chrome at rest, a light wash on hover, and a pressed fill while it's open. */
+.tray-button {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 2px 9px;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: inherit;
+}
+.tray-button:hover {
+    background: #d4d4d4;
+}
+.tray-button[aria-expanded="true"] {
+    background: #b0b0b0;
+}
+
+/* ===== World clocks ========================================================
+   A tray flyout in the Win95 idiom: raised panel, sunken rows. It rises out
+   of the taskbar instead of dropping from it - bottom:100% pins it to the top
+   edge of the tray, so it follows the bar whether the footer is fixed
+   (desktop) or static (the stacked mobile layout) with no JS positioning.
+   Right-aligned to the tray so it never runs off the screen edge. */
+.taskbar-tray {
+    position: relative;
+}
+.clock-flyout {
+    position: absolute;
+    bottom: 100%;
+    right: -2px;
+    margin-bottom: 3px;
+    padding: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: #c0c0c0;
+    border: 2px outset #f0f0f0;
+    z-index: 5;
+}
+.clock-flyout[hidden] {
+    display: none;
+}
+.clock-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 6px 2px 4px;
+    background: #000080;
+    border: 2px inset #f0f0f0;
+}
+.clock-flag {
+    flex: 0 0 auto;
+    display: block;
+    border: 1px solid #000;
+    image-rendering: pixelated;
+}
+.clock-time {
+    flex: 1 1 auto;
+    text-align: right;
+    /* Tabular so the rows don't jitter as the digits change. */
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    line-height: 16px;
+    letter-spacing: 1px;
+    color: #fff;
+    white-space: nowrap;
+}
+
+/* While the flyout is up the taskbar has to clear the windows, which sit at
+   z-index 10000+. Scoped to the open state so the normal stacking - windows
+   over the bar - is untouched the rest of the time. */
+body.clock-open footer {
+    z-index: 30000;
 }
 
 @media screen and (max-width: 600px) {

@@ -411,21 +411,88 @@ function renderTaskbar() {
     });
 }
 
+// The tray clock reads 24-hour; the flyout it opens reads 12-hour per city,
+// which is the split in the Win95 tray it's modelled on.
+//
+// Named zones rather than fixed offsets so the rows stay right through both
+// countries' DST changes - the US and EU don't switch on the same dates, so
+// hardcoded offsets would be wrong for a couple of weeks twice a year.
+var WORLD_CLOCKS = [
+    { id: "clock-us", zone: "America/Los_Angeles" },
+    { id: "clock-uk", zone: "Europe/London" },
+    { id: "clock-de", zone: "Europe/Berlin" }
+];
+
+// Intl.DateTimeFormat is the only thing here that can throw on an old browser,
+// so each formatter is built once behind a try and a null formatter just leaves
+// that row at its placeholder rather than breaking the tray clock with it.
+function makeZoneFormatter(zone) {
+    try {
+        return new Intl.DateTimeFormat("en-US", {
+            timeZone: zone, hour: "2-digit", minute: "2-digit", hour12: true
+        });
+    } catch (e) {
+        return null;
+    }
+}
+
 // Tray clock. setInterval rather than an animation-frame loop, so it keeps
 // ticking in webviews that throttle frames.
 $(document).ready(function() {
     var clock = document.getElementById("tray-clock");
     if (!clock) return;
+
+    // The clock span only carries the text; the surrounding button is the
+    // control, so the whole tray - speaker icon included - is the hit area.
+    var trayButton = document.getElementById("tray-button");
+
+    var rows = WORLD_CLOCKS.map(function(spec) {
+        return {
+            el: document.getElementById(spec.id),
+            format: makeZoneFormatter(spec.zone)
+        };
+    });
+
     function tick() {
         var now = new Date();
         var hours = now.getHours();
         var minutes = now.getMinutes();
-        var suffix = hours >= 12 ? "PM" : "AM";
-        hours = hours % 12 || 12;
-        clock.textContent = hours + ":" + (minutes < 10 ? "0" : "") + minutes + " " + suffix;
+        // Military time: zero-padded, no suffix. 16:37, 09:05, 00:12.
+        clock.textContent = (hours < 10 ? "0" : "") + hours + ":" +
+                            (minutes < 10 ? "0" : "") + minutes;
+
+        rows.forEach(function(row) {
+            if (!row.el || !row.format) return;
+            row.el.textContent = row.format.format(now);
+        });
     }
     tick();
+    // 20s is fine for a minute display, but it can leave a row up to 20s stale
+    // the moment the flyout opens - so open() ticks as well.
     setInterval(tick, 20000);
+
+    var flyout = document.getElementById("clock-flyout");
+    if (!flyout || !trayButton) return;
+
+    function setOpen(open) {
+        if (open) tick();
+        flyout.hidden = !open;
+        trayButton.setAttribute("aria-expanded", open ? "true" : "false");
+        document.body.classList.toggle("clock-open", open);
+    }
+
+    trayButton.addEventListener("click", function(e) {
+        e.stopPropagation();   // otherwise the document handler closes it again
+        setOpen(flyout.hidden);
+    });
+
+    // Click-away and Escape, the way a real tray flyout dismisses.
+    document.addEventListener("click", function(e) {
+        if (!flyout.hidden && !flyout.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape" && !flyout.hidden) setOpen(false);
+    });
 });
 $(document).ready(function() {
     var observer = new MutationObserver(syncOpenWindowClass);
