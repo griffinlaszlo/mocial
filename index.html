@@ -9,13 +9,13 @@
 
     <!-- ==== PASSWORD GATE =========================================
          REQUIRE_PASSWORD controls whether every visitor meets the
-         dialog on arrival. It is off for now, so the site opens
-         straight up. Set it to true when you want the gate on for
-         real - at launch, or whenever the site should be shut.
+         dialog on arrival. It is ON: mocial.org is published, so the
+         gate is what keeps the site shut while it's still being
+         built. Set it to false to open the site to everyone.
 
-         The gate is still reachable while it's off: the Lock button
-         in Settings (and the ?lock URL it uses) always brings it up,
-         so it can be checked without switching it on for everyone.
+         The gate stays reachable when it's off: the Lock button in
+         Settings (and the ?lock URL it uses) always brings it up, so
+         it can be checked without switching it on for everyone.
 
          To change the password, open the browser console on the site
          and run:   hashPassword("your new password")
@@ -28,7 +28,7 @@
          while you build; it does not protect anything secret.
          ========================================================== -->
     <script>
-        window.REQUIRE_PASSWORD = false;
+        window.REQUIRE_PASSWORD = true;
         window.SITE_PASSWORD_HASH = "e32065a";   // "mocial" - change this
 
         // ?lock forgets this session's unlock and forces the gate up even
