@@ -52,7 +52,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=40">
+    <link rel="stylesheet" href="main.css?v=41">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -326,7 +326,12 @@
 
         <div class="popup-inner-wrapper notepad-inner">
             <textarea id="notepad-text" spellcheck="false" placeholder="Free ideas go here..."></textarea>
-            <div class="notepad-status" id="notepad-status"></div>
+            <!-- Hidden unless the converter is up, since it's the only thing
+                 that can publish. Visitors reading mocial.org never see it. -->
+            <div class="notepad-footer">
+                <div class="notepad-status" id="notepad-status"></div>
+                <button type="button" id="notepad-publish" hidden>Publish</button>
+            </div>
         </div>
     </div>
 
@@ -661,7 +666,7 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=41"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=42"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>

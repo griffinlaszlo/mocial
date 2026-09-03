@@ -820,6 +820,35 @@ body.dark-mode .popup-inner-wrapper {
 /* Says whether this copy can be edited and whether the last keystroke made it
    to disk. A notepad that silently stops saving is worse than one that can't
    save at all. */
+/* Status on the left, Publish on the right - the status is what tells you
+   whether pressing it would do anything. */
+.notepad-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#notepad-publish {
+    flex: 0 0 auto;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 13px;
+    min-width: 84px;
+    padding: 4px 12px;
+    background: #d8d8d8;
+    border: 2px outset #f0f0f0;
+    border-radius: 0;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+#notepad-publish:active {
+    border-style: inset;
+}
+#notepad-publish[disabled] {
+    color: #808080;
+    border-style: outset;
+    cursor: url('cursor2-arrow.png') 0 0, default;
+}
+
 .notepad-status {
     min-height: 15px;
     padding: 4px 3px 1px;

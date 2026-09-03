@@ -100,6 +100,11 @@ MAX_NOTES_BYTES = 200 * 1024
 # oversized note was discarded before the notes handler ever saw it.
 MAX_BODY_BYTES = 4 * MAX_NOTES_BYTES
 
+# The branch GitHub Pages builds from. Publishing pushes the current branch
+# here, which is what going live actually means.
+PUBLISH_BRANCH = os.environ.get("MOCIAL_PUBLISH_BRANCH", "main")
+GIT_TIMEOUT_SECONDS = 90
+
 # yt-dlp is doing real network + CPU work, so a handful at once, not unbounded.
 MAX_ACTIVE_JOBS = 2
 
@@ -625,6 +630,68 @@ def write_notes(text: str) -> dict:
     return {"saved": True, "bytes": len(encoded), "updated_at": iso(time.time())}
 
 
+# ---------------------------------------------------------------------------
+# Publishing
+# ---------------------------------------------------------------------------
+#
+# Commits ideas.txt and pushes, so writing a note and putting it on the site is
+# one button rather than a trip to a terminal.
+#
+# Two deliberate limits. It stages ideas.txt BY NAME and nothing else - never
+# `git add -A` - so a publish can never sweep up unrelated work in progress.
+# And it does not try to rebase or resolve anything: if the push is rejected,
+# it says so and stops, rather than doing history surgery while nobody's
+# watching. A button that quietly rewrites your repo is worse than one that
+# occasionally says "do this bit yourself".
+
+def git(*args) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["git", *args],
+        cwd=str(NOTES_FILE.parent),
+        capture_output=True,
+        text=True,
+        timeout=GIT_TIMEOUT_SECONDS,
+    )
+
+
+def git_problem(result: subprocess.CompletedProcess) -> str:
+    """git puts the useful line on either stream depending on the subcommand."""
+    text = (result.stderr or result.stdout or "").strip()
+    return text.splitlines()[-1][:300] if text else "git exited with %d" % result.returncode
+
+
+def publish_notes() -> dict:
+    if not (NOTES_FILE.parent / ".git").exists():
+        raise ValueError("The site folder isn't a git repository.")
+
+    added = git("add", "--", NOTES_FILE.name)
+    if added.returncode != 0:
+        raise ValueError("Couldn't stage the notes: %s" % git_problem(added))
+
+    # --quiet returns 1 when there IS a staged difference, 0 when there isn't.
+    staged = git("diff", "--cached", "--quiet", "--", NOTES_FILE.name)
+    committed = None
+
+    if staged.returncode == 1:
+        result = git("commit", "-m", "Update ideas", "--", NOTES_FILE.name)
+        if result.returncode != 0:
+            raise ValueError("Couldn't commit: %s" % git_problem(result))
+        committed = git("rev-parse", "--short", "HEAD").stdout.strip()
+
+    pushed = git("push", "origin", "HEAD:" + PUBLISH_BRANCH)
+    if pushed.returncode != 0:
+        raise ValueError(
+            "Couldn't push: %s. Sort that out in a terminal and press Publish "
+            "again - the note is committed either way." % git_problem(pushed)
+        )
+
+    if committed:
+        return {"published": True, "commit": committed, "branch": PUBLISH_BRANCH}
+    # Nothing new to commit, but the push may still have carried earlier work.
+    return {"published": True, "commit": None, "branch": PUBLISH_BRANCH,
+            "note": "No changes since the last publish."}
+
+
 def run_job(job: Job) -> None:
     command = build_command(job)
     last_output = time.time()
@@ -945,7 +1012,19 @@ class Handler(BaseHTTPRequestHandler):
         return self._error("Not found.", 404)
 
     def do_POST(self):
-        if urlparse(self.path).path.rstrip("/") != "/api/convert":
+        path = urlparse(self.path).path.rstrip("/")
+
+        if path == "/api/publish":
+            if not self._is_local_client():
+                return self._error("Publishing is only available locally.", 403)
+            try:
+                return self._json(publish_notes())
+            except subprocess.TimeoutExpired:
+                return self._error("git took too long - check your connection.", 504)
+            except ValueError as exc:
+                return self._error(str(exc))
+
+        if path != "/api/convert":
             return self._error("Not found.", 404)
 
         payload = self._read_body()
@@ -992,6 +1071,17 @@ class Handler(BaseHTTPRequestHandler):
 
         threading.Thread(target=run_job, args=(job,), daemon=True).start()
         return self._json(job.to_dict(), 202)
+
+    def _is_local_client(self) -> bool:
+        """Belt and braces over the 127.0.0.1 bind.
+
+        Publishing is the one route that can change what the world sees, so it
+        checks the peer address itself rather than trusting HOST to have been
+        left alone. Someone running this with MOCIAL_CONVERTER_HOST=0.0.0.0
+        gets a converter anyone on their network can use - they should not also
+        get a button that commits to their site.
+        """
+        return self.client_address[0] in ("127.0.0.1", "::1", "::ffff:127.0.0.1")
 
     def do_PUT(self):
         if urlparse(self.path).path.rstrip("/") != "/api/notes":

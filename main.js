@@ -1796,9 +1796,40 @@ function saveNotepad() {
     });
 }
 
+function publishNotepad() {
+    var button = document.getElementById("notepad-publish");
+
+    // Any keystroke in the debounce window hasn't reached the file yet, and
+    // publishing would commit the previous text. Flush first.
+    clearTimeout(notepadSaveTimer);
+
+    button.disabled = true;
+    setNotepadStatus("Saving...");
+
+    converterFetch("/api/notes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: document.getElementById("notepad-text").value })
+    }).then(function() {
+        setNotepadStatus("Publishing...");
+        return converterFetch("/api/publish", { method: "POST" });
+    }).then(function(result) {
+        setNotepadStatus(result.commit
+            ? "Published " + result.commit + " - live in a minute"
+            : "Already published - nothing new to send");
+    }).catch(function(err) {
+        setNotepadStatus(err.message, true);
+    }).then(function() {
+        button.disabled = false;
+    });
+}
+
 (function setUpNotepad() {
     var field = document.getElementById("notepad-text");
     if (!field) return;
+
+    document.getElementById("notepad-publish")
+            .addEventListener("click", publishNotepad);
 
     field.addEventListener("input", function() {
         if (!notepadEditable) return;
@@ -1815,10 +1846,16 @@ function saveNotepad() {
 function loadNotepad() {
     var field = document.getElementById("notepad-text");
 
+    var publish = document.getElementById("notepad-publish");
+
     function readOnly(text, why) {
         notepadEditable = false;
         field.value = text || "";
         field.readOnly = true;
+        // Nothing to offer a reader: the converter is what publishes, and it
+        // isn't there. Hidden rather than disabled - a greyed button invites
+        // you to wonder what you'd have to do to earn it.
+        publish.hidden = true;
         setNotepadStatus(why);
     }
 
@@ -1836,6 +1873,7 @@ function loadNotepad() {
         notepadEditable = true;
         field.value = data.text || "";
         field.readOnly = false;
+        publish.hidden = false;
         setNotepadStatus(data.updated_at ? "Saved to ideas.txt" : "Empty - start typing");
     }).catch(function() {
         // Converter down. Show whatever was last published rather than a blank
