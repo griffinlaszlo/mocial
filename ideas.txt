@@ -1,3 +1,3 @@
-1. barber therapists
-2. history tiktok
-3. publish button test
+1. Start a barber shop where you require all the barbers to become registered therapists. It motivates barbers to pursure higher education and you can charge more for the cuts. Call it Herapy or something.
+
+2. TikTok but for short little history lessons
