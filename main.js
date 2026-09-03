@@ -107,6 +107,24 @@ $(document).ready(function() {
     $("#folder-contents-window").draggable();
 });
 $(document).ready(function() {
+    // Handle-limited, like the dino window: the body has a text field and two
+    // dropdowns in it, and a whole-window drag swallows clicks into them.
+    $("#converter-window").draggable({ handle: ".windows-header-wrapper" });
+});
+$(document).ready(function() {
+    // Handle-limited: there's a text field in the body, and a whole-window
+    // drag swallows clicks into it.
+    $("#google-window").draggable({ handle: ".windows-header-wrapper" });
+});
+$(document).ready(function() {
+    $("#cat-window").draggable({ handle: ".windows-header-wrapper" });
+});
+$(document).ready(function() {
+    // Handle-limited: the body is one big textarea, and a whole-window drag
+    // would make it impossible to select text inside it.
+    $("#notepad-window").draggable({ handle: ".windows-header-wrapper" });
+});
+$(document).ready(function() {
     $("#dino-window").draggable({ handle: ".windows-header-wrapper" });
 });
 $(document).ready(function() {
@@ -284,7 +302,11 @@ var windowIcons = {
     "files-window":           "cd1.png",
     // Applications - their own icon, the way a Win95 app window does
     "dino-window":            "dino.png",
-    "settings-window":        "settings-icon.png"
+    "google-window":          "google-icon.png",
+    "cat-window":             "cat.png",
+    "notepad-window":         "tips.png",
+    "settings-window":        "settings-icon.png",
+    "converter-window":       "music_note_spinning.gif"
 };
 
 // The taskbar still wants an icon on every button - a real taskbar never has a
@@ -474,11 +496,29 @@ $(document).ready(function() {
     var flyout = document.getElementById("clock-flyout");
     if (!flyout || !trayButton) return;
 
+    // The tray doubles as a music box. Every way the flyout opens or closes -
+    // the button, a click away, Escape - runs through setOpen, so hanging the
+    // audio off it covers all of them without a second set of handlers.
+    var trayAudio = document.getElementById("tray-audio");
+
     function setOpen(open) {
         if (open) tick();
         flyout.hidden = !open;
         trayButton.setAttribute("aria-expanded", open ? "true" : "false");
         document.body.classList.toggle("clock-open", open);
+
+        if (!trayAudio) return;
+        if (open) {
+            // pause() leaves currentTime alone, so this picks the track back up
+            // where it stopped rather than restarting it - the dance icon
+            // behaves the same way. Opening always follows a click, so autoplay
+            // policy is satisfied; the promise only rejects when a play is
+            // interrupted by an immediate close, which isn't worth surfacing.
+            var started = trayAudio.play();
+            if (started) started.catch(function() {});
+        } else {
+            trayAudio.pause();
+        }
     }
 
     trayButton.addEventListener("click", function(e) {
@@ -659,7 +699,19 @@ makeElementDraggable("college-icon-group", function() {
     toggleDesktopFolder("college");
 });
 makeElementDraggable("google-icon-group", function() {
-    window.location.href = "https://google.com";
+    var win = document.getElementById("google-window");
+    var origin = document.getElementById("google-icon-group");
+
+    if (!$(win).is(":hidden")) {
+        hidePopup("google-window", origin);
+        return;
+    }
+
+    showPopup("google-window", origin);
+    // Straight into the field - the window exists to be typed in
+    setTimeout(function() {
+        document.getElementById("google-query").focus();
+    }, 80);
 });
 makeElementDraggable("dancing-icon-group", function() {
     var img = document.getElementById("dancing-icon");
@@ -709,6 +761,39 @@ makeElementDraggable("dino-icon-group", function() {
         frame.focus();
         try { frame.contentWindow.focus(); } catch (e) {}
     }, 60);
+});
+// Opens the FREE IDEAS notepad, toggling it shut on a second click like dino
+// and sneaky links do.
+makeElementDraggable("tips-icon-group", function() {
+    var win = document.getElementById("notepad-window");
+    var origin = document.getElementById("tips-icon-group");
+
+    if (!$(win).is(":hidden")) {
+        hidePopup("notepad-window", origin);
+        return;
+    }
+
+    showPopup("notepad-window", origin);
+    // Reload on every open, so notes changed in the file - or from another
+    // browser - are picked up without refreshing the page
+    loadNotepad();
+    // Straight into the text - the window exists to be typed in
+    setTimeout(function() {
+        document.getElementById("notepad-text").focus();
+    }, 80);
+});
+
+// Opens SNEAKY LINKS, and toggles it shut on a second click like dino does.
+// The window no longer opens on arrival, so this is the only way in.
+makeElementDraggable("incognito-icon-group", function() {
+    var win = document.getElementById("converter-window");
+    var origin = document.getElementById("incognito-icon-group");
+
+    if (!$(win).is(":hidden")) {
+        closeConverterWindow();
+        return;
+    }
+    openConverterWindow(origin);
 });
 makeElementDraggable("settings-icon-group", function() {
     var popup = document.getElementById("settings-window");
@@ -1040,12 +1125,14 @@ document.getElementById("bottom-bar-classic").addEventListener("change", functio
 var stackOrder = [
     "settings-icon-group", "computer-icon-group", "folder-icon-group",
     "google-icon-group", "dancing-icon-group", "moon-icon-group",
-    "dino-icon-group", "college-icon-group", "files-icon-group"
+    "tips-icon-group", "dino-icon-group", "incognito-icon-group",
+    "college-icon-group", "files-icon-group"
 ];
 var stackRightOffsets = {
     "settings-icon-group": 10, "computer-icon-group": 10, "folder-icon-group": 10,
     "google-icon-group": 8, "dancing-icon-group": 10, "moon-icon-group": 10,
-    "dino-icon-group": 10, "college-icon-group": 10, "files-icon-group": 10
+    "tips-icon-group": 10, "dino-icon-group": 10, "incognito-icon-group": 10,
+    "college-icon-group": 10, "files-icon-group": 10
 };
 function applyStackLayout(mode) {
     var rowSpacing = 110;
@@ -1171,3 +1258,595 @@ function typeWriter(text, elementId, speed, callback) {
 const title = "mocial"
 
 typeWriter(title, 'title', 40);
+
+
+// ===== YouTube converter ====================================================
+// This is chrome and polling only. The conversion itself happens in
+// converter/server.py, which has to be running on your own machine - the site
+// is a static file, so there is nowhere on mocial.org for yt-dlp to live.
+//
+// Nothing below knows what an mp3 is. Both dropdowns are built from whatever
+// the converter reports at GET /api/formats, so a format added to the FORMATS
+// table in server.py appears here without an edit on this side.
+
+// Point somewhere else with:
+//   localStorage.setItem("mocial-converter-api", "http://192.168.1.5:8770")
+var CONVERTER_API = localStorage.getItem("mocial-converter-api") || "http://127.0.0.1:8770";
+var CONVERTER_POLL_MS = 500;
+var CONVERTER_OFFLINE = "The converter isn't running. Start it with: python3 converter/server.py";
+
+var converterPane = "form";
+var converterJobId = null;
+var converterTimer = null;
+var converterFormats = null;
+var converterFinished = null;   // the finished job, held for the Save button
+var converterOrigin = null;     // the icon it flew in from, once it has one
+
+// Every call goes through here so a converter that isn't running produces one
+// useful sentence rather than a browser-flavoured network error.
+function converterFetch(path, options) {
+    return fetch(CONVERTER_API + path, options).then(function(res) {
+        if (res.ok) {
+            return res.status === 204 ? null : res.json();
+        }
+        return res.json().catch(function() {
+            return {};
+        }).then(function(body) {
+            throw new Error(body.error || ("The converter returned " + res.status + "."));
+        });
+    }, function() {
+        throw new Error(CONVERTER_OFFLINE);
+    });
+}
+
+function converterFormatBytes(bytes) {
+    if (bytes === null || bytes === undefined) return "";
+    var units = ["B", "KB", "MB", "GB"];
+    var i = 0;
+    while (bytes >= 1024 && i < units.length - 1) {
+        bytes /= 1024;
+        i++;
+    }
+    return (i === 0 ? Math.round(bytes) : bytes.toFixed(1)) + " " + units[i];
+}
+
+
+function setConverterError(message) {
+    document.getElementById("converter-error").textContent = message || "";
+}
+
+// One window, three panes. The buttons stay put and change what they say -
+// swapping the buttons themselves made the dialog jump as it resized.
+function setConverterPane(name) {
+    converterPane = name;
+    ["form", "progress", "done"].forEach(function(pane) {
+        document.getElementById("converter-pane-" + pane).style.display =
+            (pane === name) ? "block" : "none";
+    });
+
+    var formats = document.getElementById("converter-formats");
+    var go = document.getElementById("converter-go");
+    var cancel = document.getElementById("converter-cancel");
+
+    // One column, two tenants. The form's actions are the format buttons; the
+    // working states want Convert/Cancel instead. They swap rather than sit
+    // together, so the column stays the same width and the dialog doesn't
+    // resize under you mid-job.
+    var onForm = (name === "form");
+    if (formats) formats.style.display = onForm ? "" : "none";
+    go.style.display = onForm ? "none" : "";
+    cancel.style.display = onForm ? "none" : "";
+
+    if (name === "progress") {
+        // Nothing to confirm while it runs, so the dialog is down to one button
+        go.style.display = "none";
+        cancel.textContent = "Cancel";
+    } else if (name === "done") {
+        go.textContent = "Save";
+        cancel.textContent = "Again";
+    }
+}
+
+// Only used when the converter can't be reached as the dialog opens, so the
+// row has its buttons instead of sitting empty. Deliberately not cached into
+// converterFormats - the real list still replaces it the moment the converter
+// answers, so a converter started after the page loaded self-heals.
+var CONVERTER_FALLBACK_FORMATS = {
+    "default": "mp3",
+    formats: [
+        { key: "mp3", label: "MP3 (audio)", qualities: [], default_quality: "" },
+        { key: "mp4", label: "MP4 (video)", default_quality: "720", qualities: [
+            { value: "480", label: "480p" },
+            { value: "720", label: "720p" },
+            { value: "1080", label: "1080p" },
+            { value: "best", label: "Best available" }
+        ] }
+    ]
+};
+
+function loadConverterFormats() {
+    if (converterFormats) return Promise.resolve(converterFormats);
+
+    return converterFetch("/api/formats").then(function(data) {
+        converterFormats = data;
+        renderConverterFormats(data);
+        return data;
+    });
+}
+
+// One button per format the converter offers. A format with no quality choice
+// converts on click; one with choices raises its options first. Because this
+// is built from the API rather than written out in the markup, adding a
+// format server-side still costs nothing here - it just grows another button.
+function renderConverterFormats(data) {
+    var host = document.getElementById("converter-formats");
+    if (!host) return;
+    host.innerHTML = "";
+
+    data.formats.forEach(function(format) {
+        var wrapper = document.createElement("div");
+        wrapper.className = "converter-format-wrapper";
+
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "converter-format-button";
+        // MP3 / MP4 rather than the long label - it's a button, not a menu
+        button.textContent = format.key.toUpperCase();
+        wrapper.appendChild(button);
+
+        var qualities = format.qualities || [];
+
+        if (!qualities.length) {
+            button.addEventListener("click", function() {
+                startConversion(format.key, "");
+            });
+            host.appendChild(wrapper);
+            return;
+        }
+
+        var flyout = document.createElement("div");
+        flyout.className = "converter-flyout";
+        flyout.hidden = true;
+        button.setAttribute("aria-expanded", "false");
+
+        qualities.forEach(function(quality) {
+            var row = document.createElement("button");
+            row.type = "button";
+            row.className = "converter-flyout-row";
+            row.textContent = quality.label;
+            row.addEventListener("click", function(e) {
+                e.stopPropagation();
+                closeConverterFlyouts();
+                startConversion(format.key, quality.value);
+            });
+            flyout.appendChild(row);
+        });
+
+        button.addEventListener("click", function(e) {
+            // Without this the document handler below closes it again inside
+            // the same click - the tray button carries the same guard.
+            e.stopPropagation();
+            var opening = flyout.hidden;
+            closeConverterFlyouts();
+            if (opening) {
+                flyout.hidden = false;
+                button.setAttribute("aria-expanded", "true");
+            }
+        });
+
+        wrapper.appendChild(flyout);
+        host.appendChild(wrapper);
+    });
+}
+
+function closeConverterFlyouts() {
+    [].forEach.call(document.querySelectorAll(".converter-flyout"), function(flyout) {
+        flyout.hidden = true;
+    });
+    [].forEach.call(
+        document.querySelectorAll(".converter-format-button[aria-expanded]"),
+        function(button) { button.setAttribute("aria-expanded", "false"); }
+    );
+}
+
+// Click-away and Escape, the way the tray flyout dismisses
+document.addEventListener("click", closeConverterFlyouts);
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") closeConverterFlyouts();
+});
+
+// How many blocks make up a full bar. 20 means each one is worth 5% - lighting
+// the tenth is the job being half done, exactly.
+var CONVERTER_BLOCKS = 20;
+
+function buildConverterBar(bar) {
+    if (!bar) return;
+    bar.innerHTML = "";
+    for (var i = 0; i < CONVERTER_BLOCKS; i++) {
+        var block = document.createElement("div");
+        block.className = "converter-block";
+        bar.appendChild(block);
+    }
+}
+
+function setConverterBar(bar, percent) {
+    if (!bar) return;
+    var blocks = bar.children;
+
+    // floor, not round, with 100% special-cased: rounding would light the last
+    // block at 97.5% and show a bar that reads finished while ffmpeg is still
+    // running. A full bar should mean a finished file.
+    var lit = (percent >= 100)
+        ? blocks.length
+        : Math.floor((percent || 0) / 100 * blocks.length);
+    lit = Math.max(0, Math.min(blocks.length, lit));
+
+    for (var i = 0; i < blocks.length; i++) {
+        blocks[i].classList.toggle("is-on", i < lit);
+    }
+}
+
+// One animation, start to finish. The job moves through queued, downloading
+// and converting, but that's the converter's business, not something worth
+// showing three different ways - it read as the dialog restarting itself
+// twice. The blocks just light left to right the whole time.
+function renderConverterJob(job) {
+    var status = document.getElementById("converter-status");
+    var sub = document.getElementById("converter-substatus");
+
+    setConverterBar(document.getElementById("converter-bar"), job.percent || 0);
+    status.textContent = "Converting your " + String(job.format || "").toUpperCase() + "...";
+    sub.textContent = job.title || "";
+}
+
+function stopConverterPolling() {
+    if (converterTimer) {
+        clearInterval(converterTimer);
+        converterTimer = null;
+    }
+}
+
+function converterFailed(message) {
+    stopConverterPolling();
+    converterJobId = null;
+    setConverterPane("form");
+    setConverterError(message);
+}
+
+function converterSucceeded(job) {
+    stopConverterPolling();
+    converterJobId = null;
+    converterFinished = job;
+
+    setConverterPane("done");
+    setConverterBar(document.getElementById("converter-done-bar"), 100);
+    document.getElementById("converter-done-message").textContent =
+        (job.title || "Your file") + " is ready.";
+    document.getElementById("converter-done-detail").textContent =
+        job.filename + "   ·   " + converterFormatBytes(job.size);
+}
+
+// Back to an empty form, leaving whatever link is in the field alone
+function converterReset() {
+    stopConverterPolling();
+    converterJobId = null;
+    converterFinished = null;
+    setConverterPane("form");
+    setConverterError("");
+}
+
+function pollConverterJob() {
+    var polling = converterJobId;
+    if (!polling) return;
+
+    converterFetch("/api/jobs/" + polling).then(function(job) {
+        // A cancel can land between the request going out and coming back
+        if (converterJobId !== polling) return;
+
+        if (job.state === "done") return converterSucceeded(job);
+        if (job.state === "error") return converterFailed(job.error || "Conversion failed.");
+        if (job.state === "cancelled") return converterReset();
+        renderConverterJob(job);
+    }).catch(function(err) {
+        converterFailed(err.message);
+    });
+}
+
+// Format and quality come from whichever button was pressed, rather than being
+// read back out of the dialog - the button IS the choice now.
+function startConversion(format, quality) {
+    var url = document.getElementById("converter-url").value.trim();
+    if (!url) {
+        setConverterError("Paste a YouTube link first.");
+        document.getElementById("converter-url").focus();
+        return;
+    }
+
+    setConverterError("");
+    setConverterPane("progress");
+    // Seeded with the format so the text is right from the first frame,
+    // before the converter has answered with a job of its own
+    renderConverterJob({ state: "queued", percent: 0, format: format });
+
+    // Loading the formats here as well as on open means a converter you
+    // started after the page did still works, without a reload
+    loadConverterFormats().then(function() {
+        return converterFetch("/api/convert", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                url: url,
+                format: format,
+                quality: quality || ""
+            })
+        });
+    }).then(function(job) {
+        converterJobId = job.id;
+        renderConverterJob(job);
+        converterTimer = setInterval(pollConverterJob, CONVERTER_POLL_MS);
+    }).catch(function(err) {
+        converterFailed(err.message);
+    });
+}
+
+function cancelConverterJob() {
+    if (converterJobId) {
+        // Fire and forget: the job is going away on this side either way
+        converterFetch("/api/jobs/" + converterJobId, { method: "DELETE" })
+            .catch(function() {});
+    }
+    converterReset();
+}
+
+// Content-Disposition on the converter's side makes this a download rather
+// than a navigation, which is why there's no `download` attribute here - it
+// wouldn't apply cross-origin anyway.
+function saveConverterFile() {
+    if (!converterFinished || !converterFinished.download_url) return;
+
+    var link = document.createElement("a");
+    link.href = CONVERTER_API + converterFinished.download_url;
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+}
+
+function openConverterWindow(originEl) {
+    var popup = document.getElementById("converter-window");
+    converterOrigin = originEl || null;
+
+    // Centred, the way the settings window is: neither has a desktop icon
+    // with a position of its own to sit under. Only on desktop - the mobile
+    // layouts position windows from CSS (stacked makes them static
+    // !important), so left/top there would be dead weight, and showPopup is
+    // what puts the window in the right place in the stack.
+    if (!isMobileLayout()) {
+        popup.style.display = "block";
+        var width = popup.offsetWidth;
+        var height = popup.offsetHeight;
+        popup.style.left = Math.max(0, (window.innerWidth / 2 - width / 2 + window.scrollX)) + "px";
+        popup.style.top = Math.max(0, (window.innerHeight / 2 - height / 2 + window.scrollY)) + "px";
+    }
+    showPopup("converter-window", originEl);
+
+    converterReset();
+
+    // Builds the format buttons, and surfaces a converter that isn't running
+    // now rather than after you've pasted a link and pressed one. The fallback
+    // keeps the row populated either way - an empty dialog reads as broken,
+    // and the real list replaces it as soon as the converter answers.
+    loadConverterFormats().catch(function(err) {
+        renderConverterFormats(CONVERTER_FALLBACK_FORMATS);
+        setConverterError(err.message);
+    });
+
+    setTimeout(function() {
+        document.getElementById("converter-url").focus();
+    }, 80);
+}
+
+function closeConverterWindow() {
+    if (converterJobId) cancelConverterJob();
+    hidePopup("converter-window", converterOrigin);
+}
+
+buildConverterBar(document.getElementById("converter-bar"));
+buildConverterBar(document.getElementById("converter-done-bar"));
+
+document.getElementById("converter-go").addEventListener("click", function() {
+    if (converterPane === "done") saveConverterFile();
+});
+
+document.getElementById("converter-cancel").addEventListener("click", function() {
+    if (converterPane === "progress") {
+        cancelConverterJob();
+        return;
+    }
+    if (converterPane === "done") {
+        // "Again" means another link, not the same one twice - that file is
+        // already saved. Cleared and focused so the next paste just goes in.
+        //
+        // Deliberately here rather than inside converterReset(): cancelling a
+        // running job resets too, and there you usually DO want the link back,
+        // to retry it or fix a typo.
+        var field = document.getElementById("converter-url");
+        converterReset();
+        field.value = "";
+        field.focus();
+    }
+});
+
+document.getElementById("converter-url").addEventListener("keydown", function(e) {
+    if (e.key !== "Enter") {
+        setConverterError("");
+        return;
+    }
+    // There's no single Convert button to imply a format any more, so Enter
+    // takes the converter's default - mp3, at its only quality.
+    var data = converterFormats || CONVERTER_FALLBACK_FORMATS;
+    var key = data["default"] || data.formats[0].key;
+    var format = data.formats.filter(function(f) { return f.key === key; })[0];
+    startConversion(key, format ? format.default_quality : "");
+});
+
+
+// ===== Google search ========================================================
+// Google can't be framed the way the dino game is: google.com serves
+// x-frame-options: SAMEORIGIN, so an <iframe> pointed at it renders nothing.
+// dinasour.html frames fine because it's a local file, same origin.
+//
+// So the window is a search box that hands the query to the real Google in a
+// new tab. If results should ever appear inside the window instead, Google's
+// Programmable Search Engine is the supported route - it drops into this same
+// window and only needs an engine ID.
+function submitGoogleSearch() {
+    var field = document.getElementById("google-query");
+    var query = field.value.trim();
+    if (!query) {
+        field.focus();
+        return;
+    }
+    // noopener so the new tab gets no handle back onto this page
+    window.open("https://www.google.com/search?q=" + encodeURIComponent(query),
+                "_blank", "noopener");
+}
+
+document.getElementById("google-search").addEventListener("click", submitGoogleSearch);
+document.getElementById("google-query").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") submitGoogleSearch();
+});
+
+
+// ===== Purrr ================================================================
+// A joke message box after Widget-04 in the icon pack. Both buttons agree with
+// you, and both just dismiss it - there's no wrong answer to give.
+[].forEach.call(document.querySelectorAll("#cat-window .cat-yes"), function(button) {
+    button.addEventListener("click", function() {
+        hidePopup("cat-window", null);
+    });
+});
+
+// Opens on arrival alongside the converter. Its CSS puts it low and left of
+// centre, so the two don't land on top of each other.
+(function openCatOnEntrance() {
+    var root = document.documentElement;
+
+    function open() {
+        if (document.readyState === "complete") showPopup("cat-window", null);
+        else window.addEventListener("load", function() {
+            showPopup("cat-window", null);
+        }, { once: true });
+    }
+
+    if (!root.classList.contains("gated")) {
+        open();
+        return;
+    }
+    var observer = new MutationObserver(function() {
+        if (root.classList.contains("gated")) return;
+        observer.disconnect();
+        open();
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+})();
+
+
+// ===== Free ideas ===========================================================
+// Everyone reads, only you write.
+//
+// The notes live in ideas.txt at the project root - a real, committable file.
+// Two ways in, and which one you get depends on where the page is running:
+//
+//   Locally, with the converter up:  edits go to PUT /api/notes, which writes
+//                                    the file. Editable.
+//   Anywhere else (mocial.org):      the file is fetched as a plain static
+//                                    asset. Read-only.
+//
+// The permission model isn't a flag - it's the fact that the only thing that
+// can write ideas.txt is a server bound to 127.0.0.1. A visitor can't edit the
+// notes because the writer isn't reachable from the internet. Nothing in this
+// file is load-bearing for that; setting notepadEditable = true in a console
+// on mocial.org would just produce saves that fail.
+var NOTEPAD_SAVE_DEBOUNCE_MS = 600;
+var notepadEditable = false;
+var notepadSaveTimer = null;
+
+function setNotepadStatus(message, isError) {
+    var el = document.getElementById("notepad-status");
+    if (!el) return;
+    el.textContent = message || "";
+    el.classList.toggle("is-error", !!isError);
+}
+
+function saveNotepad() {
+    var field = document.getElementById("notepad-text");
+    setNotepadStatus("Saving...");
+
+    converterFetch("/api/notes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: field.value })
+    }).then(function() {
+        setNotepadStatus("Saved to ideas.txt");
+    }).catch(function(err) {
+        // Loud on purpose. Silently dropping keystrokes is the one behaviour a
+        // notepad must never have.
+        setNotepadStatus("Not saved - " + err.message, true);
+    });
+}
+
+(function setUpNotepad() {
+    var field = document.getElementById("notepad-text");
+    if (!field) return;
+
+    field.addEventListener("input", function() {
+        if (!notepadEditable) return;
+        // Debounced: a PUT per keystroke would rewrite the file dozens of
+        // times a second for no benefit.
+        clearTimeout(notepadSaveTimer);
+        setNotepadStatus("Typing...");
+        notepadSaveTimer = setTimeout(saveNotepad, NOTEPAD_SAVE_DEBOUNCE_MS);
+    });
+})();
+
+// Called each time the window opens, so notes edited elsewhere - or the file
+// edited by hand - show up without a reload.
+function loadNotepad() {
+    var field = document.getElementById("notepad-text");
+
+    function readOnly(text, why) {
+        notepadEditable = false;
+        field.value = text || "";
+        field.readOnly = true;
+        setNotepadStatus(why);
+    }
+
+    // Only try the writable path where a converter could plausibly be. On
+    // mocial.org this would be a request to the VISITOR's own machine, which
+    // is both pointless and slow.
+    if (!window.IS_LOCAL) {
+        return fetch("ideas.txt", { cache: "no-store" })
+            .then(function(res) { return res.ok ? res.text() : ""; })
+            .then(function(text) { readOnly(text, "Read-only"); })
+            .catch(function() { readOnly("", "Read-only"); });
+    }
+
+    return converterFetch("/api/notes").then(function(data) {
+        notepadEditable = true;
+        field.value = data.text || "";
+        field.readOnly = false;
+        setNotepadStatus(data.updated_at ? "Saved to ideas.txt" : "Empty - start typing");
+    }).catch(function() {
+        // Converter down. Show whatever was last published rather than a blank
+        // window, but don't pretend it's editable - saves would fail.
+        return fetch("ideas.txt", { cache: "no-store" })
+            .then(function(res) { return res.ok ? res.text() : ""; })
+            .then(function(text) {
+                readOnly(text, "Read-only - converter isn't running");
+            })
+            .catch(function() {
+                readOnly("", "Read-only - converter isn't running");
+            });
+    });
+}

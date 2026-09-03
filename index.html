@@ -29,20 +29,30 @@
          ========================================================== -->
     <script>
         window.REQUIRE_PASSWORD = true;
-        window.SITE_PASSWORD_HASH = "1bb5a76c";   // "shiloh" - change this
+        window.SITE_PASSWORD_HASH = "1bb5a76c";   // see README: Deploying
 
         // ?lock forgets this session's unlock and forces the gate up even
         // when REQUIRE_PASSWORD is off. It can only ever re-lock.
         window.FORCE_LOCK = location.search.indexOf("lock") !== -1;
         if (window.FORCE_LOCK) sessionStorage.removeItem("mocial-unlocked");
 
+        // Serving the site off your own machine skips the gate - the doorman
+        // exists to keep mocial.org shut while it's being built, and there is
+        // nobody to keep out of localhost. Published behaviour is unchanged:
+        // mocial.org is neither of these hostnames. ?lock still overrides it,
+        // so the dialog stays testable locally.
+        window.IS_LOCAL = location.hostname === "localhost" ||
+                          location.hostname === "127.0.0.1" ||
+                          location.protocol === "file:";
+
         if ((window.REQUIRE_PASSWORD || window.FORCE_LOCK) &&
+            !(window.IS_LOCAL && !window.FORCE_LOCK) &&
             sessionStorage.getItem("mocial-unlocked") !== "1") {
             document.documentElement.className += " gated";
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=30">
+    <link rel="stylesheet" href="main.css?v=40">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -93,7 +103,10 @@
         </div>
         <div id="google-icon-group" class="desktop-icon-group">
             <img src="google-icon.png" id="google-icon" alt="Google Icon" draggable="false">
-            <div id="google-icon-label"><a href="https://google.com">google</a></div>
+            <!-- href="#" like every other icon: the click handler opens the
+                 search window now, and a real link here would navigate the
+                 whole site away to google.com before it could. -->
+            <div id="google-icon-label"><a href="#">google</a></div>
         </div>
         <div id="dancing-icon-group" class="desktop-icon-group">
             <img src="dancing.png" id="dancing-icon" alt="Dancing Icon" draggable="false">
@@ -107,6 +120,19 @@
         <div id="dino-icon-group" class="desktop-icon-group">
             <img src="dino.png" id="dino-icon" alt="Dino Icon" draggable="false">
             <div id="dino-icon-label"><a href="#">dino</a></div>
+        </div>
+        <!-- tips.png, same treatment as incognito.png: copied out of the
+             gitignored icon pack with its baked-in teal background cleared. -->
+        <div id="tips-icon-group" class="desktop-icon-group">
+            <img src="tips.png" id="tips-icon" alt="Free Ideas Icon" draggable="false">
+            <div id="tips-icon-label"><a href="#">free ideas</a></div>
+        </div>
+        <!-- Opens SNEAKY LINKS. incognito.png is copied out of
+             windows-95-app-icons/Icons/, which is gitignored as design
+             reference - the copy lives at the project root so it publishes. -->
+        <div id="incognito-icon-group" class="desktop-icon-group">
+            <img src="incognito.png" id="incognito-icon" alt="Sneaky Links Icon" draggable="false">
+            <div id="incognito-icon-label"><a href="#">sneaky links</a></div>
         </div>
         <div id="settings-icon-group" class="desktop-icon-group" style="display:none;">
             <img src="settings-icon.png" id="settings-icon" alt="Settings Icon" draggable="false">
@@ -281,6 +307,80 @@
 
         <div class="popup-inner-wrapper files-inner">
             <div class="files-grid" id="college-grid"></div>
+        </div>
+    </div>
+
+    <!-- ==== FREE IDEAS ============================================
+         A Notepad, opened by the free ideas desktop icon. The text
+         auto-saves to localStorage as you type - a notes window that
+         forgets everything on reload isn't worth opening twice.
+
+         Per-browser and per-device: it never leaves the machine it
+         was typed on, so it's a scratchpad, not a synced document.
+         ========================================================== -->
+    <div id="notepad-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">FREE IDEAS</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#notepad-window').toggleClass('iconize'); $('#notepad-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#notepad-window').toggleClass('resize'); $('#notepad-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#notepad-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper notepad-inner">
+            <textarea id="notepad-text" spellcheck="false" placeholder="Free ideas go here..."></textarea>
+            <div class="notepad-status" id="notepad-status"></div>
+        </div>
+    </div>
+
+    <!-- ==== PURRR =================================================
+         A joke message box, after Widget-04 in the icon pack. Close
+         button only in the title bar, no minimise or maximise: this
+         is a Win95 message box rather than an app window, and that's
+         how they were drawn. Both buttons agree with you.
+
+         cat.png is cropped out of windows-95-app-icons/Widgets/
+         Widget-04.jpg, which is gitignored as design reference - the
+         crop lives at the project root so it actually publishes.
+         ========================================================== -->
+    <div id="cat-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">PURRR</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#cat-window').toggleClass('iconize'); $('#cat-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#cat-window').toggleClass('resize'); $('#cat-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#cat-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper cat-inner">
+            <div class="cat-row">
+                <img src="cat.png" class="cat-icon" alt="" draggable="false">
+                <div class="cat-message">Do you love cats?</div>
+            </div>
+            <div class="cat-buttons">
+                <button type="button" class="cat-yes">Yes</button>
+                <button type="button" class="cat-yes">Yes, I do</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==== GOOGLE SEARCH =========================================
+         Not an iframe like the dino window, because Google won't
+         allow it: google.com serves x-frame-options: SAMEORIGIN, so
+         framing it renders nothing at all. dinasour.html can be
+         framed because it's a local file.
+
+         So the window is a Win95 search box that hands the query to
+         the real Google in a new tab. If you ever want results
+         showing up inside the window instead, Google's Programmable
+         Search Engine is the sanctioned way - it drops into this
+         same window, it just needs an engine ID from their console.
+         ========================================================== -->
+    <div id="google-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">GOOGLE SEARCH...</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#google-window').toggleClass('iconize'); $('#google-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#google-window').toggleClass('resize'); $('#google-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#google-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper google-inner">
+            <input type="text" id="google-query" placeholder="Search..." spellcheck="false" autocomplete="off">
+            <div class="google-buttons">
+                <button type="button" id="google-search">Search!</button>
+            </div>
         </div>
     </div>
 
@@ -460,14 +560,85 @@
                         <span class="clock-time" id="clock-de">--:-- --</span>
                     </div>
                 </div>
+
+                <!-- Opening the tray plays this, closing it stops. preload="none"
+                     because it's a 12MB file that most visits never ask for -
+                     same as the dance icon's audio. The ⧸ in the filename is a
+                     big solidus (U+29F8), not a slash, so it has to be
+                     percent-encoded as %E2%A7%B8 to resolve. -->
+                <audio id="tray-audio" src="Pink%20Floyd%20-%20Time%20%28No%20Intro%E2%A7%B8No%20Clocks%29.mp3" preload="none"></audio>
             </div>
         </div>
     </footer>
 
+    <!-- ==== YOUTUBE CONVERTER =====================================
+         Same shell as the password dialog: icon on the left, message
+         and input in the middle, two buttons stacked at the right.
+         Three panes swap inside that one body - the form, the loading
+         screen while yt-dlp runs, and the finished file.
+
+         The conversion itself happens in converter/server.py, which
+         has to be running locally. See converter/README.md.
+
+         Opened by the sneaky links desktop icon, which toggles it.
+         ========================================================== -->
+    <div id="converter-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">SNEAKY LINKS</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#converter-window').toggleClass('iconize'); $('#converter-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#converter-window').toggleClass('resize'); $('#converter-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="closeConverterWindow();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper converter-inner">
+            <img src="music_note_spinning.gif" class="converter-icon" alt="" draggable="false">
+
+            <div class="converter-body">
+                <div class="converter-pane" id="converter-pane-form">
+                    <div class="converter-message">Paste a sneaky YouTube link and we'll mocialize it (take it to conversion town) for you.</div>
+                    <div class="converter-row">
+                        <label for="converter-url">Link:</label>
+                        <input type="url" id="converter-url" placeholder="https://www.youtube.com/watch?v=..." spellcheck="false" autocomplete="off">
+                    </div>
+                    <div class="converter-error" id="converter-error"></div>
+                </div>
+
+                <div class="converter-pane" id="converter-pane-progress" style="display:none;">
+                    <div class="converter-message" id="converter-status">Loading one of the greatest songs in history...</div>
+                    <!-- Blocks are real elements, built by buildConverterBar()
+                         and divided by flex, so a whole number of them always
+                         fills the bar exactly at any width. -->
+                    <div class="converter-bar" id="converter-bar"></div>
+                    <div class="converter-substatus" id="converter-substatus"></div>
+                </div>
+
+                <div class="converter-pane" id="converter-pane-done" style="display:none;">
+                    <div class="converter-message" id="converter-done-message">Ready.</div>
+                    <div class="converter-bar" id="converter-done-bar"></div>
+                    <div class="converter-substatus" id="converter-done-detail"></div>
+                </div>
+            </div>
+
+            <!-- The right-hand column, where Convert/Cancel used to live. On
+                 the form it holds the format buttons stacked - MP3 then MP4 -
+                 and those ARE the action: clicking one starts the job. They're
+                 built at runtime from the converter's own /api/formats, so a
+                 format added server-side still needs no edit here; it just
+                 gets another button, with a flyout of its own if it offers a
+                 quality choice.
+
+                 Convert/Cancel swap in for the two working states: stopping a
+                 running job, and saving a finished one. -->
+            <div class="converter-buttons">
+                <div class="converter-formats" id="converter-formats"></div>
+                <button type="button" id="converter-go">Convert</button>
+                <button type="button" id="converter-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div id="password-gate">
         <div id="password-dialog" class="popup-window">
             <div class="windows-header-wrapper clearafter">
-                <div class="window-title">Enter Network Password</div>
+                <div class="window-title">ENTER NETWORK PASSWORD</div>
                 <div class="window-icons"><span class="win-btn">?</span><span class="win-btn">&#10005;</span></div>
             </div>
 
@@ -490,7 +661,7 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=35"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=41"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>

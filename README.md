@@ -122,6 +122,27 @@ which popups open on page load, the fly-in toggle, and icon stack layout
 copies it to the clipboard as ready-to-paste CSS — the intended way to tune
 window and icon positions by dragging rather than guessing pixel values.
 
+### The taskbar tray and world clocks
+
+The tray clock reads 24-hour (`16:37`). Clicking the tray opens a flyout of
+world clocks — US, UK and Germany, in 12-hour with AM/PM — that rises *out of*
+the taskbar rather than dropping from it. It's anchored `bottom: 100%` against
+`.taskbar-tray`, so it tracks the bar with no JS positioning, whether the
+footer is `fixed` (desktop) or `static` (the stacked mobile layout).
+
+The whole sunken tray box is the button, speaker icon and padding included —
+`.taskbar-tray` keeps only its border and `.tray-button` fills the interior.
+
+Times come from `Intl.DateTimeFormat` with named IANA zones
+(`America/Los_Angeles`, `Europe/London`, `Europe/Berlin`) rather than fixed
+offsets, because the US and EU don't change DST on the same dates. Add a row by
+extending `WORLD_CLOCKS` in `main.js` and adding markup in `index.html`; the
+flags are inline SVG, so no new image files are needed.
+
+It closes on click-away and Escape. The footer only takes a raised `z-index`
+while the flyout is open (`body.clock-open`), so the normal stacking — windows
+over the bar — is untouched the rest of the time.
+
 ### Odds and ends
 
 - `moon` toggles dark mode and swaps its own icon between sun and moon.
@@ -150,8 +171,27 @@ collapsing to one.
 
 **The `college` icon has no click handler.** It drags but does nothing.
 
+**HTTPS on the custom domain is broken.** `https://mocial.org` fails
+certificate validation — only `http://` serves the site. DNS is correct (the
+four GitHub Pages IPs), so it's the Pages TLS certificate for the custom
+domain: re-provision by toggling the domain off and on in the repo's Pages
+settings, then enable "Enforce HTTPS".
+
+**The icon column overflows on a short viewport.** At around 375×500 the lower
+desktop icons run past the bottom of the screen and sit behind the taskbar,
+needing a scroll to reach.
+
 ## Deploying
 
 GitHub Pages serves the `main` branch, and `CNAME` points it at mocial.org.
 Merging to `main` and pushing puts changes live immediately — there is no
 staging step. Work on a branch until you actually want it public.
+
+The site is published, and `REQUIRE_PASSWORD` is `true`, so every visitor meets
+the gate rather than the desktop. To change the password, open the console on
+the site, run `hashPassword("the new one")`, and paste the result into
+`SITE_PASSWORD_HASH` in `index.html`. Don't write the password itself into this
+repo — it's public.
+
+Remember the gate is a doorman, not a lock: the page is a static file, so its
+full markup ships to every visitor whether or not they get past the dialog.

@@ -17,3 +17,22 @@ twitterbot/
 # Design reference only (the Win95 dialog the password gate is modelled on).
 # Nothing on the site loads these - delete this line if something starts to.
 windows-95-app-icons/
+
+# The converter's log of what has been converted. This one matters: per the
+# note at the top, anything committed here is fetchable at mocial.org/<file>,
+# and a database of every link run through the converter is not something to
+# publish by accident. converter/server.py itself is fine to track - it's just
+# code - but the database it writes is not.
+converter/conversions.db
+converter/*.db
+converter/*.db-journal
+
+# Converted audio and video, if you ever point MOCIAL_CONVERTER_DIR at the
+# project folder instead of /tmp. Same reasoning, more so.
+converter/files/
+
+# Commercial recording, kept local. The tray clock plays it off your own disk;
+# committing it would publish it at mocial.org/<file> and put it in the repo's
+# history, where deleting it later means a rewrite rather than a delete.
+# Coeursica.mp3 and Howl are deliberately public - they aren't this.
+Pink Floyd - Time (No Intro⧸No Clocks).mp3
