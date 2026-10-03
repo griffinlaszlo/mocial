@@ -135,6 +135,8 @@ POSTPROCESS_PERCENT = 95.0
 ALLOWED_ORIGINS = {
     "https://mocial.org",
     "https://www.mocial.org",
+    "http://localhost:8899",   # the port the main README serves the site on
+    "http://127.0.0.1:8899",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://localhost:5500",   # VS Code Live Server
