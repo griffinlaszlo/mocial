@@ -142,6 +142,11 @@ $(document).ready(function() {
 $(document).ready(function() {
     $("#settings-window").draggable();
 });
+$(document).ready(function() {
+    // Handle-limited, like the converter and dino windows: the body is full
+    // of clickable form controls, and a whole-window drag would swallow them.
+    $("#shop-window").draggable({ handle: ".windows-header-wrapper" });
+});
 
 // Corner-resize on popups is disabled for now - the border/content visibly
 // disconnected from the resize handle while dragging and couldn't be
@@ -306,7 +311,8 @@ var windowIcons = {
     "cat-window":             "cat.png",
     "notepad-window":         "tips.png",
     "settings-window":        "settings-icon.png",
-    "converter-window":       "music_note_spinning.gif"
+    "converter-window":       "music_note_spinning.gif",
+    "shop-window":            "griffinchairlift-icon.png"
 };
 
 // The taskbar still wants an icon on every button - a real taskbar never has a
@@ -325,7 +331,8 @@ var iconSizes = {
     "folder-icon.png":   "2.2em",
     "cd1.png":           "1.6em",
     "dino.png":          "1.6em",
-    "settings-icon.png": "1.5em"
+    "settings-icon.png": "1.5em",
+    "griffinchairlift-icon.png": "1.5em"
 };
 
 $(document).ready(function() {
@@ -795,6 +802,23 @@ makeElementDraggable("incognito-icon-group", function() {
     }
     openConverterWindow(origin);
 });
+// Opens GRIFF SKI CO., toggling it shut on a second click like dino and
+// sneaky links do. The iframe is pointed at the shop the first time it's
+// opened rather than on every page load - same reasoning as the dino game.
+makeElementDraggable("shop-icon-group", function() {
+    var win = document.getElementById("shop-window");
+    var frame = document.getElementById("shop-frame");
+    var origin = document.getElementById("shop-icon-group");
+
+    if (!$(win).is(":hidden")) {
+        hidePopup("shop-window", origin);
+        return;
+    }
+
+    if (!frame.getAttribute("src")) frame.src = "shop/index.html";
+
+    showPopup("shop-window", origin);
+});
 makeElementDraggable("settings-icon-group", function() {
     var popup = document.getElementById("settings-window");
     if (popup.style.display === "block") {
@@ -823,11 +847,11 @@ var filesData = {
     ],
     press: [
         { type: "file", name: "tech crunch", openPopup: "snapmap-wrapper" },
-        { type: "file", name: "snap newsroom", url: "https://newsroom.snap.com/now-playing-brings-music-sharing-to-snap-map" },
-        { type: "file", name: "spotify newsletter", url: "https://spotify.substack.com/p/snapchat-turns-snap-map-into-a-realtime" },
-        { type: "file", name: "igeeksblog", url: "https://www.igeeksblog.com/snapchat-now-playing-snap-map/" },
-        { type: "file", name: "cleveland.com", url: "https://www.cleveland.com/news/2026/07/snapchat-has-something-new-for-music-lovers-now-playing.html" },
-        { type: "file", name: "ceci_linkedin", url: "https://www.linkedin.com/posts/ceci-mourkogiannis-a71a7912_happy-monday-today-we-are-proud-to-introduce-ugcPost-7487517874211745793-XgNk/" }
+        { type: "file", name: "snap newsroom", openPopup: "press-snap-window" },
+        { type: "file", name: "spotify newsletter", openPopup: "press-spotify-window" },
+        { type: "file", name: "igeeksblog", openPopup: "press-igeeks-window" },
+        { type: "file", name: "cleveland.com", openPopup: "press-cleveland-window" },
+        { type: "file", name: "ceci_linkedin", openPopup: "press-linkedin-window" }
     ],
     patent: [
         { type: "file", name: "application" },
@@ -1126,13 +1150,13 @@ var stackOrder = [
     "settings-icon-group", "computer-icon-group", "folder-icon-group",
     "google-icon-group", "dancing-icon-group", "moon-icon-group",
     "tips-icon-group", "dino-icon-group", "incognito-icon-group",
-    "college-icon-group", "files-icon-group"
+    "college-icon-group", "files-icon-group", "shop-icon-group"
 ];
 var stackRightOffsets = {
     "settings-icon-group": 10, "computer-icon-group": 10, "folder-icon-group": 10,
     "google-icon-group": 8, "dancing-icon-group": 10, "moon-icon-group": 10,
     "tips-icon-group": 10, "dino-icon-group": 10, "incognito-icon-group": 10,
-    "college-icon-group": 10, "files-icon-group": 10
+    "college-icon-group": 10, "files-icon-group": 10, "shop-icon-group": 10
 };
 function applyStackLayout(mode) {
     var rowSpacing = 110;
@@ -1888,3 +1912,144 @@ function loadNotepad() {
             });
     });
 }
+
+
+// ===== Press windows ========================================================
+// Each press file in "now playing" opens a window with the article's own
+// preview image, deep-linking to the piece - the same shape as the TECH CRUNCH
+// window, which stays hand-written in index.html because the Settings
+// "popups on open" list references it by id.
+//
+// Built from a table rather than five near-identical blocks of markup: the
+// next article is one entry here and one line in filesData, not another
+// fourteen lines of chrome to keep in sync.
+//
+// Images are each publisher's own og:image - the preview they publish for
+// link cards, which is exactly what this is. cleveland.com blocks automated
+// requests, so that one has no image and renders as a text card instead;
+// drop a file in and add `image:` if you ever grab one by hand.
+var pressArticles = [
+    {
+        id: "press-snap-window",
+        title: "SNAP NEWSROOM",
+        headline: "Now Playing Brings Music Sharing to Snap Map",
+        url: "https://newsroom.snap.com/now-playing-brings-music-sharing-to-snap-map",
+        image: "press-snap.png"
+    },
+    {
+        id: "press-spotify-window",
+        title: "SPOTIFY NEWSLETTER",
+        headline: "Snapchat Turns Snap Map Into a Real-Time Music Feed With Spotify “Now Playing”",
+        url: "https://spotify.substack.com/p/snapchat-turns-snap-map-into-a-realtime",
+        image: "press-spotify.jpg"
+    },
+    {
+        id: "press-igeeks-window",
+        title: "IGEEKSBLOG",
+        headline: "Snapchat Now Playing: Share your live Spotify music on Snap Map",
+        url: "https://www.igeeksblog.com/snapchat-now-playing-snap-map/",
+        image: "press-igeeksblog.jpg"
+    },
+    {
+        id: "press-cleveland-window",
+        title: "CLEVELAND.COM",
+        headline: "Snapchat has something new for music lovers: Now Playing",
+        url: "https://www.cleveland.com/news/2026/07/snapchat-has-something-new-for-music-lovers-now-playing.html",
+        image: null
+    },
+    {
+        id: "press-linkedin-window",
+        title: "CECI ON LINKEDIN",
+        headline: "Snap Map Now Playing with Spotify",
+        url: "https://www.linkedin.com/posts/ceci-mourkogiannis-a71a7912_happy-monday-today-we-are-proud-to-introduce-ugcPost-7487517874211745793-XgNk/",
+        image: "press-linkedin.jpg"
+    }
+];
+
+// The Win95 title bar every window carries. Built here rather than pasted into
+// each one, with real listeners instead of the inline onclick the older
+// windows use - same behaviour, nothing to keep in sync by hand.
+function buildWindowChrome(win, titleText) {
+    var header = document.createElement("div");
+    header.className = "windows-header-wrapper clearafter";
+
+    var title = document.createElement("div");
+    title.className = "window-title";
+    title.textContent = titleText;
+    header.appendChild(title);
+
+    var icons = document.createElement("div");
+    icons.className = "window-icons";
+
+    function button(glyphClass, onClick) {
+        var btn = document.createElement("span");
+        btn.className = "win-btn";
+        if (glyphClass) {
+            var glyph = document.createElement("span");
+            glyph.className = "glyph " + glyphClass;
+            btn.appendChild(glyph);
+        } else {
+            btn.innerHTML = "&#10005;";
+        }
+        btn.addEventListener("click", onClick);
+        return btn;
+    }
+
+    icons.appendChild(button("glyph-min", function() {
+        $(win).toggleClass("iconize").removeClass("resize");
+    }));
+    icons.appendChild(button("glyph-max", function() {
+        $(win).toggleClass("resize").removeClass("iconize");
+    }));
+    icons.appendChild(button(null, function() { $(win).hide(); }));
+
+    header.appendChild(icons);
+    return header;
+}
+
+(function buildPressWindows() {
+    pressArticles.forEach(function(article) {
+        var win = document.createElement("div");
+        win.id = article.id;
+        win.className = "popup-window press-window";
+
+        win.appendChild(buildWindowChrome(win, article.title));
+
+        var inner = document.createElement("div");
+        inner.className = "popup-inner-wrapper";
+
+        var headline = document.createElement("div");
+        headline.className = "inner-title";
+        // textContent, not innerHTML - these are headlines quoted from other
+        // people's pages, and they should never be parsed as markup
+        headline.textContent = article.headline;
+        inner.appendChild(headline);
+
+        var link = document.createElement("a");
+        link.href = article.url;
+        link.target = "_blank";
+        link.rel = "noopener";
+
+        if (article.image) {
+            var img = document.createElement("img");
+            img.src = article.image;
+            img.alt = "";
+            img.draggable = false;
+            link.appendChild(img);
+        } else {
+            // No preview image available, so the link carries the card itself
+            link.className = "press-link-only";
+            link.textContent = "Read it on " + article.title.toLowerCase();
+        }
+
+        inner.appendChild(link);
+        win.appendChild(inner);
+        document.body.appendChild(win);
+
+        // Deliberately absent from windowIcons: per the note on that map, a
+        // window showing a file gets no title-bar icon, and TECH CRUNCH - the
+        // window these copy - has none either. The taskbar still gets one
+        // through TASKBAR_FALLBACK_ICON.
+        $(win).draggable({ handle: ".windows-header-wrapper" });
+    });
+})();

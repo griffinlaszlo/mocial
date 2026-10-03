@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIFF SKI CO. — Chairlift Tee</title>
+<meta name="description" content="Limited run of 100. The chairlift tee, in six colorways.">
+<link href="https://fonts.cdnfonts.com/css/w95fa" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+
+<header class="shop-header">
+    <div class="shop-brand">GRIFF SKI CO.</div>
+    <div class="shop-tagline">one chairlift. one beer. one hundred shirts.</div>
+    <button type="button" id="cart-button" class="cart-button" aria-haspopup="dialog" aria-controls="cart-drawer">
+        CART <span id="cart-count" class="cart-count">0</span>
+    </button>
+</header>
+
+<main class="shop-main">
+
+    <section class="product-visual">
+        <div class="tee-stage">
+            <svg class="tee-svg" viewBox="0 0 400 460" aria-hidden="true">
+                <defs>
+                    <!-- Off-white-to-white sweep rather than a flat fill, so the
+                         body reads as a rounded, lit garment instead of a paper
+                         cutout. Darkest at the far edges, brightest just left of
+                         center - a slightly off-axis "key light" instead of a
+                         flat mirror-symmetric one, which is what made earlier
+                         passes look CG rather than photographed. -->
+                    <linearGradient id="fabricLight" x1="0" y1="0" x2="1" y2="0.15">
+                        <stop offset="0%"   stop-color="#d9d9dc" />
+                        <stop offset="14%"  stop-color="#f2f2f3" />
+                        <stop offset="42%"  stop-color="#ffffff" />
+                        <stop offset="70%"  stop-color="#f7f7f8" />
+                        <stop offset="100%" stop-color="#d3d3d7" />
+                    </linearGradient>
+                    <linearGradient id="collarBand" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#c9c9cc" />
+                        <stop offset="100%" stop-color="#e8e8ea" />
+                    </linearGradient>
+                    <radialGradient id="collarShadow" cx="50%" cy="0%" r="65%">
+                        <stop offset="0%" stop-color="#000000" stop-opacity="0.16" />
+                        <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+                    </radialGradient>
+                    <radialGradient id="hemShadow" cx="50%" cy="100%" r="55%">
+                        <stop offset="0%" stop-color="#000000" stop-opacity="0.08" />
+                        <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+                    </radialGradient>
+                    <filter id="softBlur" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="9" />
+                    </filter>
+                </defs>
+
+                <path class="tee-shape" fill="url(#fabricLight)"
+                    d="M 150 18
+                       C 150 40 172 56 200 56
+                       C 228 56 250 40 250 18
+                       L 300 34
+                       C 330 44 355 66 368 96
+                       L 396 152
+                       C 400 160 398 170 390 175
+                       L 340 205
+                       C 333 209 325 207 321 200
+                       L 300 165
+                       L 300 420
+                       C 300 434 289 445 275 445
+                       L 125 445
+                       C 111 445 100 434 100 420
+                       L 100 165
+                       L 79 200
+                       C 75 207 67 209 60 205
+                       L 10 175
+                       C 2 170 0 160 4 152
+                       L 32 96
+                       C 45 66 70 44 100 34
+                       Z" />
+
+                <!-- Soft fold down the chest, the way a flat-laid tee never
+                     quite lies perfectly flat - blurred so it reads as a
+                     fabric shadow rather than a drawn line -->
+                <path d="M 198 168 C 192 230 194 330 202 443" fill="none"
+                    stroke="#000000" stroke-opacity="0.05" stroke-width="30"
+                    stroke-linecap="round" filter="url(#softBlur)" />
+
+                <!-- Side seams - a couple of px inset from the silhouette's
+                     own edge so they read as construction, not outline -->
+                <path d="M 113 178 L 113 435" fill="none" stroke="#000000" stroke-opacity="0.08" stroke-width="1.5" />
+                <path d="M 287 178 L 287 435" fill="none" stroke="#000000" stroke-opacity="0.08" stroke-width="1.5" />
+
+                <!-- Shoulder seams -->
+                <path d="M 148 30 L 105 42" fill="none" stroke="#000000" stroke-opacity="0.07" stroke-width="1.5" />
+                <path d="M 252 30 L 295 42" fill="none" stroke="#000000" stroke-opacity="0.07" stroke-width="1.5" />
+
+                <path d="M 0 0 h 400 v 460 h -400 Z" fill="url(#hemShadow)" opacity="0.6" />
+
+                <path class="tee-collar" fill="url(#collarBand)"
+                    d="M 150 18 C 150 40 172 56 200 56 C 228 56 250 40 250 18
+                       C 250 18 228 30 200 30 C 172 30 150 18 150 18 Z" />
+                <!-- Ribbing texture: two more concentric bands, same shape scaled down slightly -->
+                <path class="tee-collar-rib" fill="none" stroke="#00000018" stroke-width="1"
+                    d="M 156 20 C 156 38 175 51 200 51 C 225 51 244 38 244 20" />
+                <path fill="url(#collarShadow)" opacity="0.7"
+                    d="M 100 34 C 130 20 165 12 200 12 C 235 12 270 20 300 34 L 300 70 C 270 50 235 40 200 40 C 165 40 130 50 100 70 Z" />
+            </svg>
+            <img id="design-img" class="design-img" src="assets/tee-og-blue.png" alt="Griff on the chairlift print">
+        </div>
+
+        <div class="colorway-row" id="colorway-row" role="radiogroup" aria-label="Colorway"></div>
+    </section>
+
+    <section class="product-info">
+        <h1 class="product-title">Chairlift Tee</h1>
+        <div class="product-price" id="product-price">$32</div>
+        <p class="product-copy">
+            Screen-printed on a heavyweight white tee. Griff, one chairlift,
+            one beer, going 100mph doing absolutely nothing. Limited edition —
+            100 made, then it's gone.
+        </p>
+
+        <div class="option-block">
+            <div class="option-label">Colorway: <span id="colorway-name">OG Blue</span></div>
+        </div>
+
+        <div class="option-block">
+            <div class="option-label">Size</div>
+            <div class="size-row" id="size-row" role="radiogroup" aria-label="Size"></div>
+        </div>
+
+        <div class="option-block">
+            <div class="option-label">Quantity</div>
+            <div class="qty-row">
+                <button type="button" class="qty-btn" id="qty-minus" aria-label="Decrease quantity">&minus;</button>
+                <span class="qty-value" id="qty-value">1</span>
+                <button type="button" class="qty-btn" id="qty-plus" aria-label="Increase quantity">+</button>
+            </div>
+        </div>
+
+        <div class="add-to-cart-row">
+            <button type="button" class="add-to-cart-btn" id="add-to-cart-btn">Add to Cart</button>
+            <div class="size-warning" id="size-warning" hidden>Pick a size first.</div>
+        </div>
+
+        <p class="fine-print">Ships in 5–10 business days. US shipping only for now.</p>
+    </section>
+
+</main>
+
+<footer class="shop-footer">
+    <p>&copy; 2026 Griff Ski Co. · a mocial.org production</p>
+</footer>
+
+<!-- ===== Cart drawer =========================================== -->
+<div class="drawer-overlay" id="drawer-overlay" hidden></div>
+<aside class="cart-drawer" id="cart-drawer" role="dialog" aria-label="Cart" aria-hidden="true">
+    <div class="drawer-header">
+        <span>YOUR CART</span>
+        <button type="button" class="drawer-close" id="cart-close" aria-label="Close cart">&#10005;</button>
+    </div>
+    <div class="drawer-body" id="cart-items"></div>
+    <div class="drawer-footer">
+        <div class="cart-subtotal-row">
+            <span>Subtotal</span>
+            <span id="cart-subtotal">$0</span>
+        </div>
+        <button type="button" class="checkout-btn" id="checkout-btn" disabled>Checkout</button>
+    </div>
+</aside>
+
+<!-- ===== Checkout modal ========================================= -->
+<div class="modal-overlay" id="checkout-overlay" hidden>
+    <div class="checkout-modal" role="dialog" aria-label="Checkout" aria-modal="true">
+        <div class="drawer-header">
+            <span>CHECKOUT</span>
+            <button type="button" class="drawer-close" id="checkout-close" aria-label="Close checkout">&#10005;</button>
+        </div>
+
+        <div class="checkout-body" id="checkout-form-pane">
+            <div class="checkout-order-summary" id="checkout-summary"></div>
+
+            <label class="checkout-field">
+                Name
+                <input type="text" id="checkout-name" autocomplete="name" required>
+            </label>
+            <label class="checkout-field">
+                Email
+                <input type="email" id="checkout-email" autocomplete="email" required>
+            </label>
+            <label class="checkout-field">
+                Shipping address
+                <textarea id="checkout-address" autocomplete="street-address" required></textarea>
+            </label>
+
+            <p class="checkout-note">
+                Real card checkout isn't wired up yet — placing an order below
+                sends the details straight to Griff by email to arrange
+                payment and confirm your order.
+            </p>
+
+            <button type="button" class="checkout-btn" id="place-order-btn">Send Order</button>
+        </div>
+
+        <div class="checkout-body checkout-done" id="checkout-done-pane" hidden>
+            <p>Your order's drafted in an email — send it and you're in the queue.</p>
+            <p class="checkout-note">Didn't open? <button type="button" class="link-btn" id="copy-order-btn">Copy the order details</button> and email them to <span id="order-email-address"></span> instead.</p>
+            <button type="button" class="checkout-btn" id="checkout-done-btn">Done</button>
+        </div>
+    </div>
+</div>
+
+<script src="shop.js?v=1"></script>
+</body>
+</html>

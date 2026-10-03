@@ -52,7 +52,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=41">
+    <link rel="stylesheet" href="main.css?v=44">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -137,6 +137,14 @@
         <div id="settings-icon-group" class="desktop-icon-group" style="display:none;">
             <img src="settings-icon.png" id="settings-icon" alt="Settings Icon" draggable="false">
             <div id="settings-icon-label"><a href="#">settings</a></div>
+        </div>
+        <!-- Opens the GRIFF SKI CO. shop, a standalone mini-site (its own
+             HTML/CSS/JS in /shop) framed here the same way the dino game
+             frames dinasour.html - self-contained enough to be copied onto
+             its own domain and linked directly from Instagram later. -->
+        <div id="shop-icon-group" class="desktop-icon-group">
+            <img src="griffinchairlift-icon.png" id="shop-icon" alt="Shop Icon" draggable="false">
+            <div id="shop-icon-label"><a href="#">shop</a></div>
         </div>
 
         <div class = "center-container"></div>
@@ -640,6 +648,22 @@
         </div>
     </div>
 
+    <!-- ==== GRIFF SKI CO. =========================================
+         The shop, iframed from its own self-contained folder. Lazy src
+         like the dino game - it's a real page with its own cart state,
+         not worth loading until someone actually opens it.
+         ========================================================== -->
+    <div id="shop-window" class="popup-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">GRIFF SKI CO.</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#shop-window').toggleClass('iconize'); $('#shop-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#shop-window').toggleClass('resize'); $('#shop-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#shop-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper">
+            <iframe id="shop-frame" class="shop-viewer" title="Griff Ski Co. shop"></iframe>
+        </div>
+    </div>
+
     <div id="password-gate">
         <div id="password-dialog" class="popup-window">
             <div class="windows-header-wrapper clearafter">
@@ -666,7 +690,7 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=42"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=45"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>
