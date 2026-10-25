@@ -712,6 +712,16 @@ makeElementDraggable("college-icon-group", function() {
 makeElementDraggable("arcade-icon-group", function() {
     toggleDesktopFolder("arcade");
 });
+// griffinland leaves mocial for griffinlaszlo.com, its sister desktop. Same
+// tab, not a popup - the point is that it feels like the desktop changed
+// under you rather than that you opened somewhere else. An unlocked visitor
+// carries the unlock across in the URL fragment, so griffinland's copy of the
+// password dialog doesn't stop them at the door (see index.html's gate).
+makeElementDraggable("griffinland-icon-group", function() {
+    var pass = sessionStorage.getItem("mocial-unlocked") === "1"
+        ? "#pass=" + window.SITE_PASSWORD_HASH : "";
+    window.location.href = "https://griffinlaszlo.com/" + pass;
+});
 makeElementDraggable("google-icon-group", function() {
     var win = document.getElementById("google-window");
     var origin = document.getElementById("google-icon-group");
@@ -946,43 +956,63 @@ renderFilesGrid("root");
 // "../../" for shared songs and art - keeping the layout means none of them
 // had to be edited to run here.
 //
-// Each one gets its own window, built by buildGameWindows below. The three
-// "maker" pages are Bond templates that build themselves from the query
-// string; they're filled in here with WARMLECHE's art and song, the same
-// values Bond passes them.
+// Each one gets its own window, built by buildGameWindows below. The
+// visualizer is a Bond "maker" template that builds itself from the query
+// string; it's filled in here with WARMLECHE's art and song, the same values
+// Bond passes it.
+//
+// size is the [width, height] each game's frame is drawn at - its own shape,
+// measured per game, so nothing is letterboxed or cropped. The two pixel-art
+// games (wave to come, howl!) draw a 216px-tall canvas, so theirs are exactly
+// 2x it to keep the pixels square. Windows shrink, keeping that ratio, when
+// the browser is too small for them.
+//
+// icon, where a game has one, replaces the joystick in the folder, title bar
+// and taskbar. Each is that game's own character, read out of the game rather
+// than cropped from a screenshot where the game has the art: the surfer and
+// the monkey are their pixel sprites scaled up, the spider and the cat their
+// painted art, mirrored to face the way the games draw them, and the vinyl
+// room's is the painting from its room photo, squared off by extending its
+// red (the Christmas room's adds a Santa hat and snow). Pressure's rings are
+// captured from the running visualizer; the WARMLECHE one recolours its art
+// as it runs, so its circle is cut from a screenshot. The rest are each
+// game's own art: the lullabies bear charm, the play pen photo, the cover
+// the visualizer plays, and YEAT's COCOON cover. Painted icons are named arcade-art-*.png,
+// which main.css scales smoothly instead of pixelated.
 var ARCADE_MAKER = {
     art: "f/deck-rainbow.jpg",
     name: "WARMLECHE",
     audio: "songs/warmleche/07.mp3",
     song: "Rainb0wbridge"
 };
-function makerQuery(extra) {
-    var params = new URLSearchParams(ARCADE_MAKER);
-    Object.keys(extra || {}).forEach(function(key) { params.set(key, extra[key]); });
-    return "?" + params.toString();
+function makerQuery() {
+    return "?" + new URLSearchParams(ARCADE_MAKER).toString();
 }
 var arcadeGames = [
-    { id: "wave-to-come",      name: "wave to come",     title: "WAVE TO COME",           src: "games/wheres-west.html" },
-    { id: "howl",              name: "howl!",            title: "HOWL!",                  src: "games/howl-game_4.html" },
-    { id: "spider-web",        name: "spider web",       title: "HOWL SPIDER WEB",        src: "games/howl-spider-web.html" },
-    { id: "kitty-clouds",      name: "kitty clouds",     title: "KITTY CLOUDS",           src: "games/kitty-clouds.html" },
-    { id: "drive-radio",       name: "drive radio",      title: "DRIVE RADIO",            src: "games/drive-radio.html" },
-    { id: "mac-tames-bar",     name: "mac & tame's bar", title: "MAC & TAME'S BAR",       src: "games/mac-tames-bar.html" },
-    { id: "playpen",           name: "play pen",         title: "SHILOH'S PLAY PEN",      src: "games/playpen/index.html" },
-    { id: "butterfly-jar",     name: "butterfly jar",    title: "BUTTERFLY JAR",          src: "games/maker/catch.html" + makerQuery({
-        title: "Butterfly Jar", goal: "Catch the butterflies in the jar. Leave the spiders.",
-        catcher: "🫙", items: "🦋,🌸,🌈", avoid: "🕷️", bg: "#ff3b8d" }) },
-    { id: "pressure",          name: "pressure",         title: "PRESSURE",               src: "games/pressure-visualizer.html" },
-    { id: "pressure-warmleche", name: "pressure (warmleche)", title: "PRESSURE (WARMLECHE)", src: "games/pressure-warmleche.html" },
-    { id: "drake-ice",         name: "pressure (ice)",   title: "PRESSURE (DRAKE ICE)",   src: "games/drake-ice/index.html" },
-    { id: "visualizer",        name: "visualizer",       title: "WARMLECHE VISUALIZER",   src: "games/maker/visualizer.html" + makerQuery() },
-    { id: "stickers",          name: "stickers",         title: "WARMLECHE STICKERS",     src: "games/maker/stickers.html" + makerQuery() },
-    { id: "lullabies",         name: "lullabies",        title: "LIL BABY LULLABIES",     src: "games/lil-baby-lullabies.html" },
-    { id: "vinyl-room",        name: "vinyl room",       title: "JIMMY'S VINYL ROOM",     src: "games/vinyl-room/index.html" },
-    { id: "vinyl-xmas",        name: "vinyl xmas",       title: "VINYL ROOM: CHRISTMAS",  src: "games/vinyl-room/xmas.html" },
-    { id: "yeat",              name: "yeat.exe",         title: "YEAT.EXE",               src: "games/yeat/index.html" },
-    { id: "sickassfoos",       name: "sick ass foo's",   title: "SICK ASS FOO'S",         src: "games/sickassfoos/index.html" },
-    { id: "dial",              name: "set your dial",    title: "SET YOUR DIAL",          src: "games/dial/index.html" }
+    { id: "wave-to-come",      size: [520, 432], name: "wave to come",     title: "WAVE TO COME",           src: "games/wheres-west.html",
+      icon: "arcade-surfer-icon.png" },
+    { id: "howl",              size: [576, 432], name: "howl!",            title: "HOWL!",                  src: "games/howl-game_4.html",
+      icon: "arcade-howl-icon.png" },
+    { id: "spider-web",        size: [480, 480], name: "spider web",       title: "HOWL SPIDER WEB",        src: "games/howl-spider-web.html",
+      icon: "arcade-art-spider.png" },
+    { id: "kitty-clouds",      size: [400, 600], name: "kitty clouds",     title: "KITTY CLOUDS",           src: "games/kitty-clouds.html",
+      icon: "arcade-art-kitty.png" },
+    { id: "playpen",           size: [420, 560], name: "play pen",         title: "SHILOH'S PLAY PEN",      src: "games/playpen/index.html",
+      icon: "arcade-art-playpen.png" },
+    { id: "pressure",          size: [500, 500], name: "pressure",         title: "PRESSURE",               src: "games/pressure-visualizer.html",
+      icon: "arcade-art-pressure.png" },
+    { id: "pressure-warmleche", size: [500, 500], name: "pressure (warmleche)", title: "PRESSURE (WARMLECHE)", src: "games/pressure-warmleche.html",
+      icon: "arcade-art-warmleche.png" },
+    { id: "visualizer",        size: [480, 480], name: "visualizer",       title: "WARMLECHE VISUALIZER",   src: "games/maker/visualizer.html" + makerQuery(),
+      icon: "arcade-art-visualizer.png" },
+    { id: "lullabies",         size: [440, 440], name: "lullabies",        title: "LIL BABY LULLABIES",     src: "games/lil-baby-lullabies.html",
+      icon: "arcade-art-lullabies.png" },
+    { id: "vinyl-room",        size: [450, 600], name: "vinyl room",       title: "JIMMY'S VINYL ROOM",     src: "games/vinyl-room/index.html",
+      icon: "arcade-art-vinyl.png" },
+    { id: "vinyl-xmas",        size: [450, 600], name: "vinyl xmas",       title: "VINYL ROOM: CHRISTMAS",  src: "games/vinyl-room/xmas.html",
+      icon: "arcade-art-vinyl-xmas.png" },
+    { id: "yeat",              size: [400, 480], name: "yeat.exe",         title: "YEAT.EXE",               src: "games/yeat/index.html",
+      icon: "arcade-art-yeat.png" }
 ];
 
 // Desktop folders that open a window listing their contents as folder icons.
@@ -1021,7 +1051,7 @@ var desktopFolders = {
         windowId: "arcade-window",
         gridId: "arcade-grid",
         items: arcadeGames.map(function(game) {
-            return { name: game.name, popup: "game-" + game.id + "-window", icon: "arcade-icon.png" };
+            return { name: game.name, popup: "game-" + game.id + "-window", icon: game.icon || "arcade-icon.png" };
         })
     }
 };
@@ -2128,6 +2158,10 @@ function buildWindowChrome(win, titleText) {
 // Minimising doesn't hide the window, so a minimised game keeps playing, the
 // way a minimised player would.
 var ARCADE_ROOT = "arcade/";
+// Cache-buster for the game pages, like the ?v= on main.js. Bump it after
+// editing any file under arcade/games or browsers keep showing the old copy.
+// The games only read the query keys they know, so the extra one is ignored.
+var ARCADE_VERSION = 2;
 var arcadeCascade = 0;
 
 (function buildGameWindows() {
@@ -2135,6 +2169,10 @@ var arcadeCascade = 0;
         var win = document.createElement("div");
         win.id = "game-" + game.id + "-window";
         win.className = "popup-window game-window";
+        // Read by .game-window/.game-viewer in main.css to size the window
+        // to this game's shape
+        win.style.setProperty("--game-w", game.size[0]);
+        win.style.setProperty("--game-h", game.size[1]);
 
         win.appendChild(buildWindowChrome(win, game.title));
 
@@ -2164,7 +2202,8 @@ var arcadeCascade = 0;
                     win.style.left = "calc(46vw + " + step + "px)";
                     win.style.top = "calc(3vw + " + step + "px)";
                 }
-                frame.src = ARCADE_ROOT + game.src;
+                frame.src = ARCADE_ROOT + game.src +
+                    (game.src.indexOf("?") === -1 ? "?" : "&") + "v=" + ARCADE_VERSION;
                 // Most games listen for keys, so hand them the keyboard
                 setTimeout(function() {
                     try { frame.contentWindow.focus(); } catch (e) {}
@@ -2177,7 +2216,7 @@ var arcadeCascade = 0;
             }
         }).observe(win, { attributes: true, attributeFilter: ["style"] });
 
-        windowIcons[win.id] = "arcade-icon.png";
+        windowIcons[win.id] = game.icon || "arcade-icon.png";
         $(win).draggable({
             handle: ".windows-header-wrapper",
             // The iframe swallows mouse events, so a fast drag that slips off

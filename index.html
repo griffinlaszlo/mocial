@@ -36,6 +36,16 @@
         window.FORCE_LOCK = location.search.indexOf("lock") !== -1;
         if (window.FORCE_LOCK) sessionStorage.removeItem("mocial-unlocked");
 
+        // Coming back from griffinlaszlo.com (its mocial icon): an unlocked
+        // visitor arrives with #pass=<hash>, so they don't meet the dialog a
+        // second time. The hash is already readable in this file, so the
+        // fragment gives away nothing View Source didn't. Wiped from the
+        // address bar once read. griffinland's gate uses the same hash.
+        if (location.hash === "#pass=" + window.SITE_PASSWORD_HASH) {
+            sessionStorage.setItem("mocial-unlocked", "1");
+            history.replaceState({}, "", location.pathname + location.search);
+        }
+
         // Serving the site off your own machine skips the gate - the doorman
         // exists to keep mocial.org shut while it's being built, and there is
         // nobody to keep out of localhost. Published behaviour is unchanged:
@@ -52,7 +62,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=45">
+    <link rel="stylesheet" href="main.css?v=49">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -149,6 +159,11 @@
         <!-- Opens the ARCADE folder: the mini games and music experiences
              brought over from Bond, each in its own window. arcade-icon.png
              is drawn for the site, not taken from the icon pack. -->
+        <!-- griffinland: goes to griffinlaszlo.com, mocial's sister desktop -->
+        <div id="griffinland-icon-group" class="desktop-icon-group">
+            <img src="world_spinning.gif" id="griffinland-icon" alt="Griffinland Icon" draggable="false">
+            <div id="griffinland-icon-label"><a href="#">griffinland</a></div>
+        </div>
         <div id="arcade-icon-group" class="desktop-icon-group">
             <img src="arcade-icon.png" id="arcade-icon" alt="Arcade Icon" draggable="false">
             <div id="arcade-icon-label"><a href="#">arcade</a></div>
@@ -708,7 +723,7 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=46"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=56"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>

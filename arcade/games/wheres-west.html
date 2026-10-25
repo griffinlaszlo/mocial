@@ -42,6 +42,7 @@
 </head>
 <body>
 <canvas id="game" width="216" height="216"></canvas>
+<script src="win95-speaker.js"></script>
 <script>window.WW_SNIPPET = "wave-to-come.mp3";</script>
 <script>
 /* ======================= CONFIG ======================= */
@@ -845,7 +846,8 @@ function updateBoss(dt) {
 
 /* ---------- input ---------- */
 const keys = {}; const ptrs = new Map();
-const BTN_SND = { get x() { return W / 2 - 22; }, y: 1, w: 44, h: 12 };
+// mocial: sized to the Win95 speaker button drawn in drawHUD, plus a little margin
+const BTN_SND = { get x() { return W / 2 - 10; }, y: 0, w: 20, h: 16 };
 function local(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
 const inBox = (p, b) => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
 function action() {
@@ -1011,7 +1013,7 @@ function boardIcon(x, y, on) {
   if (on) { ctx.fillStyle = '#f060b0'; ctx.fillRect(x, y + 7, 3, 2); }
 }
 function drawHUD() {
-  text(muted ? 'SND OFF' : 'SND ON', W / 2, 4, 1, muted ? '#9aa8c8' : '#ffffff', 'center');
+  drawWin95Speaker(ctx, Math.round(W / 2) - 6, 1, 13, muted); // mocial: was 'SND ON' / 'SND OFF' text
   const s = Math.floor(elapsed);
   text(Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'), 4, 4, 2, C.yellow);
   text(score(), W - 4, 4, 2, C.yellow, 'right');
@@ -1066,7 +1068,7 @@ function draw() {
   ctx.drawImage(vignette, 0, 0);
 
   if (state === 'play' || state === 'wipe') drawHUD();
-  else text(muted ? 'SND OFF' : 'SND ON', W / 2, 4, 1, muted ? '#9aa8c8' : '#ffffff', 'center');
+  else drawWin95Speaker(ctx, Math.round(W / 2) - 6, 1, 13, muted); // mocial: was 'SND ON' / 'SND OFF' text
   if (state === 'title') {
     const big = W >= 172 ? 3 : 2;
     if (MINI) {

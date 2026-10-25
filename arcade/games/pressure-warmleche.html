@@ -57,6 +57,7 @@
 </head>
 <body>
 <canvas id="c"></canvas><canvas id="ui"></canvas>
+<script src="win95-speaker.js"></script>
 <script>
 (function(){
 'use strict';
@@ -374,8 +375,9 @@ function draw2D(i,j,mix,scale){
 }
 
 // UI overlay (separate canvas, only redrawn when something on it changes)
-// Bond: in the opened view, line the mute icon up with the app's close button (top 54, 18 in) so it clears the status bar.
-function muteRect(){ var big=H>380, s=big?40:Math.max(34,Math.min(W,H)*0.09); return big?{x:W-s-18,y:54,s:s}:{x:W-s-10,y:10,s:s}; }
+// mocial: 18px in from the top-right corner - Bond dropped it to 54px to clear its app's close button, which there isn't one of here.
+// 39 = 3x the speaker button's 13px grid, so its pixels stay square.
+function muteRect(){ var big=H>380, s=big?39:Math.max(34,Math.min(W,H)*0.09); return big?{x:W-s-18,y:18,s:s}:{x:W-s-10,y:10,s:s}; }
 function maxBend(){ return Math.min(W,H)*0.42; }
 var uiKey='';
 // Bond: chunky pixel "START" with a 3D drop, tinted by the current colorway. Tapping anywhere starts.
@@ -410,15 +412,10 @@ function drawUI(wall){
     var r2=m*0.12; g.strokeStyle='rgba(255,255,255,0.9)'; g.lineWidth=Math.max(3,r2*0.12); g.lineCap='round';
     g.beginPath(); g.arc(W/2,H/2,r2,wall*6,wall*6+Math.PI*1.3); g.stroke();
   } else if(!tile){
-    var rr=muteRect(), x=rr.x, y=rr.y, s=rr.s;
-    g.globalAlpha=0.85; g.fillStyle='rgba(0,0,0,0.25)'; g.beginPath(); g.arc(x+s/2,y+s/2,s/2,0,Math.PI*2); g.fill();
-    g.fillStyle='#fff'; g.strokeStyle='#fff'; g.lineWidth=Math.max(2,s*0.07); g.lineCap='round';
-    var u=s/10, ox=x+u*2.2, oy=y+s/2;
-    g.beginPath(); g.moveTo(ox,oy-u*1.3); g.lineTo(ox+u*1.6,oy-u*1.3); g.lineTo(ox+u*3.6,oy-u*3);
-    g.lineTo(ox+u*3.6,oy+u*3); g.lineTo(ox+u*1.6,oy+u*1.3); g.lineTo(ox,oy+u*1.3); g.closePath(); g.fill();
-    if(muted){ g.beginPath(); g.moveTo(ox+u*4.6,oy-u*1.5); g.lineTo(ox+u*7.2,oy+u*1.5); g.moveTo(ox+u*7.2,oy-u*1.5); g.lineTo(ox+u*4.6,oy+u*1.5); g.stroke(); }
-    else { g.beginPath(); g.arc(ox+u*3.8,oy,u*2,-0.9,0.9); g.stroke(); g.beginPath(); g.arc(ox+u*3.8,oy,u*3.5,-0.9,0.9); g.stroke(); }
-    g.globalAlpha=1;
+    // mocial: the Win95 speaker button (win95-speaker.js) in place of the
+    // original round icon
+    var rr=muteRect();
+    drawWin95Speaker(g, rr.x, rr.y, rr.s, muted);
   }
 }
 
