@@ -140,6 +140,9 @@ $(document).ready(function() {
     $("#random-window").draggable();
 });
 $(document).ready(function() {
+    $("#arcade-window").draggable();
+});
+$(document).ready(function() {
     $("#settings-window").draggable();
 });
 $(document).ready(function() {
@@ -304,6 +307,7 @@ var windowIcons = {
     "random-window":          "folder-icon.png",
     "college-window":         "folder-icon.png",
     "folder-contents-window": "folder-icon.png",
+    "arcade-window":          "arcade-icon.png",
     "files-window":           "cd1.png",
     // Applications - their own icon, the way a Win95 app window does
     "dino-window":            "dino.png",
@@ -705,6 +709,9 @@ makeElementDraggable("files-icon-group", function() {
 makeElementDraggable("college-icon-group", function() {
     toggleDesktopFolder("college");
 });
+makeElementDraggable("arcade-icon-group", function() {
+    toggleDesktopFolder("arcade");
+});
 makeElementDraggable("google-icon-group", function() {
     var win = document.getElementById("google-window");
     var origin = document.getElementById("google-icon-group");
@@ -933,6 +940,51 @@ function openFolderContents(folderKey) {
 
 renderFilesGrid("root");
 
+// The ARCADE folder: mini games and music experiences brought over from Bond.
+// They live in arcade/ laid out the way Bond's public/ folder is (games/,
+// songs/, vinyl/, f/), because several reach out of their own folder with
+// "../../" for shared songs and art - keeping the layout means none of them
+// had to be edited to run here.
+//
+// Each one gets its own window, built by buildGameWindows below. The three
+// "maker" pages are Bond templates that build themselves from the query
+// string; they're filled in here with WARMLECHE's art and song, the same
+// values Bond passes them.
+var ARCADE_MAKER = {
+    art: "f/deck-rainbow.jpg",
+    name: "WARMLECHE",
+    audio: "songs/warmleche/07.mp3",
+    song: "Rainb0wbridge"
+};
+function makerQuery(extra) {
+    var params = new URLSearchParams(ARCADE_MAKER);
+    Object.keys(extra || {}).forEach(function(key) { params.set(key, extra[key]); });
+    return "?" + params.toString();
+}
+var arcadeGames = [
+    { id: "wave-to-come",      name: "wave to come",     title: "WAVE TO COME",           src: "games/wheres-west.html" },
+    { id: "howl",              name: "howl!",            title: "HOWL!",                  src: "games/howl-game_4.html" },
+    { id: "spider-web",        name: "spider web",       title: "HOWL SPIDER WEB",        src: "games/howl-spider-web.html" },
+    { id: "kitty-clouds",      name: "kitty clouds",     title: "KITTY CLOUDS",           src: "games/kitty-clouds.html" },
+    { id: "drive-radio",       name: "drive radio",      title: "DRIVE RADIO",            src: "games/drive-radio.html" },
+    { id: "mac-tames-bar",     name: "mac & tame's bar", title: "MAC & TAME'S BAR",       src: "games/mac-tames-bar.html" },
+    { id: "playpen",           name: "play pen",         title: "SHILOH'S PLAY PEN",      src: "games/playpen/index.html" },
+    { id: "butterfly-jar",     name: "butterfly jar",    title: "BUTTERFLY JAR",          src: "games/maker/catch.html" + makerQuery({
+        title: "Butterfly Jar", goal: "Catch the butterflies in the jar. Leave the spiders.",
+        catcher: "🫙", items: "🦋,🌸,🌈", avoid: "🕷️", bg: "#ff3b8d" }) },
+    { id: "pressure",          name: "pressure",         title: "PRESSURE",               src: "games/pressure-visualizer.html" },
+    { id: "pressure-warmleche", name: "pressure (warmleche)", title: "PRESSURE (WARMLECHE)", src: "games/pressure-warmleche.html" },
+    { id: "drake-ice",         name: "pressure (ice)",   title: "PRESSURE (DRAKE ICE)",   src: "games/drake-ice/index.html" },
+    { id: "visualizer",        name: "visualizer",       title: "WARMLECHE VISUALIZER",   src: "games/maker/visualizer.html" + makerQuery() },
+    { id: "stickers",          name: "stickers",         title: "WARMLECHE STICKERS",     src: "games/maker/stickers.html" + makerQuery() },
+    { id: "lullabies",         name: "lullabies",        title: "LIL BABY LULLABIES",     src: "games/lil-baby-lullabies.html" },
+    { id: "vinyl-room",        name: "vinyl room",       title: "JIMMY'S VINYL ROOM",     src: "games/vinyl-room/index.html" },
+    { id: "vinyl-xmas",        name: "vinyl xmas",       title: "VINYL ROOM: CHRISTMAS",  src: "games/vinyl-room/xmas.html" },
+    { id: "yeat",              name: "yeat.exe",         title: "YEAT.EXE",               src: "games/yeat/index.html" },
+    { id: "sickassfoos",       name: "sick ass foo's",   title: "SICK ASS FOO'S",         src: "games/sickassfoos/index.html" },
+    { id: "dial",              name: "set your dial",    title: "SET YOUR DIAL",          src: "games/dial/index.html" }
+];
+
 // Desktop folders that open a window listing their contents as folder icons.
 // Clicking the icon opens just that window; its contents open individually
 // from the grid inside. Add more folders here with the same shape -
@@ -963,6 +1015,14 @@ var desktopFolders = {
             // showing up in two folders, not two copies of it
             { name: "ds research", popup: "s13688-window" }
         ]
+    },
+    arcade: {
+        iconId: "arcade-icon-group",
+        windowId: "arcade-window",
+        gridId: "arcade-grid",
+        items: arcadeGames.map(function(game) {
+            return { name: game.name, popup: "game-" + game.id + "-window", icon: "arcade-icon.png" };
+        })
     }
 };
 
@@ -972,10 +1032,13 @@ function renderDesktopFolder(folderKey) {
     grid.innerHTML = "";
 
     folder.items.forEach(function(item) {
-        // Every entry here opens a popup, so every entry is a file
+        // Every entry here opens a popup, so every entry is a file - unless it
+        // names its own icon, the way the arcade's games are applications
         var el = document.createElement("div");
         el.className = "file-item";
-        el.innerHTML = '<img src="fileicon.png" class="file-type-icon" draggable="false"><span>' + item.name + "</span>";
+        el.innerHTML = item.icon
+            ? '<img src="' + item.icon + '" class="app-type-icon" draggable="false"><span>' + item.name + "</span>"
+            : '<img src="fileicon.png" class="file-type-icon" draggable="false"><span>' + item.name + "</span>";
         el.onclick = function() {
             var popup = document.getElementById(item.popup);
             if (popup && $(popup).is(":hidden")) showPopup(item.popup, el);
@@ -1001,6 +1064,7 @@ function toggleDesktopFolder(folderKey) {
 
 renderDesktopFolder("random");
 renderDesktopFolder("college");
+renderDesktopFolder("arcade");
 
 // Settings: pointer color
 function setPointerColor(color) {
@@ -2051,5 +2115,75 @@ function buildWindowChrome(win, titleText) {
         // window these copy - has none either. The taskbar still gets one
         // through TASKBAR_FALLBACK_ICON.
         $(win).draggable({ handle: ".windows-header-wrapper" });
+    });
+})();
+
+// One window per arcade game, built from arcadeGames. Same chrome as the press
+// windows; the body is an iframe pointed at the game.
+//
+// The iframe is only given its src while the window is showing, and is
+// blanked the moment it's hidden - by its close button, by the arcade folder
+// pulling it back in, by anything. Most of these play music, and a hidden
+// iframe keeps playing, so closing a game has to actually unload it.
+// Minimising doesn't hide the window, so a minimised game keeps playing, the
+// way a minimised player would.
+var ARCADE_ROOT = "arcade/";
+var arcadeCascade = 0;
+
+(function buildGameWindows() {
+    arcadeGames.forEach(function(game) {
+        var win = document.createElement("div");
+        win.id = "game-" + game.id + "-window";
+        win.className = "popup-window game-window";
+
+        win.appendChild(buildWindowChrome(win, game.title));
+
+        var inner = document.createElement("div");
+        inner.className = "popup-inner-wrapper";
+
+        var frame = document.createElement("iframe");
+        frame.className = "game-viewer";
+        frame.title = game.title;
+        frame.allow = "autoplay; fullscreen";
+        // The maker templates only run when their frame carries "live" -
+        // without it they render as a static Bond feed thumbnail
+        frame.classList.add("live");
+        inner.appendChild(frame);
+        win.appendChild(inner);
+        document.body.appendChild(win);
+
+        new MutationObserver(function() {
+            var showing = win.style.display !== "none" && win.getClientRects().length > 0;
+            if (showing && !frame.getAttribute("src")) {
+                // Cascade each newly opened game down and to the right of the
+                // last, so two open games don't land exactly on top of each
+                // other. Only until it's dragged - then it stays where it was put.
+                if (!win.dataset.dragged) {
+                    var step = (arcadeCascade++ % 5) * 28;
+                    // 46vw clears the arcade folder (14vw + 30vw wide)
+                    win.style.left = "calc(46vw + " + step + "px)";
+                    win.style.top = "calc(3vw + " + step + "px)";
+                }
+                frame.src = ARCADE_ROOT + game.src;
+                // Most games listen for keys, so hand them the keyboard
+                setTimeout(function() {
+                    try { frame.contentWindow.focus(); } catch (e) {}
+                }, 300);
+            } else if (!showing && frame.getAttribute("src")) {
+                // Navigating away is what stops the audio; dropping the
+                // attribute after marks it unloaded for the next open
+                frame.src = "about:blank";
+                frame.removeAttribute("src");
+            }
+        }).observe(win, { attributes: true, attributeFilter: ["style"] });
+
+        windowIcons[win.id] = "arcade-icon.png";
+        $(win).draggable({
+            handle: ".windows-header-wrapper",
+            // The iframe swallows mouse events, so a fast drag that slips off
+            // the title bar onto it would drop the window mid-drag
+            iframeFix: true,
+            stop: function() { win.dataset.dragged = "1"; }
+        });
     });
 })();

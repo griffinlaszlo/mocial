@@ -86,6 +86,30 @@ and everything it spilled back into the icon.
 `renderDesktopFolder` and `toggleDesktopFolder` take a folder key and aren't
 random-specific — other desktop folders can become entries in the same object.
 
+### The arcade
+
+The `arcade` icon (a joystick, `arcade-icon.png`, drawn for the site) opens a
+folder of 19 mini games and music experiences brought over from the Bond
+project (`~/Desktop/bond/dist/games`). They're listed in `arcadeGames` in
+`main.js`, and `buildGameWindows` gives each one its own phone-shaped window
+with an iframe.
+
+`arcade/` copies the layout of Bond's `public/` folder — `games/`, `songs/`,
+`vinyl/`, `f/` — because Shiloh's Play Pen, YEAT.EXE, the vinyl rooms and the
+three `maker/` templates load songs and art from `../../`. Keeping that layout
+meant none of the games had to be edited. Only the songs those games actually
+use came over (5 artists, ~160MB), not Bond's whole 539MB `songs/` folder.
+
+- A game's iframe only gets its `src` while its window is showing, and is
+  blanked when the window hides, so closing a game stops its music.
+  Minimising leaves it playing.
+- The `maker/` pages (butterfly jar, visualizer, stickers) are Bond templates
+  that build themselves from the query string. They're filled in with
+  WARMLECHE's art and "Rainb0wbridge" (`ARCADE_MAKER`), and their iframe
+  carries the `live` class, without which they render as a static thumbnail.
+- To add a game, drop it under `arcade/games/` and add a line to
+  `arcadeGames`.
+
 ### Now Playing
 
 A separate, older system with the same shape: `filesData` describes a root

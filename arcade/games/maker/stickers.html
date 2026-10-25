@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Sticker pack</title>
+<!--
+  BOND STICKER PACK: what ChatGPT builds when a fan asks for "a sticker pack with <artist>".
+  Any artist: ?art=<image path> &audio=<song path> &name=<artist> &song=<title> (paths from the site root).
+  Seven die-cut stickers cut from the artist's art, scattered on a board in colours pulled from it.
+  Drag them anywhere, tap one to slap it down on top, Shuffle to re-scatter. Opened in the viewer
+  (iframe.embed.live) the song plays; in a feed tile it's silent. window.BondMaker = { mute(bool) }.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Caveat:wght@700&display=swap">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;-webkit-user-select:none;user-select:none;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;-webkit-tap-highlight-color:transparent;touch-action:none}
+  body{background:var(--bg,#2a2a33);transition:background .6s}
+  body::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.14),transparent 55%),repeating-linear-gradient(45deg,rgba(255,255,255,.025) 0 2px,transparent 2px 9px);pointer-events:none}
+  .st{position:absolute;left:0;top:0;cursor:grab;will-change:transform;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 8px 12px rgba(0,0,0,.35));transition:filter .2s}
+  .st.drag{cursor:grabbing;filter:drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff) drop-shadow(0 18px 22px rgba(0,0,0,.4))}
+  .st i{display:block;background-size:cover;background-position:center;position:relative;overflow:hidden}
+  .st i::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.35) 48%,transparent 60%);transform:translateX(-120%);transition:transform .7s}
+  .st.slap i::after{transform:translateX(120%)}
+  .word{font-family:'Bowlby One',Impact,sans-serif;color:#fff;padding:.25em .55em;border-radius:.4em;white-space:nowrap;line-height:1.1;display:block}
+  .note{font-family:'Caveat',cursive;font-weight:700;color:#111;background:#fff8c8;padding:.2em .6em;border-radius:6px;white-space:nowrap;display:block}
+  #bar{position:absolute;left:0;right:0;bottom:18px;display:flex;justify-content:center;align-items:center;gap:10px;pointer-events:none}
+  #cap{color:#fff;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.85;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+  #shuf{pointer-events:auto;height:34px;padding:0 14px;border-radius:999px;border:0;background:#fff;color:#111;font:700 13px -apple-system,Helvetica,Arial,sans-serif;box-shadow:0 6px 16px rgba(0,0,0,.25);cursor:pointer}
+</style>
+</head>
+<body>
+<div id="board"></div>
+<div id="bar"><span id="cap"></span><button id="shuf">Shuffle</button></div>
+<script>
+(function(){
+  const q=new URLSearchParams(location.search), ROOT='../../';
+  const ART=ROOT+(q.get('art')||'f/art-olivia.jpg'), AUDIO=q.get('audio')?ROOT+q.get('audio'):'', NAME=q.get('name')||'Bond', SONG=q.get('song')||'';
+  const board=document.getElementById('board');
+  document.getElementById('cap').textContent=`${NAME} sticker pack`;
+  const live=(()=>{ try{ const f=window.frameElement; return !f||f.classList.contains('live'); }catch(e){ return true; } })();
+
+  // colours from the art: board background + the word sticker
+  let accent='#ff3b8d';
+  const img=new Image(); img.onload=()=>{ try{ const c=document.createElement('canvas'); c.width=c.height=20; const g=c.getContext('2d'); g.drawImage(img,0,0,20,20); const d=g.getImageData(0,0,20,20).data; let best=0,h=330;
+    for(let i=0;i<d.length;i+=4){ const r=d[i],gg=d[i+1],b=d[i+2],mx=Math.max(r,gg,b),mn=Math.min(r,gg,b),s=mx-mn; if(s>best&&mx>70){ best=s; let hh=mx===r?((gg-b)/s)%6:mx===gg?(b-r)/s+2:(r-gg)/s+4; h=Math.round(((hh*60)+360)%360); } }
+    accent=`hsl(${h} 85% 55%)`; document.body.style.setProperty('--bg',`hsl(${h} 35% 18%)`); document.querySelectorAll('.word').forEach(w=>w.style.background=accent); }catch(e){} };
+  img.src=ART;
+
+  // the heart is a mask so it scales with the sticker (clip-path path() is fixed-size)
+  const heart='mask:'+`url("data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 94"><path d="M50 92C20 70 2 52 2 30 2 13 15 2 29 2c10 0 17 6 21 13 4-7 11-13 21-13 14 0 27 11 27 28 0 22-18 40-48 62z"/></svg>')}") center/100% 100% no-repeat`;
+  // [shape, size as a share of the shorter side, background-position, zoom]
+  const CUTS=[
+    ['circle(50%)',.32,'50% 40%','cover'],
+    ['inset(0 round 18%)',.28,'20% 30%','220%'],
+    ['polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)',.3,'60% 45%','170%'],
+    [heart,.27,'45% 35%','190%'],
+    ['polygon(50% 0,63% 12%,80% 6%,84% 24%,100% 32%,92% 50%,100% 68%,84% 76%,80% 94%,63% 88%,50% 100%,37% 88%,20% 94%,16% 76%,0 68%,8% 50%,0 32%,16% 24%,20% 6%,37% 12%)',.28,'70% 60%','240%'],
+  ];
+  const els=[];
+  function mk(inner,w){ const s=document.createElement('div'); s.className='st'; s.appendChild(inner); board.appendChild(s); els.push({el:s,w,x:0,y:0,r:0}); return s; }
+  // sized in vmin so they're right whatever size the frame turns out to be (it can be 0×0 while it loads)
+  CUTS.forEach(([clip,k,pos,zoom])=>{ const i=document.createElement('i'); i.style.cssText=`width:${k*100}vmin;height:${k*100}vmin;${clip.startsWith('mask:')?'-webkit-'+clip+';'+clip:'clip-path:'+clip};background-image:url("${ART}");background-position:${pos};background-size:${zoom}`; mk(i,0); });
+  const word=document.createElement('b'); word.className='word'; word.textContent=NAME; word.style.background=accent; word.style.fontSize=`max(16px,${Math.min(8,66/Math.max(4,NAME.length))}vmin)`; mk(word,0);
+  if(SONG){ const n=document.createElement('b'); n.className='note'; n.textContent='♪ '+SONG; n.style.fontSize='max(15px,5vmin)'; mk(n,0); }
+
+  let z=1; const place=o=>{ o.el.style.transform=`translate(${o.x}px,${o.y}px) rotate(${o.r}deg)`; };
+  function scatter(anim){ const W=innerWidth,H=innerHeight-70; els.forEach((o,k)=>{ const b=o.el.getBoundingClientRect(), w=b.width||o.w, h=b.height||o.w;
+      const col=k%2, row=Math.floor(k/2); o.x=Math.max(6,Math.min(W-w-6,(col?.52:.06)*W+(Math.random()-.5)*W*.12)); const top=Math.min(96,H*.15), rows=Math.ceil(els.length/2); o.y=Math.max(top,Math.min(H-h,top+(row/Math.max(1,rows-1))*(H-top-h)+(Math.random()-.5)*H*.05));   // clear of the viewer's close button o.r=(Math.random()-.5)*30;
+      o.el.style.transition=anim?'transform .55s cubic-bezier(.2,.8,.2,1)':''; place(o); o.el.style.zIndex=k+1; }); z=els.length+1; }
+  (function first(){ if(!innerWidth||!innerHeight) return requestAnimationFrame(first); requestAnimationFrame(()=>scatter(false)); })();
+  let lastW=innerWidth; addEventListener('resize',()=>{ if(Math.abs(innerWidth-lastW)>40){ lastW=innerWidth; scatter(false); } });
+
+  // drag anywhere; a tap without moving slaps the sticker down on top with a shine
+  let cur=null;
+  els.forEach(o=>o.el.addEventListener('pointerdown',e=>{ e.preventDefault(); o.el.setPointerCapture(e.pointerId); o.el.style.transition=''; o.el.style.zIndex=++z; o.el.classList.add('drag'); cur={o,sx:e.clientX,sy:e.clientY,ox:o.x,oy:o.y,moved:false}; play(); }));
+  addEventListener('pointermove',e=>{ if(!cur) return; const dx=e.clientX-cur.sx, dy=e.clientY-cur.sy; if(Math.abs(dx)+Math.abs(dy)>4) cur.moved=true; cur.o.x=cur.ox+dx; cur.o.y=cur.oy+dy; place(cur.o); });
+  addEventListener('pointerup',()=>{ if(!cur) return; const o=cur.o; o.el.classList.remove('drag');
+    if(!cur.moved){ o.r=(Math.random()-.5)*36; o.el.style.transition='transform .35s cubic-bezier(.3,1.6,.5,1)'; place(o); o.el.classList.remove('slap'); void o.el.offsetWidth; o.el.classList.add('slap'); }
+    cur=null; });
+  document.getElementById('shuf').addEventListener('click',()=>{ scatter(true); play(); });
+
+  let el=null, muted=!live;
+  function play(){ if(muted||!AUDIO) return; if(!el){ el=new Audio(AUDIO); el.loop=true; el.volume=.8; } if(el.paused) el.play().catch(()=>{}); }
+  if(!live) document.getElementById('bar').style.display='none';   // as a tile or a station's art, just the stickers
+  window.BondMaker={ mute(m){ muted=!!m; if(muted&&el) el.pause(); else play(); } };
+  if(live) play();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+[
+ {
+  "slug": "torpedoes",
+  "album": "Damn the Torpedoes",
+  "artist": "Tom Petty & The Heartbreakers",
+  "year": "1979",
+  "tracks": [
+   {
+    "t": "Refugee",
+    "f": "torpedoes-1.m4a"
+   },
+   {
+    "t": "Don't Do Me Like That",
+    "f": "torpedoes-2.m4a"
+   }
+  ]
+ },
+ {
+  "slug": "belladonna",
+  "album": "Bella Donna (2016 Remaster)",
+  "artist": "Stevie Nicks",
+  "year": "1981",
+  "tracks": [
+   {
+    "t": "Edge of Seventeen",
+    "f": "belladonna-1.m4a"
+   },
+   {
+    "t": "Stop Draggin' My Heart Around (with Tom Petty & the Heartbreakers)",
+    "f": "belladonna-2.m4a"
+   }
+  ]
+ },
+ {
+  "slug": "makingmovies",
+  "album": "Making Movies",
+  "artist": "Dire Straits",
+  "year": "1980",
+  "tracks": [
+   {
+    "t": "Romeo and Juliet",
+    "f": "makingmovies-1.m4a"
+   },
+   {
+    "t": "Tunnel of Love",
+    "f": "makingmovies-2.m4a"
+   }
+  ]
+ },
+ {
+  "slug": "rattlehum",
+  "album": "Rattle and Hum",
+  "artist": "U2",
+  "year": "1988",
+  "tracks": [
+   {
+    "t": "Desire",
+    "f": "rattlehum-1.m4a"
+   },
+   {
+    "t": "Angel of Harlem",
+    "f": "rattlehum-2.m4a"
+   }
+  ]
+ },
+ {
+  "slug": "easter",
+  "album": "Easter",
+  "artist": "Patti Smith Group",
+  "year": "1978",
+  "tracks": [
+   {
+    "t": "Because the Night",
+    "f": "easter-1.m4a"
+   },
+   {
+    "t": "Easter",
+    "f": "easter-2.m4a"
+   }
+  ]
+ },
+ {
+  "slug": "borntorun",
+  "album": "Born to Run",
+  "artist": "Bruce Springsteen",
+  "year": "1975",
+  "tracks": [
+   {
+    "t": "Born to Run",
+    "f": "borntorun-1.m4a"
+   },
+   {
+    "t": "Thunder Road",
+    "f": "borntorun-2.m4a"
+   }
+  ]
+ },
+ {
+  "slug": "2001",
+  "album": "2001",
+  "artist": "Dr. Dre",
+  "year": "1999",
+  "tracks": [
+   {
+    "t": "Still D.R.E. (feat. Snoop Dogg)",
+    "f": "2001-1.m4a"
+   },
+   {
+    "t": "Forgot About Dre (feat. Eminem)",
+    "f": "2001-2.m4a"
+   }
+  ]
+ },
+ {
+  "slug": "rocksteady",
+  "album": "Rock Steady (Bonus Track Version)",
+  "artist": "No Doubt",
+  "year": "2001",
+  "tracks": [
+   {
+    "t": "Hey Baby (feat. Bounty Killer)",
+    "f": "rocksteady-1.m4a"
+   },
+   {
+    "t": "Underneath It All (feat. Lady Saw)",
+    "f": "rocksteady-2.m4a"
+   }
+  ]
+ }
+]

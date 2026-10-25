@@ -1,0 +1,50 @@
+[
+ {
+  "slug": "torpedoes",
+  "t": "Christmas All Over Again",
+  "artist": "Tom Petty & The Heartbreakers",
+  "f": "xmas-torpedoes.m4a"
+ },
+ {
+  "slug": "belladonna",
+  "t": "Silent Night",
+  "artist": "Stevie Nicks",
+  "f": "xmas-belladonna.m4a"
+ },
+ {
+  "slug": "makingmovies",
+  "t": "The Little Drummer Boy",
+  "artist": "Bob Seger & The Silver Bullet Band",
+  "f": "xmas-makingmovies.m4a"
+ },
+ {
+  "slug": "rattlehum",
+  "t": "Christmas (Baby Please Come Home)",
+  "artist": "U2",
+  "f": "xmas-rattlehum.m4a"
+ },
+ {
+  "slug": "easter",
+  "t": "Have Yourself a Merry Little Christmas",
+  "artist": "Pretenders",
+  "f": "xmas-easter.m4a"
+ },
+ {
+  "slug": "borntorun",
+  "t": "Merry Christmas Baby",
+  "artist": "Bruce Springsteen & The E Street Band",
+  "f": "xmas-borntorun.m4a"
+ },
+ {
+  "slug": "2001",
+  "t": "Christmas In Hollis",
+  "artist": "Run-DMC",
+  "f": "xmas-2001.m4a"
+ },
+ {
+  "slug": "rocksteady",
+  "t": "Santa Baby",
+  "artist": "Madonna",
+  "f": "xmas-rocksteady.m4a"
+ }
+]

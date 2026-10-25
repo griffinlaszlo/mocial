@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Catch</title>
+<!--
+  BOND CATCH GAME: a themed catch game ChatGPT builds from an artist idea ("a Migos cooking game").
+  ?title= &goal= &items=<emoji,emoji> &avoid=<emoji> &catcher=<emoji> &bg=<hex> &art=<image> &audio=<song> &name= &song=
+  Drag (or move) to catch the good things, dodge the bad one; three misses on the bad one ends the round.
+  In a feed tile it plays itself, silent; opened (iframe.embed.live) the song plays. window.BondMaker = { mute(bool) }.
+-->
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#111;-webkit-user-select:none;user-select:none;font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;touch-action:none;-webkit-tap-highlight-color:transparent}
+  #bg{position:absolute;inset:-10%;width:120%;height:120%;object-fit:cover;filter:blur(18px) saturate(1.3) brightness(.6)}
+  #tint{position:absolute;inset:0;mix-blend-mode:multiply;opacity:.55}
+  canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #hud{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top) + 14px);display:flex;justify-content:space-between;align-items:center;padding:0 16px;color:#fff;font-weight:800;pointer-events:none;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+  #hud .t{font-size:15px;letter-spacing:.02em}#hud .s{font-size:22px;font-variant-numeric:tabular-nums}
+  #msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;text-align:center;padding:0 30px;pointer-events:none;text-shadow:0 2px 12px rgba(0,0,0,.5)}
+  #msg b{font-size:30px;font-weight:900;letter-spacing:-.02em}#msg span{font-size:15px;opacity:.9;max-width:280px}#msg i{font-style:normal;margin-top:6px;padding:9px 16px;border-radius:999px;background:#fff;color:#111;font-weight:800;font-size:14px;text-shadow:none}
+  #cap{transition:opacity .3s;position:absolute;left:0;right:0;bottom:16px;text-align:center;color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.75;pointer-events:none}
+</style>
+</head>
+<body>
+<img id="bg" alt=""><div id="tint"></div>
+<canvas id="cv"></canvas>
+<div id="hud"><span class="t" id="ttl"></span><span class="s" id="sc">0</span></div>
+<div id="msg"><b id="mt"></b><span id="mg"></span><i id="mi">Tap to play</i></div>
+<div id="cap"></div>
+<script>
+(function(){
+  const q=new URLSearchParams(location.search), ROOT='../../';
+  const TITLE=q.get('title')||'Catch', GOAL=q.get('goal')||'Catch the good stuff.', ITEMS=(q.get('items')||'⭐,💖').split(','), AVOID=q.get('avoid')||'💣', CATCHER=q.get('catcher')||'🧺';
+  const ART=q.get('art')?ROOT+q.get('art'):'', AUDIO=q.get('audio')?ROOT+q.get('audio'):'', NAME=q.get('name')||'', SONG=q.get('song')||'';
+  document.getElementById('bg').src=ART; document.getElementById('tint').style.background=q.get('bg')||'#333';
+  document.getElementById('ttl').textContent=TITLE; document.getElementById('mt').textContent=TITLE; document.getElementById('mg').textContent=GOAL;
+  document.getElementById('cap').textContent=SONG?`♪ ${SONG} · ${NAME}`:NAME;
+  const live=(()=>{ try{ const f=window.frameElement; return !f||f.classList.contains('live'); }catch(e){ return true; } })();
+  if(!live){ document.getElementById('msg').style.display='none'; document.getElementById('cap').style.display='none'; }
+  const cv=document.getElementById('cv'), x=cv.getContext('2d'); let W=0,H=0,DPR=1;
+  function size(){ DPR=Math.min(2,devicePixelRatio||1); W=innerWidth; H=innerHeight; cv.width=W*DPR; cv.height=H*DPR; x.setTransform(DPR,0,0,DPR,0,0); } size(); addEventListener('resize',size);
+
+  let el=null, muted=!live; function play(){ if(muted||!AUDIO) return; if(!el){ el=new Audio(AUDIO); el.loop=true; el.volume=.75; } if(el.paused) el.play().catch(()=>{}); }
+  window.BondMaker={ mute(m){ muted=!!m; if(muted&&el) el.pause(); else if(state==='play') play(); } };
+
+  // state: 'idle' (title card / demo), 'play', 'over'
+  let state=live?'idle':'demo', score=0, best=0, lives=3, drops=[], px=.5, tx=.5, last=0, spawn=0, pops=[], shake=0;
+  const S=()=>Math.min(W,H), C=()=>S()*.13;
+  function start(){ state='play'; score=0; lives=3; drops=[]; pops=[]; document.getElementById('msg').style.display='none'; document.getElementById('cap').style.opacity=0; document.getElementById('sc').textContent='0'; play(); }
+  function over(){ state='over'; if(live) document.getElementById('cap').style.opacity=.75; best=Math.max(best,score); const m=document.getElementById('msg'); m.style.display='flex'; document.getElementById('mt').textContent=`${score} caught`; document.getElementById('mg').textContent=best>score?`Best ${best}`:'New best'; document.getElementById('mi').textContent='Tap to play again'; }
+  const setX=cx=>{ tx=Math.max(.06,Math.min(.94,cx/W)); };
+  addEventListener('pointerdown',e=>{ if(state==='idle'||state==='over') start(); setX(e.clientX); });
+  addEventListener('pointermove',e=>{ if(state==='play'&&(e.buttons||e.pointerType!=='mouse')) setX(e.clientX); if(state==='play'&&e.pointerType==='mouse') setX(e.clientX); });
+
+  function frame(t){ requestAnimationFrame(frame); const dt=Math.min(.05,(t-(last||t))/1000); last=t; x.clearRect(0,0,W,H);
+    const running=state==='play'||state==='demo', speed=1+Math.min(1.6,score*.04);
+    if(running){ spawn-=dt; if(spawn<=0){ spawn=Math.max(.32,.85-score*.012)*(state==='demo'?1.1:1); const bad=Math.random()<.22; drops.push({x:.08+Math.random()*.84,y:-.08,v:(.28+Math.random()*.16)*speed,bad,e:bad?AVOID:ITEMS[Math.floor(Math.random()*ITEMS.length)],r:(Math.random()-.5)*.6,rv:(Math.random()-.5)*2}); } }
+    if(state==='demo'){ const good=drops.filter(d=>!d.bad&&d.y<.9).sort((a,b)=>b.y-a.y)[0]; if(good) tx=good.x; }
+    px+=(tx-px)*Math.min(1,dt*(state==='demo'?6:16));
+    const cy=H-S()*.2, cw=C();
+    drops.forEach(d=>{ d.y+=d.v*dt; d.r+=d.rv*dt;
+      if(!d.done&&d.y*H>cy-cw*.55&&d.y*H<cy+cw*.2&&Math.abs(d.x-px)*W<cw*.7){ d.done=true;
+        if(d.bad){ if(state==='play'){ lives--; shake=1; if(lives<=0) over(); } pops.push({x:d.x*W,y:cy-cw*.5,t:1,txt:'✕',c:'#ff4d4d'}); }
+        else { if(state==='play'){ score++; document.getElementById('sc').textContent=score; } pops.push({x:d.x*W,y:cy-cw*.5,t:1,txt:'+1',c:'#fff'}); } } });
+    drops=drops.filter(d=>!d.done&&d.y<1.1);
+    const fs=S()*.09; x.textAlign='center'; x.textBaseline='middle';
+    drops.forEach(d=>{ x.save(); x.translate(d.x*W,d.y*H); x.rotate(d.r); x.font=`${fs}px serif`; x.fillText(d.e,0,0); x.restore(); });
+    // the catcher, with a little bounce when it catches
+    shake*=.9; x.save(); x.translate(px*W+(Math.random()-.5)*shake*10,cy); x.font=`${cw*1.25}px serif`; x.fillText(CATCHER,0,0); x.restore();
+    pops=pops.filter(p=>(p.t-=dt*1.6)>0); pops.forEach(p=>{ x.globalAlpha=p.t; x.fillStyle=p.c; x.font=`900 ${S()*.06}px -apple-system,Arial`; x.fillText(p.txt,p.x,p.y-(1-p.t)*40); }); x.globalAlpha=1;
+    if(state==='play'){ x.font=`${S()*.05}px serif`; x.textAlign='left'; for(let i=0;i<3;i++){ x.globalAlpha=i<lives?1:.25; x.fillText('❤️',16+i*S()*.065,H-S()*.07); } x.globalAlpha=1; }
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
