@@ -714,13 +714,10 @@ makeElementDraggable("arcade-icon-group", function() {
 });
 // griffinland leaves mocial for griffinlaszlo.com, its sister desktop. Same
 // tab, not a popup - the point is that it feels like the desktop changed
-// under you rather than that you opened somewhere else. An unlocked visitor
-// carries the unlock across in the URL fragment, so griffinland's copy of the
-// password dialog doesn't stop them at the door (see index.html's gate).
+// under you rather than that you opened somewhere else. griffinland has its
+// own password (and a hangman game that gives it away), so it asks for that.
 makeElementDraggable("griffinland-icon-group", function() {
-    var pass = sessionStorage.getItem("mocial-unlocked") === "1"
-        ? "#pass=" + window.SITE_PASSWORD_HASH : "";
-    window.location.href = "https://griffinlaszlo.com/" + pass;
+    window.location.href = "https://griffinlaszlo.com/";
 });
 makeElementDraggable("google-icon-group", function() {
     var win = document.getElementById("google-window");
