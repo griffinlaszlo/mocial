@@ -140,6 +140,9 @@ $(document).ready(function() {
     $("#random-window").draggable();
 });
 $(document).ready(function() {
+    $("#arcade-window").draggable();
+});
+$(document).ready(function() {
     $("#settings-window").draggable();
 });
 $(document).ready(function() {
@@ -304,6 +307,7 @@ var windowIcons = {
     "random-window":          "folder-icon.png",
     "college-window":         "folder-icon.png",
     "folder-contents-window": "folder-icon.png",
+    "arcade-window":          "arcade-icon.png",
     "files-window":           "cd1.png",
     // Applications - their own icon, the way a Win95 app window does
     "dino-window":            "dino.png",
@@ -705,6 +709,16 @@ makeElementDraggable("files-icon-group", function() {
 makeElementDraggable("college-icon-group", function() {
     toggleDesktopFolder("college");
 });
+makeElementDraggable("arcade-icon-group", function() {
+    toggleDesktopFolder("arcade");
+});
+// griffinland leaves mocial for griffinlaszlo.com, its sister desktop. Same
+// tab, not a popup - the point is that it feels like the desktop changed
+// under you rather than that you opened somewhere else. griffinland has its
+// own password (and a hangman game that gives it away), so it asks for that.
+makeElementDraggable("griffinland-icon-group", function() {
+    window.location.href = "https://griffinlaszlo.com/";
+});
 makeElementDraggable("google-icon-group", function() {
     var win = document.getElementById("google-window");
     var origin = document.getElementById("google-icon-group");
@@ -933,6 +947,71 @@ function openFolderContents(folderKey) {
 
 renderFilesGrid("root");
 
+// The ARCADE folder: mini games and music experiences brought over from Bond.
+// They live in arcade/ laid out the way Bond's public/ folder is (games/,
+// songs/, vinyl/, f/), because several reach out of their own folder with
+// "../../" for shared songs and art - keeping the layout means none of them
+// had to be edited to run here.
+//
+// Each one gets its own window, built by buildGameWindows below. The
+// visualizer is a Bond "maker" template that builds itself from the query
+// string; it's filled in here with WARMLECHE's art and song, the same values
+// Bond passes it.
+//
+// size is the [width, height] each game's frame is drawn at - its own shape,
+// measured per game, so nothing is letterboxed or cropped. The two pixel-art
+// games (wave to come, howl!) draw a 216px-tall canvas, so theirs are exactly
+// 2x it to keep the pixels square. Windows shrink, keeping that ratio, when
+// the browser is too small for them.
+//
+// icon, where a game has one, replaces the joystick in the folder, title bar
+// and taskbar. Each is that game's own character, read out of the game rather
+// than cropped from a screenshot where the game has the art: the surfer and
+// the monkey are their pixel sprites scaled up, the spider and the cat their
+// painted art, mirrored to face the way the games draw them, and the vinyl
+// room's is the painting from its room photo, squared off by extending its
+// red (the Christmas room's adds a Santa hat and snow). Pressure's rings are
+// captured from the running visualizer; the WARMLECHE one recolours its art
+// as it runs, so its circle is cut from a screenshot. The rest are each
+// game's own art: the lullabies bear charm, the play pen photo, the cover
+// the visualizer plays, and YEAT's COCOON cover. Painted icons are named arcade-art-*.png,
+// which main.css scales smoothly instead of pixelated.
+var ARCADE_MAKER = {
+    art: "f/deck-rainbow.jpg",
+    name: "WARMLECHE",
+    audio: "songs/warmleche/07.mp3",
+    song: "Rainb0wbridge"
+};
+function makerQuery() {
+    return "?" + new URLSearchParams(ARCADE_MAKER).toString();
+}
+var arcadeGames = [
+    { id: "wave-to-come",      size: [520, 432], name: "wave to come",     title: "WAVE TO COME",           src: "games/wheres-west.html",
+      icon: "arcade-surfer-icon.png" },
+    { id: "howl",              size: [576, 432], name: "howl!",            title: "HOWL!",                  src: "games/howl-game_4.html",
+      icon: "arcade-howl-icon.png" },
+    { id: "spider-web",        size: [480, 480], name: "spider web",       title: "HOWL SPIDER WEB",        src: "games/howl-spider-web.html",
+      icon: "arcade-art-spider.png" },
+    { id: "kitty-clouds",      size: [400, 600], name: "kitty clouds",     title: "KITTY CLOUDS",           src: "games/kitty-clouds.html",
+      icon: "arcade-art-kitty.png" },
+    { id: "playpen",           size: [420, 560], name: "play pen",         title: "SHILOH'S PLAY PEN",      src: "games/playpen/index.html",
+      icon: "arcade-art-playpen.png" },
+    { id: "pressure",          size: [500, 500], name: "pressure",         title: "PRESSURE",               src: "games/pressure-visualizer.html",
+      icon: "arcade-art-pressure.png" },
+    { id: "pressure-warmleche", size: [500, 500], name: "pressure (warmleche)", title: "PRESSURE (WARMLECHE)", src: "games/pressure-warmleche.html",
+      icon: "arcade-art-warmleche.png" },
+    { id: "visualizer",        size: [480, 480], name: "visualizer",       title: "WARMLECHE VISUALIZER",   src: "games/maker/visualizer.html" + makerQuery(),
+      icon: "arcade-art-visualizer.png" },
+    { id: "lullabies",         size: [440, 440], name: "lullabies",        title: "LIL BABY LULLABIES",     src: "games/lil-baby-lullabies.html",
+      icon: "arcade-art-lullabies.png" },
+    { id: "vinyl-room",        size: [450, 600], name: "vinyl room",       title: "JIMMY'S VINYL ROOM",     src: "games/vinyl-room/index.html",
+      icon: "arcade-art-vinyl.png" },
+    { id: "vinyl-xmas",        size: [450, 600], name: "vinyl xmas",       title: "VINYL ROOM: CHRISTMAS",  src: "games/vinyl-room/xmas.html",
+      icon: "arcade-art-vinyl-xmas.png" },
+    { id: "yeat",              size: [400, 480], name: "yeat.exe",         title: "YEAT.EXE",               src: "games/yeat/index.html",
+      icon: "arcade-art-yeat.png" }
+];
+
 // Desktop folders that open a window listing their contents as folder icons.
 // Clicking the icon opens just that window; its contents open individually
 // from the grid inside. Add more folders here with the same shape -
@@ -963,6 +1042,14 @@ var desktopFolders = {
             // showing up in two folders, not two copies of it
             { name: "ds research", popup: "s13688-window" }
         ]
+    },
+    arcade: {
+        iconId: "arcade-icon-group",
+        windowId: "arcade-window",
+        gridId: "arcade-grid",
+        items: arcadeGames.map(function(game) {
+            return { name: game.name, popup: "game-" + game.id + "-window", icon: game.icon || "arcade-icon.png" };
+        })
     }
 };
 
@@ -972,10 +1059,13 @@ function renderDesktopFolder(folderKey) {
     grid.innerHTML = "";
 
     folder.items.forEach(function(item) {
-        // Every entry here opens a popup, so every entry is a file
+        // Every entry here opens a popup, so every entry is a file - unless it
+        // names its own icon, the way the arcade's games are applications
         var el = document.createElement("div");
         el.className = "file-item";
-        el.innerHTML = '<img src="fileicon.png" class="file-type-icon" draggable="false"><span>' + item.name + "</span>";
+        el.innerHTML = item.icon
+            ? '<img src="' + item.icon + '" class="app-type-icon" draggable="false"><span>' + item.name + "</span>"
+            : '<img src="fileicon.png" class="file-type-icon" draggable="false"><span>' + item.name + "</span>";
         el.onclick = function() {
             var popup = document.getElementById(item.popup);
             if (popup && $(popup).is(":hidden")) showPopup(item.popup, el);
@@ -1001,6 +1091,7 @@ function toggleDesktopFolder(folderKey) {
 
 renderDesktopFolder("random");
 renderDesktopFolder("college");
+renderDesktopFolder("arcade");
 
 // Settings: pointer color
 function setPointerColor(color) {
@@ -2051,5 +2142,84 @@ function buildWindowChrome(win, titleText) {
         // window these copy - has none either. The taskbar still gets one
         // through TASKBAR_FALLBACK_ICON.
         $(win).draggable({ handle: ".windows-header-wrapper" });
+    });
+})();
+
+// One window per arcade game, built from arcadeGames. Same chrome as the press
+// windows; the body is an iframe pointed at the game.
+//
+// The iframe is only given its src while the window is showing, and is
+// blanked the moment it's hidden - by its close button, by the arcade folder
+// pulling it back in, by anything. Most of these play music, and a hidden
+// iframe keeps playing, so closing a game has to actually unload it.
+// Minimising doesn't hide the window, so a minimised game keeps playing, the
+// way a minimised player would.
+var ARCADE_ROOT = "arcade/";
+// Cache-buster for the game pages, like the ?v= on main.js. Bump it after
+// editing any file under arcade/games or browsers keep showing the old copy.
+// The games only read the query keys they know, so the extra one is ignored.
+var ARCADE_VERSION = 2;
+var arcadeCascade = 0;
+
+(function buildGameWindows() {
+    arcadeGames.forEach(function(game) {
+        var win = document.createElement("div");
+        win.id = "game-" + game.id + "-window";
+        win.className = "popup-window game-window";
+        // Read by .game-window/.game-viewer in main.css to size the window
+        // to this game's shape
+        win.style.setProperty("--game-w", game.size[0]);
+        win.style.setProperty("--game-h", game.size[1]);
+
+        win.appendChild(buildWindowChrome(win, game.title));
+
+        var inner = document.createElement("div");
+        inner.className = "popup-inner-wrapper";
+
+        var frame = document.createElement("iframe");
+        frame.className = "game-viewer";
+        frame.title = game.title;
+        frame.allow = "autoplay; fullscreen";
+        // The maker templates only run when their frame carries "live" -
+        // without it they render as a static Bond feed thumbnail
+        frame.classList.add("live");
+        inner.appendChild(frame);
+        win.appendChild(inner);
+        document.body.appendChild(win);
+
+        new MutationObserver(function() {
+            var showing = win.style.display !== "none" && win.getClientRects().length > 0;
+            if (showing && !frame.getAttribute("src")) {
+                // Cascade each newly opened game down and to the right of the
+                // last, so two open games don't land exactly on top of each
+                // other. Only until it's dragged - then it stays where it was put.
+                if (!win.dataset.dragged) {
+                    var step = (arcadeCascade++ % 5) * 28;
+                    // 46vw clears the arcade folder (14vw + 30vw wide)
+                    win.style.left = "calc(46vw + " + step + "px)";
+                    win.style.top = "calc(3vw + " + step + "px)";
+                }
+                frame.src = ARCADE_ROOT + game.src +
+                    (game.src.indexOf("?") === -1 ? "?" : "&") + "v=" + ARCADE_VERSION;
+                // Most games listen for keys, so hand them the keyboard
+                setTimeout(function() {
+                    try { frame.contentWindow.focus(); } catch (e) {}
+                }, 300);
+            } else if (!showing && frame.getAttribute("src")) {
+                // Navigating away is what stops the audio; dropping the
+                // attribute after marks it unloaded for the next open
+                frame.src = "about:blank";
+                frame.removeAttribute("src");
+            }
+        }).observe(win, { attributes: true, attributeFilter: ["style"] });
+
+        windowIcons[win.id] = game.icon || "arcade-icon.png";
+        $(win).draggable({
+            handle: ".windows-header-wrapper",
+            // The iframe swallows mouse events, so a fast drag that slips off
+            // the title bar onto it would drop the window mid-drag
+            iframeFix: true,
+            stop: function() { win.dataset.dragged = "1"; }
+        });
     });
 })();

@@ -254,6 +254,75 @@ footer {
     right: 81px;
 }
 
+/* Second column, level with now playing's row - directly above arcade */
+#griffinland-icon-group {
+    top: 181px;
+    right: 81px;
+}
+
+/* 40px pixel-art gif, shown at 44px like the moon beside it in the column */
+#griffinland-icon {
+    -webkit-user-drag: none;
+    user-drag: none;
+    user-select: none;
+    position: absolute;
+    top: 0;
+    right: 28px; /* centers the 44px icon within the 100px group */
+    width: 44px;
+    height: auto;
+    image-rendering: pixelated;
+}
+
+#griffinland-icon-label {
+    position: absolute;
+    right: 0;
+    width: 100px;
+    text-align: center;
+    font-family: 'W95FA', sans-serif;
+    font-size: 13px;
+    line-height: 1.2;
+    top: 48px;
+}
+
+#griffinland-icon-label a {
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Second column, directly above shop, level with google's row */
+#arcade-icon-group {
+    top: 252px;
+    right: 81px;
+}
+
+#arcade-icon {
+    -webkit-user-drag: none;
+    user-drag: none;
+    user-select: none;
+    position: absolute;
+    top: 0;
+    right: 26px; /* centers the 48px icon within the 100px group */
+    width: 48px;
+    height: auto;
+    image-rendering: pixelated;
+}
+
+#arcade-icon-label {
+    position: absolute;
+    right: 0;
+    width: 100px;
+    text-align: center;
+    font-family: 'W95FA', sans-serif;
+    font-size: 13px;
+    line-height: 1.2;
+    top: 48px;
+}
+
+#arcade-icon-label a {
+    color: #fff;
+    text-decoration: none;
+}
+
 #computer-icon,
 #folder-icon,
 #files-icon,
@@ -1143,6 +1212,63 @@ body.dark-mode .notepad-status {
 /* The print's soft, shaded illustration reads as noisy when pixelated -
    unlike the pixel-art icons the default rule was written for */
 #shop-window .window-title-icon {
+    image-rendering: auto;
+}
+
+#arcade-window {
+    text-align: left;
+    width: 30vw;
+    min-width: 300px;
+    position: absolute;
+    z-index: 10000;
+    left: 14vw;
+    top: 6vw;
+    border: 4px ridge #d8d8d8;
+    display: none;
+}
+
+/* Each game window takes its game's own shape: --game-w/--game-h are set per
+   window from arcadeGames in main.js. The width is the smallest of the game's
+   size, the screen width, and whatever width keeps the frame's height inside
+   the screen (less room for the header, title bar and taskbar), and the frame
+   follows with aspect-ratio - so a window that has to shrink keeps its shape
+   instead of cropping or letterboxing the game.
+   left/top are set per window when it opens, cascading so two don't stack
+   exactly. */
+.game-window {
+    text-align: left;
+    width: min(calc(var(--game-w) * 1px), 94vw,
+               calc((100vh - 130px) * var(--game-w) / var(--game-h)));
+    position: absolute;
+    z-index: 10000;
+    border: 4px ridge #d8d8d8;
+    display: none;
+}
+
+.game-viewer {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--game-w) / var(--game-h);
+    border: 0;
+    display: block;
+    background: #000;
+}
+
+/* Application icons in a folder grid - the arcade's joystick. Between the
+   48px folder and 30px file sizes, since the art fills its own canvas. */
+.file-item img.app-type-icon {
+    width: 40px;
+    image-rendering: pixelated;
+}
+
+/* Arcade icons named arcade-art-*.png are painted art or photos, not pixel
+   art - nearest-neighbour scaling, right for the joystick, surfer and monkey,
+   turns their soft edges jagged. Matched in each place an icon appears -
+   folder, title bar, taskbar - each selector out-ranking that place's own
+   pixelated rule. */
+.file-item img.app-type-icon[src^="arcade-art-"],
+.window-title-icon[src^="arcade-art-"],
+.task-button img[src^="arcade-art-"] {
     image-rendering: auto;
 }
 

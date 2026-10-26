@@ -1,0 +1,68 @@
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0c0605;overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+body{font-family:ui-serif,Georgia,'Times New Roman',serif;color:#fff}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.room{position:absolute;inset:0;container-type:size;overflow:hidden;--accent:#f2c27a;--bass:.2;--mid:.2}
+/* the photo is the whole scene; everything alive is pinned to a spot in it (percent of the photo) */
+.stage{position:absolute;left:50%;top:50%;width:max(100cqw,75cqh);aspect-ratio:3/4;transform:translate(-50%,-50%) scale(calc(1 + var(--bass)*.012));container-type:inline-size}
+.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.04) brightness(1.02)}
+.glow{position:absolute;pointer-events:none;mix-blend-mode:screen;transition:opacity .12s linear}
+.chand{left:46.7%;top:29%;width:46%;aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,226,170,.85),rgba(255,190,110,.3) 38%,transparent 66%);opacity:calc(.12 + var(--mid)*.62)}
+.paint{left:37.2%;top:36.6%;width:21.4%;height:22.6%;background:linear-gradient(165deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#ff3b30));mix-blend-mode:soft-light;opacity:calc(.1 + var(--bass)*.85)}
+.paint2{left:37.2%;top:36.6%;width:21.4%;height:22.6%;background:radial-gradient(circle at 50% 45%,var(--accent),transparent 72%);opacity:calc(var(--bass)*.34);filter:blur(1.4cqw)}
+.floor{left:50%;top:70%;width:70%;aspect-ratio:1.6;transform:translate(-50%,-50%);background:radial-gradient(ellipse,color-mix(in srgb,var(--accent) 80%,transparent),transparent 62%);opacity:calc(.1 + var(--bass)*.5)}
+.fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+/* the record lying on the table */
+.deckpos{position:absolute;left:50%;top:70.5%;width:31%;transform:translate(-50%,-50%);perspective:70cqw}
+.tilt{transform:rotateX(56deg);transform-style:preserve-3d}
+.shadow{position:absolute;inset:6% -4% -10%;border-radius:50%;background:radial-gradient(circle,rgba(0,0,0,.75),transparent 66%);transform:translateZ(-1px)}
+.disc{position:relative;width:100%;aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle,transparent 0 16%,rgba(255,255,255,.08) 16.5%,transparent 17.5%),repeating-radial-gradient(circle,#070707 0 .3cqw,#181818 .3cqw .6cqw);box-shadow:0 0 0 .5cqw #000,0 0 5cqw color-mix(in srgb,var(--accent) 45%,transparent)}
+.disc.spin{animation:spin 3.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.disc::after{content:'';position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,transparent 0 18%,rgba(255,255,255,.16) 24%,transparent 32% 66%,rgba(255,255,255,.12) 72%,transparent 80%)}
+.lab{position:absolute;inset:32%;border-radius:50%;overflow:hidden;box-shadow:0 0 0 .4cqw #0008}
+.lab img{width:100%;height:100%;object-fit:cover}
+.lab::after{content:'';position:absolute;left:50%;top:50%;width:9%;height:9%;margin:-4.5% 0 0 -4.5%;border-radius:50%;background:#0a0504}
+.hit{position:absolute;left:50%;top:70.5%;width:33%;height:15%;transform:translate(-50%,-50%);z-index:4;border-radius:50%}
+.sk{position:absolute;top:70.5%;width:7%;aspect-ratio:1;border-radius:50%;z-index:5;display:grid;place-items:center;background:rgba(10,5,4,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);box-shadow:inset 0 0 0 .25cqw #fff3;transform:translateY(-50%)}
+.sk.p{left:12.6%}.sk.n{right:12.6%}
+.sk svg{width:44%;height:44%;fill:#fff}
+/* the sleeves, resting on the table's front face where records lean in the photo */
+.rack{position:absolute;left:13.7%;top:80.2%;width:69%;display:flex;gap:.9%;z-index:5}
+.rack button{position:relative;flex:1 1 0;aspect-ratio:1;border-radius:.35cqw;overflow:hidden;box-shadow:0 .8cqw 1.6cqw #000c;transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s;transform:rotate(var(--r,0deg))}
+.rack button img{width:100%;height:100%;object-fit:cover;display:block}
+.rack button.on{transform:translateY(-34%) scale(1.14);box-shadow:0 0 0 .35cqw var(--accent),0 0 3cqw color-mix(in srgb,var(--accent) 70%,transparent),0 1.4cqw 2.4cqw #000c;z-index:2}
+/* words live on the blank ceiling: a stamped title, a quiet artist line, the song, one plain sentence */
+.hud{position:absolute;left:0;right:0;top:0;padding:5cqw 5.5cqw 11cqw;z-index:6;pointer-events:none;background:linear-gradient(180deg,rgba(6,2,2,.66),rgba(6,2,2,.3) 60%,transparent)}
+.sub2{font:700 2.7cqw/1 'Helvetica Neue',Arial,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+.alb{font:800 8.4cqw/.95 'Helvetica Neue',Arial,system-ui,sans-serif;letter-spacing:-.025em;text-transform:uppercase;margin-top:1.8cqw;text-shadow:0 .3cqw 2cqw #0009}
+.trk{font:600 3.3cqw/1.2 system-ui,-apple-system,sans-serif;color:var(--accent);margin-top:2cqw}
+.note{margin-top:1.4cqw;font:400 3.3cqw/1.35 system-ui,-apple-system,sans-serif;color:rgba(255,255,255,.88);max-width:80cqw;text-shadow:0 .2cqw 1.2cqw #000}
+.note span{animation:fadeup .5s both}
+@keyframes fadeup{from{opacity:0;transform:translateY(1.2cqw)}}
+.bar{position:absolute;left:0;right:0;bottom:0;height:.8cqw;background:rgba(255,255,255,.16);z-index:6}
+.bar i{display:block;height:100%;width:0;background:var(--accent)}
+.start{position:absolute;inset:0;z-index:9;display:grid;place-items:end center;padding-bottom:30cqh;background:linear-gradient(180deg,transparent 40%,rgba(8,3,3,.55))}
+.start span{padding:3.2cqw 6cqw;border-radius:99px;background:#fff;color:#111;font:700 3.9cqw system-ui,sans-serif;box-shadow:0 2cqw 6cqw #000a}
+.hide{display:none!important}
+/* tile mode (a thumbnail): the room with its record turning */
+.tile .hud,.tile .rack,.tile .sk,.tile .bar,.tile .hit{display:none}
+/* christmas: the same room, just dressed (see the decorations pinned in room.js) */
+.xmas .disc::before{content:'';position:absolute;inset:-4%;border-radius:50%;border:1.8cqw solid #1f7a42;box-shadow:0 0 0 .3cqw #0f4527;pointer-events:none}
+.xmas .rack button::after{content:'';position:absolute;right:7%;top:7%;width:20%;height:20%;border-radius:50%;background:#e0242e;box-shadow:0 0 0 .3cqw #fff7}
+#lightsHost{position:absolute;inset:0;pointer-events:none;z-index:3}
+.lights{position:absolute;inset:0;width:100%;height:100%}
+.dec{position:absolute;transform:translate(-50%,-100%)}
+.dec svg{display:block;width:100%;height:auto;overflow:visible}
+.dec.lean{transform:translate(-50%,-100%) rotate(14deg);transform-origin:50% 100%}.dec.lean.r{transform:translate(-50%,-100%) rotate(-14deg)}
+.dec.hang{transform:translate(-50%,-4%)}.dec.hang.flip{transform:translate(-50%,-4%) scaleX(-1)}
+.flame{transform-box:fill-box;transform-origin:50% 100%;animation:fl .55s ease-in-out infinite alternate}
+.flame+.flame{animation-delay:-.2s}
+@keyframes fl{0%{transform:scale(1,1) translateX(0)}50%{transform:scale(.9,1.12) translateX(.35px)}100%{transform:scale(1.05,.95) translateX(-.3px)}}
+.halo{animation:hl 1.1s ease-in-out infinite alternate}
+@keyframes hl{from{opacity:.65}to{opacity:1}}
+.sf{animation:sn 2.6s linear infinite}.sf.s2{animation-duration:3.2s;animation-delay:-1s}.sf.s3{animation-duration:2.2s;animation-delay:-.5s}.sf.s4{animation-duration:3.7s;animation-delay:-2s}
+@keyframes sn{from{transform:translateY(-6px)}to{transform:translateY(34px)}}
+.bulb{animation:tw 1.5s ease-in-out infinite}
+@keyframes tw{50%{opacity:.3}}

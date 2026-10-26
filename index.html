@@ -52,7 +52,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=44">
+    <link rel="stylesheet" href="main.css?v=49">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -146,6 +146,18 @@
             <img src="griffinchairlift-icon.png" id="shop-icon" alt="Shop Icon" draggable="false">
             <div id="shop-icon-label"><a href="#">shop</a></div>
         </div>
+        <!-- Opens the ARCADE folder: the mini games and music experiences
+             brought over from Bond, each in its own window. arcade-icon.png
+             is drawn for the site, not taken from the icon pack. -->
+        <!-- griffinland: goes to griffinlaszlo.com, mocial's sister desktop -->
+        <div id="griffinland-icon-group" class="desktop-icon-group">
+            <img src="world_spinning.gif" id="griffinland-icon" alt="Griffinland Icon" draggable="false">
+            <div id="griffinland-icon-label"><a href="#">griffinland</a></div>
+        </div>
+        <div id="arcade-icon-group" class="desktop-icon-group">
+            <img src="arcade-icon.png" id="arcade-icon" alt="Arcade Icon" draggable="false">
+            <div id="arcade-icon-label"><a href="#">arcade</a></div>
+        </div>
 
         <div class = "center-container"></div>
           <!--<img src="headshot.jpg" class="headshot">  -->
@@ -189,8 +201,8 @@
         <div class="popup-inner-wrapper">
             <a href="https://whereswestmusic.com/" target="_blank">
                 <video autoplay loop muted playsinline>
-                    <source src="https://whereswestmusic.com/wp-content/uploads/2026/02/Wheres-West-Final-Video.mp4" type="video/mp4">
-                    <source src="https://whereswestmusic.com/wp-content/uploads/2026/02/Wheres-West-Final-Video.webm" type="video/webm">
+                    <source src="https://whereswestmusic.com/media/Wheres-West-Final-Video.mp4" type="video/mp4">
+                    <source src="https://whereswestmusic.com/media/Wheres-West-Final-Video.webm" type="video/webm">
                 </video>
             </a>
         </div>
@@ -416,6 +428,17 @@
 
         <div class="popup-inner-wrapper files-inner">
             <div class="files-grid" id="random-grid"></div>
+        </div>
+    </div>
+
+    <div id="arcade-window" class="popup-window files-window">
+        <div class="windows-header-wrapper clearafter">
+            <div class="window-title">ARCADE</div>
+            <div class="window-icons"><span class="win-btn" onclick="$('#arcade-window').toggleClass('iconize'); $('#arcade-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#arcade-window').toggleClass('resize'); $('#arcade-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#arcade-window').hide();">&#10005;</span></div>
+        </div>
+
+        <div class="popup-inner-wrapper files-inner">
+            <div class="files-grid" id="arcade-grid"></div>
         </div>
     </div>
 
@@ -690,7 +713,7 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=45"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=57"></script> <!-- Link to your JavaScript file -->
 
 </body>
 </html>

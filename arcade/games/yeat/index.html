@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>YEAT.EXE</title>
+<!--
+  YEAT.EXE — a chrome Winamp-style player for Yeat, as a Bond creation (runs in an iframe).
+  Live spectrum visualizer (Web Audio analyser), COCOON cover breathing with the bass, and a bell you can ring.
+  Square tiles (< 380px) show the cover + an idle visualizer; the opened view is the full player.
+  window.YeatPlayer = { mute(bool), play(i), getState() }.
+-->
+<link href="https://fonts.cdnfonts.com/css/w95fa" rel="stylesheet">
+<style>
+  :root{--hi:#f4f4f6;--lo:#5b5d66;--dk:#101014;--chrome:linear-gradient(180deg,#e9eaee 0%,#b9bcc4 48%,#9a9da6 52%,#d5d7dd 100%)}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#0b0b0d;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  body{font-family:'W95FA','MS Sans Serif',Tahoma,sans-serif;color:#111}
+  #bg{position:absolute;inset:-12%;background:url(cover.jpg) center/cover;filter:blur(26px) brightness(.55) contrast(1.1);transform:scale(1);transition:transform .08s linear}
+  #grain{position:absolute;inset:0;opacity:.18;mix-blend-mode:overlay;pointer-events:none}
+  #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .5s}
+  /* mocial: top was 104px, clearing Bond's status bar - there's none in a mocial window */
+  .win{position:absolute;left:10px;right:10px;top:12px;bottom:12px;display:flex;flex-direction:column;padding:4px;
+    background:var(--chrome);border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);box-shadow:0 18px 50px rgba(0,0,0,.6),inset -1px -1px var(--lo)}
+  .win.shake{animation:shake .5s cubic-bezier(.3,.7,.4,1)}
+  @keyframes shake{0%,100%{transform:none}15%{transform:translate(-6px,2px) rotate(-1deg)}30%{transform:translate(5px,-2px) rotate(1deg)}45%{transform:translate(-4px,1px)}60%{transform:translate(3px,0)}75%{transform:translate(-1px,0)}}
+  .tb{display:flex;align-items:center;gap:6px;height:26px;padding:0 3px 0 7px;color:#fff;font-size:15px;letter-spacing:1px;
+    background:linear-gradient(90deg,#16161b,#4a4c55 60%,#16161b);text-shadow:0 0 6px rgba(255,255,255,.5)}
+  .tb b{flex:1;font-weight:400}
+  .tb .dot{width:8px;height:8px;border-radius:50%;background:#d9dde6;box-shadow:0 0 8px #fff}
+  .wb{width:22px;height:20px;display:flex;align-items:center;justify-content:center;background:var(--chrome);color:#111;font:inherit;font-size:13px;
+    border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);padding:0}
+  .lcd{margin-top:4px;background:#050506;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);padding:10px;display:flex;flex-direction:column;gap:8px;color:#e9eef7}
+  .row{display:flex;gap:10px;align-items:center}
+  #art{width:64px;height:64px;object-fit:cover;flex:none;border:1px solid #333;transition:transform .08s linear}
+  .meta{flex:1;min-width:0}
+  .mq{overflow:hidden;white-space:nowrap;font-size:19px;letter-spacing:1px;text-shadow:0 0 8px rgba(220,235,255,.7)}
+  .mq i{display:block;font-style:normal;overflow:hidden;text-overflow:ellipsis}
+  .sub{display:flex;justify-content:space-between;font-size:13px;color:#9aa3b5;margin-top:3px}
+  #viz{width:100%;height:84px;display:block}
+  .prog{height:8px;background:#1b1c22;border:1px solid #2c2e36}.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#9aa3b5,#fff)}
+  .ctl{display:flex;gap:5px;margin-top:5px}
+  .btn{flex:1;height:40px;background:var(--chrome);border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);font:inherit;font-size:18px;color:#111;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+  .btn:active,.btn.on{border-color:var(--dk) var(--hi) var(--hi) var(--dk);filter:brightness(.92)}
+  .btn.bell{flex:1.3;font-size:15px;letter-spacing:1px}
+  .list{flex:1;min-height:0;overflow:auto;margin-top:5px;background:#050506;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+  .list button{display:flex;width:100%;gap:10px;align-items:center;text-align:left;background:none;border:0;font:inherit;font-size:16px;padding:7px 9px;color:#c9cfdb;cursor:pointer}
+  .list button em{font-style:normal;color:#5d6475;width:20px}
+  .list button.on{background:linear-gradient(90deg,#e9eaee,#9a9da6);color:#000}.list button.on em{color:#333}
+  /* tile: cover + idle visualizer, no chrome */
+  body.tile #bg{inset:0;filter:brightness(.9)}
+  body.tile #grain{opacity:.08}
+  body.tile .win{top:auto;left:16%;right:16%;bottom:22%;padding:3px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  body.tile .tb,body.tile .ctl,body.tile .list,body.tile .prog,body.tile .sub,body.tile #art{display:none}
+  body.tile .lcd{margin:0;padding:8px}
+  body.tile .mq{font-size:15px;text-align:center}
+  body.tile #viz{height:56px}
+</style>
+</head>
+<body>
+<div id="bg"></div><canvas id="grain"></canvas>
+<section class="win" id="win">
+  <div class="tb"><span class="dot"></span><b>YEAT.EXE</b><button class="wb" aria-hidden="true">_</button><button class="wb" aria-hidden="true">□</button></div>
+  <div class="lcd">
+    <div class="row"><img id="art" src="cover.jpg" alt=""><div class="meta"><div class="mq"><i id="title">YEAT — press play</i></div><div class="sub"><span id="time">0:00 / 0:00</span><span id="kbps">128kbps · stereo</span></div></div></div>
+    <canvas id="viz"></canvas>
+    <div class="prog"><i id="prog"></i></div>
+  </div>
+  <div class="ctl"><button class="btn" id="prev" aria-label="Previous">⏮</button><button class="btn" id="play" aria-label="Play">▶</button><button class="btn" id="next" aria-label="Next">⏭</button><button class="btn bell" id="bell" aria-label="Ring the bell">🔔 ring</button></div>
+  <div class="list" id="list"></div>
+</section>
+<div id="flash"></div>
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)};
+  var tile=false; function layout(){ var w=innerWidth,h=innerHeight; tile=w<380&&h<380&&Math.abs(w-h)<40; document.body.classList.toggle('tile',tile); sizeViz(); }
+  var SONGS=[['Breathe','01'],['COMË N GO','02'],['Gët Busy','03'],['IM YEAT','04'],['If We Being Rëal','05'],['Monëy so big','06'],['Out thë way','07'],['Talk','08'],['The Bell','09']];
+  var audio=new Audio(); audio.preload='none'; audio.crossOrigin='anonymous'; var cur=0, muted=false, ctx=null, an=null, bins=null, out=null;
+  function ensureCtx(){ if(ctx) { if(ctx.state==='suspended') ctx.resume(); return; } var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    ctx=new AC(); var src=ctx.createMediaElementSource(audio); an=ctx.createAnalyser(); an.fftSize=256; an.smoothingTimeConstant=.78; bins=new Uint8Array(an.frequencyBinCount);
+    out=ctx.createGain(); src.connect(an); an.connect(out); out.connect(ctx.destination); loadBell(); }
+  function load(i){ cur=(i+SONGS.length)%SONGS.length; audio.src='../../songs/yeat/'+SONGS[cur][1]+'.mp3';
+    $('#title').textContent='YEAT — '+SONGS[cur][0]; [].forEach.call(document.querySelectorAll('#list button'),function(b,k){b.classList.toggle('on',k===cur);}); }
+  function play(i){ ensureCtx(); if(i!=null) load(i); audio.muted=muted; audio.play().catch(function(){}); }
+  function fmt(t){ t=Math.max(0,Math.floor(t||0)); return Math.floor(t/60)+':'+String(t%60).padStart(2,'0'); }
+  audio.addEventListener('play',function(){ $('#play').textContent='❚❚'; $('#play').classList.add('on'); });
+  audio.addEventListener('pause',function(){ $('#play').textContent='▶'; $('#play').classList.remove('on'); });
+  audio.addEventListener('ended',function(){ play(cur+1); });
+  audio.addEventListener('timeupdate',function(){ $('#prog').style.width=(audio.currentTime/(audio.duration||1)*100)+'%'; $('#time').textContent=fmt(audio.currentTime)+' / '+fmt(audio.duration); });
+  SONGS.forEach(function(s,i){ var b=document.createElement('button'); b.innerHTML='<em>'+String(i+1).padStart(2,'0')+'</em>'+s[0]; b.onclick=function(){ play(i); }; $('#list').appendChild(b); });
+  load(0);
+  $('#play').onclick=function(){ audio.paused?play():audio.pause(); };
+  $('#next').onclick=function(){ play(cur+1); }; $('#prev').onclick=function(){ play(cur-1); };
+
+  // the bell: the Tubular Bell 1 sample (bell.mp3), plus a white flash and a shake
+  var bellBuf=null, bellLoading=null;
+  function loadBell(){ if(bellBuf||bellLoading||!ctx) return; bellLoading=fetch('bell.mp3').then(function(r){return r.arrayBuffer();}).then(function(b){ return new Promise(function(res,rej){ ctx.decodeAudioData(b,res,rej); }); }).then(function(b){ bellBuf=b; }).catch(function(){}); }
+  function ringBell(){ if(!ctx||muted||!bellBuf) return; var s=ctx.createBufferSource(), g=ctx.createGain(); s.buffer=bellBuf; g.gain.value=.9; s.connect(g); g.connect(ctx.destination); s.start(); }
+  $('#bell').onclick=function(){ ensureCtx(); var w=$('#win'); w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake');
+    var f=$('#flash'); f.style.transition='none'; f.style.opacity=.55; requestAnimationFrame(function(){ f.style.transition='opacity .6s'; f.style.opacity=0; });
+    if(ctx&&!muted){ if(bellBuf) ringBell(); else if(bellLoading) bellLoading.then(ringBell); }
+    bellHit=1; };
+  var bellHit=0;
+
+  // visualizer + bass-reactive cover
+  var cv=$('#viz'), g=cv.getContext('2d'), peaks=[], N=28;
+  function sizeViz(){ var r=cv.getBoundingClientRect(), d=Math.min(2,devicePixelRatio||1); cv.width=Math.max(10,r.width*d); cv.height=Math.max(10,r.height*d); }
+  addEventListener('resize',layout); layout();
+  var t0=performance.now();
+  (function frame(now){ requestAnimationFrame(frame);
+    var W=cv.width,H=cv.height, live=an&&!audio.paused, vals=[], bass=0, t=(now-t0)/1000;
+    if(live){ an.getByteFrequencyData(bins); for(var i=0;i<N;i++){ var a=Math.floor(Math.pow(i/N,1.6)*bins.length*.85), b=Math.max(a+1,Math.floor(Math.pow((i+1)/N,1.6)*bins.length*.85)), s=0; for(var k=a;k<b;k++) s+=bins[k]; vals.push(s/(b-a)/255); }
+      bass=(bins[1]+bins[2]+bins[3])/765; }
+    else for(var j=0;j<N;j++) vals.push(.12+.1*Math.sin(t*2.2+j*.5)+.06*Math.sin(t*3.7+j*1.3));
+    bellHit*=.93; if(bellHit>.01) vals=vals.map(function(v,i){ return Math.min(1,v+bellHit*(1-Math.abs(i-N/2)/(N/2))); });
+    g.clearRect(0,0,W,H); var bw=W/N, gap=Math.max(1,bw*.22);
+    for(var i2=0;i2<N;i2++){ var v=vals[i2], h=Math.max(2,v*H), x=i2*bw+gap/2, w=bw-gap; peaks[i2]=Math.max((peaks[i2]||0)-H*.012,h);
+      var gr=g.createLinearGradient(0,H,0,0); gr.addColorStop(0,'#5d6475'); gr.addColorStop(.6,'#cfd6e3'); gr.addColorStop(1,'#ffffff'); g.fillStyle=gr;
+      for(var y=H; y>H-h; y-=Math.max(3,H/22)){ g.fillRect(x,y-Math.max(2,H/22-2),w,Math.max(2,H/22-2)); }
+      g.fillStyle='#fff'; g.fillRect(x,H-peaks[i2]-2,w,2); }
+    var s=1+bass*.09+bellHit*.06; $('#bg').style.transform='scale('+s+')'; $('#art').style.transform='scale('+(1+bass*.12)+')';
+  })(t0);
+
+  // film grain
+  (function(){ var c=$('#grain'), x=c.getContext('2d'); c.width=160; c.height=160; var d=x.createImageData(160,160);
+    setInterval(function(){ for(var i=0;i<d.data.length;i+=4){ var v=Math.random()*255; d.data[i]=d.data[i+1]=d.data[i+2]=v; d.data[i+3]=255; } x.putImageData(d,0,0); c.style.width='100%'; c.style.height='100%'; },90); })();
+
+  document.addEventListener('visibilitychange',function(){ if(document.hidden) audio.pause(); });
+  window.YeatPlayer={ mute:function(m){ muted=!!m; audio.muted=muted; if(m) audio.pause(); }, play:play, getState:function(){ return {playing:!audio.paused,song:SONGS[cur][0],t:audio.currentTime,live:!!an}; } };
+})();
+</script>
+</body>
+</html>

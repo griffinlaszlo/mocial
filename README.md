@@ -86,6 +86,50 @@ and everything it spilled back into the icon.
 `renderDesktopFolder` and `toggleDesktopFolder` take a folder key and aren't
 random-specific — other desktop folders can become entries in the same object.
 
+### The arcade
+
+The `arcade` icon (a joystick, `arcade-icon.png`, drawn for the site) opens a
+folder of 12 mini games and music experiences brought over from the Bond
+project (`~/Desktop/bond/dist/games`). They're listed in `arcadeGames` in
+`main.js`, and `buildGameWindows` gives each one its own window with an
+iframe, sized to that game's shape.
+
+`arcade/` copies the layout of Bond's `public/` folder — `games/`, `songs/`,
+`vinyl/`, `f/` — because Shiloh's Play Pen, YEAT.EXE, the vinyl rooms and the
+visualizer load songs and art from `../../`. Keeping that layout
+meant none of the games had to be moved or re-pathed. Only the songs those games actually
+use came over (5 artists, ~160MB), not Bond's whole 539MB `songs/` folder.
+
+- A game's iframe only gets its `src` while its window is showing, and is
+  blanked when the window hides, so closing a game stops its music.
+  Minimising leaves it playing.
+- Each entry's `size` is the frame the game is drawn at, measured per game
+  so nothing is letterboxed or cropped: square for the circular visualizers,
+  3:4 for the photo scenes, and exactly 2x the 216px-tall canvas for the two
+  pixel-art games. `.game-window` in `main.css` shrinks a window, keeping that
+  ratio, when the screen is too small for it.
+- The visualizer (`maker/visualizer.html`) is a Bond template that builds
+  itself from the query string. It's filled in with WARMLECHE's art and
+  "Rainb0wbridge" (`ARCADE_MAKER`), and its iframe carries the `live` class,
+  without which it renders as a static thumbnail.
+- The sound toggles in Wave to Come, HOWL!, Kitty Clouds and both Pressure
+  visualizers are redrawn as a Win95 button with the tray's pixel speaker
+  (`arcade/games/win95-speaker.js`, which each of those pages loads). Each
+  game still owns its mute state, click area and M key; the shared file only
+  draws the button. The edits in the games are marked `mocial:`.
+- YEAT.EXE's player was moved up from 104px to 12px from the top - the gap
+  was room for Bond's status bar.
+- Game pages load with `?v=ARCADE_VERSION`. Bump it in `main.js` after
+  editing anything under `arcade/games`, or browsers keep the old copy.
+- An entry's `icon` replaces the joystick in the folder, title bar and
+  taskbar; every game has one, each made from that game's own art. The
+  surfer and monkey are pixel sprites; the rest are painted art or photos,
+  named `arcade-art-*.png` so `main.css` scales them smoothly instead of
+  pixelated. The Christmas vinyl room's is the vinyl room's with a Santa hat
+  and snow drawn on.
+- To add a game, drop it under `arcade/games/` and add a line to
+  `arcadeGames` with its `size`.
+
 ### Now Playing
 
 A separate, older system with the same shape: `filesData` describes a root
