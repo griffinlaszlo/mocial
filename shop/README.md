@@ -1,4 +1,4 @@
-# GRIFF SKI CO.
+# merch
 
 The merch shop. A standalone site (its own HTML/CSS/JS, no dependency on
 mocial's `main.js`/`main.css`) that mocial currently frames in a popup window
@@ -11,19 +11,18 @@ assumes it's running inside mocial.
 
 | File | What's in it |
 |---|---|
-| `index.html` | Page structure — product view, cart drawer, checkout modal. |
-| `style.css` | All styling. |
+| `index.html` | Page structure — product view, cart drawer, checkout modal. No page header or footer: inside mocial the window's title bar names it, and the cart sits beside the product name. The tee is an inline SVG technical flat (a boxy cut in hard hairlines); the colorway boxes are the print zoomed in on griffin, where the color changes. |
+| `style.css` | All styling: product on plain white, info in small Courier, every control a bevelled Win95 one. |
 | `shop.js` | Colorways, sizes, cart (localStorage), checkout. |
 | `build_colorways.py` | Regenerates `assets/tee-*.png` and the desktop-icon cutout from `../griffinchairlift.png`. |
 | `assets/` | The six colorway prints, web-sized. |
 
 ## Things to edit before this goes live
 
-All three sit in constants at the top of `shop.js`:
+Both sit in constants at the top of `shop.js`:
 
 - `PRICE` — currently a placeholder ($32).
 - `ORDER_EMAIL` — where "Send Order" sends orders. Currently your gmail.
-- `RUN_SIZE` — currently 100, used in the product copy.
 
 ## Checkout is email-only for now
 

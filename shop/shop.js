@@ -1,4 +1,4 @@
-// GRIFF SKI CO. — standalone shop front-end. No backend, no payment
+// mocial merch — standalone shop front-end. No backend, no payment
 // processor wired up yet (see the checkout note in index.html) — this is the
 // browsing/cart/order-intake half of the store, built first so it can run
 // inside mocial and later get copied straight onto its own domain.
@@ -6,13 +6,12 @@
 // ---- Things you'll actually want to edit -----------------------------
 var PRICE = 32;                              // placeholder — set your real price
 var ORDER_EMAIL = "laszlogriffin@gmail.com"; // where "Send Order" emails land
-var RUN_SIZE = 100;                          // shirts in this run
 // ------------------------------------------------------------------------
 
 var SIZES = ["S", "M", "L", "XL", "XXL"];
 
-// jacket hex drives both the swatch dot and the page's --accent color, so
-// the "Add to Cart" button and price tint subtly with whatever's selected.
+// jacket hex drives the page's --accent color, so the cart count and the
+// selected thumbnail tint with whatever's selected.
 var COLORWAYS = [
     { slug: "og-blue",      label: "OG Blue",      accent: "#1388b9" },
     { slug: "blackout",     label: "Blackout",     accent: "#202020" },
@@ -49,17 +48,21 @@ function money(n) {
 }
 
 // ---- Product panel -------------------------------------------------------
+// Each colorway shows as a small square of the print itself, zoomed in on
+// griffin - helmet, jacket and pants are the only parts that change color,
+// so that's what the box shows, rather than the whole tee too small to tell.
 function renderColorwayRow() {
     var row = document.getElementById("colorway-row");
     row.innerHTML = "";
     COLORWAYS.forEach(function(cw) {
         var btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "swatch-btn" + (cw.slug === state.colorway.slug ? " is-selected" : "");
-        btn.style.background = cw.accent;
+        btn.className = "colorway-thumb" + (cw.slug === state.colorway.slug ? " is-selected" : "");
         btn.setAttribute("role", "radio");
         btn.setAttribute("aria-checked", cw.slug === state.colorway.slug ? "true" : "false");
+        btn.setAttribute("aria-label", cw.label);
         btn.title = cw.label;
+        btn.innerHTML = '<img src="assets/tee-' + cw.slug + '.png" alt="">';
         btn.addEventListener("click", function() {
             state.colorway = cw;
             applyColorway();
@@ -221,7 +224,7 @@ document.getElementById("place-order-btn").addEventListener("click", function() 
         return;
     }
 
-    var body = "New Griff Ski Co. order\n\n" +
+    var body = "New mocial merch order\n\n" +
         "Name: " + name + "\n" +
         "Email: " + email + "\n" +
         "Shipping address:\n" + address + "\n\n" +
@@ -229,7 +232,7 @@ document.getElementById("place-order-btn").addEventListener("click", function() 
 
     window.lastOrderText = body;
     var mailto = "mailto:" + encodeURIComponent(ORDER_EMAIL) +
-        "?subject=" + encodeURIComponent("Griff Ski Co. order — " + name) +
+        "?subject=" + encodeURIComponent("mocial merch order — " + name) +
         "&body=" + encodeURIComponent(body);
     window.location.href = mailto;
 
@@ -260,5 +263,3 @@ document.getElementById("checkout-done-btn").addEventListener("click", closeChec
 applyColorway();
 renderSizeRow();
 renderCart();
-document.querySelector(".product-copy").textContent =
-    "Screen-printed on a heavyweight white tee. Griff, one chairlift, one beer, going 100mph doing absolutely nothing. Limited edition — " + RUN_SIZE + " made, then it's gone.";

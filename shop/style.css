@@ -1,4 +1,4 @@
-/* GRIFF SKI CO. — standalone shop. No dependency on mocial's own CSS/JS, so
+/* mocial merch — standalone shop. No dependency on mocial's own CSS/JS, so
    this folder can be copied straight into its own site later. */
 
 :root {
@@ -14,79 +14,74 @@
 html, body {
     margin: 0;
     padding: 0;
-    background: #000;
+    background: var(--paper);
     color: var(--ink);
-    font-family: Tahoma, Geneva, "Segoe UI", sans-serif;
+    font-family: "Courier New", Courier, monospace;
 }
 
 img {
     max-width: 100%;
 }
 
-/* ===== Header ============================================================ */
-.shop-header {
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-    padding: 16px 20px;
-    background: #000;
-    color: #fff;
-    border-bottom: 3px solid var(--accent);
-    flex-wrap: wrap;
-}
-
-.shop-brand {
-    font-family: 'W95FA', Tahoma, sans-serif;
-    font-size: 22px;
-    letter-spacing: 1px;
-}
-
-.shop-tagline {
-    font-size: 12px;
-    color: #aaa;
-    flex: 1;
-}
-
-.cart-button {
+/* The page takes its cue from how Supreme shows a product - a big picture on
+   plain white, everything else small and quiet in Courier - but every
+   control is a Win95 one, bevelled grey, to sit in mocial's windows. */
+.win-btn-95 {
     font-family: Tahoma, Geneva, sans-serif;
     font-size: 13px;
-    font-weight: bold;
+    color: #000;
     background: #d8d8d8;
     border: 2px outset #f0f0f0;
-    padding: 6px 12px;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+/* ===== Cart button ======================================================= */
+.cart-button {
+    flex: 0 0 auto;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #000;
+    background: #d8d8d8;
+    border: 2px outset #f0f0f0;
+    border-radius: 0;
+    padding: 4px 10px;
     cursor: pointer;
 }
 .cart-button:active {
     border-style: inset;
 }
 
+/* The dark blue of mocial's window title bars */
 .cart-count {
     display: inline-block;
     min-width: 16px;
-    background: var(--accent);
+    background: rgb(51, 78, 165);
     color: #fff;
-    border-radius: 8px;
-    padding: 0 5px;
+    padding: 0 4px;
     font-size: 11px;
     margin-left: 4px;
+    text-align: center;
 }
 
 /* ===== Main layout ======================================================= */
 .shop-main {
     background: var(--paper);
     display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: 40px;
-    padding: 40px;
-    max-width: 1100px;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 36px;
+    padding: 24px 28px 26px;
+    max-width: 1000px;
     margin: 0 auto;
+    align-items: start;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 640px) {
     .shop-main {
         grid-template-columns: 1fr;
-        padding: 20px;
-        gap: 24px;
+        padding: 18px;
+        gap: 22px;
     }
 }
 
@@ -100,135 +95,165 @@ img {
 .tee-stage {
     position: relative;
     width: 100%;
-    max-width: 420px;
-    background: #f4f4f4;
-    border: 1px solid #ddd;
+    max-width: 400px;
 }
 
 .tee-svg {
     width: 100%;
     height: auto;
     display: block;
+    overflow: visible;
 }
 
-.tee-shape {
-    stroke: #cfcfcf;
-    stroke-width: 3;
+/* The tee: a technical flat, white with hard black hairlines. The stroke
+   doesn't scale, so the lines stay crisp at any size - thumbnails too. */
+.tee-body,
+.tee-line {
+    stroke: var(--ink);
+    stroke-width: 1.5px;
+    stroke-linejoin: miter;
+    vector-effect: non-scaling-stroke;
+}
+.tee-body {
+    fill: #fff;
+}
+.tee-line {
+    fill: none;
 }
 
+/* The print: centered on the chest, just under the collar */
 .design-img {
     position: absolute;
-    top: 33%;
+    top: 21.5%;
     left: 50%;
-    width: 34%;
+    width: 24%;
     transform: translateX(-50%);
     pointer-events: none;
-    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.15));
 }
 
+/* The other colorways, as little tees wearing their print */
+/* Sits under the Colorway label, above Size */
 .colorway-row {
     display: flex;
-    gap: 10px;
-    margin-top: 18px;
+    gap: 5px;
     flex-wrap: wrap;
-    justify-content: center;
 }
 
-.swatch-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    border: 2px solid #ccc;
-    cursor: pointer;
+/* Each box is the print zoomed in on griffin, so the colors read */
+.colorway-thumb {
+    position: relative;
+    width: 40px;      /* all six on one line in the right column */
+    height: 40px;
     padding: 0;
+    overflow: hidden;
+    background: var(--paper);
+    border: 1px solid #ccc;
+    cursor: pointer;
 }
-
-.swatch-btn.is-selected {
-    border-color: var(--ink);
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--ink);
+.colorway-thumb img {
+    position: absolute;
+    width: 78px;      /* the middle half of the art, helmet to pants */
+    max-width: none;
+    left: -16px;
+    top: -21px;
+}
+.colorway-thumb:hover {
+    border-color: #777;
+}
+.colorway-thumb.is-selected {
+    border: 2px solid var(--ink);
 }
 
 /* ===== Product info ======================================================= */
 .product-info {
     display: flex;
     flex-direction: column;
+    font-size: 13px;
+}
+
+/* The product name with the cart button level with it */
+.title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
 }
 
 .product-title {
-    font-family: 'W95FA', Tahoma, sans-serif;
-    font-size: 28px;
-    margin: 0 0 4px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
 }
 
 .product-price {
-    font-size: 20px;
-    font-weight: bold;
-    color: var(--accent);
-    margin-bottom: 14px;
-}
-
-.product-copy {
     font-size: 14px;
-    line-height: 1.5;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.option-block {
     margin-bottom: 18px;
 }
 
+.option-block {
+    margin-bottom: 16px;
+}
+
 .option-label {
-    font-weight: bold;
-    font-size: 13px;
-    margin-bottom: 8px;
+    font-size: 12px;
+    margin-bottom: 7px;
 }
 
 .size-row {
     display: flex;
-    gap: 8px;
+    gap: 5px;
     flex-wrap: wrap;
 }
 
 .size-btn {
     font-family: Tahoma, Geneva, sans-serif;
-    font-size: 13px;
-    min-width: 44px;
-    padding: 7px 10px;
-    background: #fff;
-    border: 2px solid #333;
+    font-size: 12px;
+    min-width: 42px;
+    padding: 5px 8px;
+    color: #000;
+    background: #d8d8d8;
+    border: 2px outset #f0f0f0;
+    border-radius: 0;
     cursor: pointer;
 }
-
+.size-btn:active {
+    border-style: inset;
+}
+/* Picked: pushed in, like a toggled Win95 button */
 .size-btn.is-selected {
-    background: var(--ink);
-    color: #fff;
-    border-color: var(--ink);
+    border-style: inset;
+    background: #c4c4c4;
+    font-weight: bold;
 }
 
 .qty-row {
     display: inline-flex;
     align-items: center;
-    border: 2px solid #333;
+    background: #fff;
+    border: 2px inset #d8d8d8;
 }
 
 .qty-btn {
-    width: 34px;
-    height: 34px;
-    background: #eee;
-    border: none;
-    font-size: 16px;
+    width: 28px;
+    height: 26px;
+    font-size: 14px;
+    color: #000;
+    background: #d8d8d8;
+    border: 2px outset #f0f0f0;
+    border-radius: 0;
     cursor: pointer;
 }
-.qty-btn:hover {
-    background: #ddd;
+.qty-btn:active {
+    border-style: inset;
 }
 
 .qty-value {
     display: inline-block;
-    min-width: 36px;
+    min-width: 34px;
     text-align: center;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .add-to-cart-row {
@@ -236,21 +261,23 @@ img {
 }
 
 .add-to-cart-btn, .checkout-btn {
-    font-family: 'W95FA', Tahoma, sans-serif;
-    font-size: 16px;
-    letter-spacing: 0.5px;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 14px;
+    font-weight: bold;
     width: 100%;
-    padding: 14px;
-    background: var(--ink);
-    color: #fff;
-    border: none;
+    padding: 9px;
+    color: #000;
+    background: #d8d8d8;
+    border: 2px outset #f0f0f0;
+    border-radius: 0;
     cursor: pointer;
 }
-.add-to-cart-btn:hover, .checkout-btn:hover {
-    background: var(--accent);
+.add-to-cart-btn:active, .checkout-btn:active {
+    border-style: inset;
 }
 .checkout-btn:disabled {
-    background: #999;
+    color: #8a8a8a;
+    text-shadow: 1px 1px 0 #fff;
     cursor: not-allowed;
 }
 
@@ -263,16 +290,7 @@ img {
 .fine-print {
     font-size: 11px;
     color: #888;
-    margin-top: 20px;
-}
-
-/* ===== Footer ============================================================= */
-.shop-footer {
-    background: #000;
-    color: #777;
-    text-align: center;
-    font-size: 11px;
-    padding: 16px;
+    margin-top: 18px;
 }
 
 /* ===== Cart drawer ========================================================= */
