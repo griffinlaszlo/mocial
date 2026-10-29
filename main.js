@@ -137,9 +137,6 @@ $(document).ready(function() {
     $("#phd-acceptance-window").draggable();
 });
 $(document).ready(function() {
-    $("#random-window").draggable();
-});
-$(document).ready(function() {
     $("#arcade-window").draggable();
 });
 $(document).ready(function() {
@@ -304,7 +301,6 @@ function hashPassword(str) {
 // added noise. Anything absent from this map has no title-bar icon.
 var windowIcons = {
     // Folders - a mini version of the desktop icon that opens them
-    "random-window":          "folder-icon.png",
     "college-window":         "folder-icon.png",
     "folder-contents-window": "folder-icon.png",
     "arcade-window":          "arcade-icon.png",
@@ -704,7 +700,7 @@ makeElementDraggable("folder-icon-group", function() {
     if (opening) flyPopupIn(el, document.getElementById("folder-icon-group"));
 });
 makeElementDraggable("files-icon-group", function() {
-    toggleDesktopFolder("random");
+    startVirusStorm();
 });
 makeElementDraggable("college-icon-group", function() {
     toggleDesktopFolder("college");
@@ -816,9 +812,31 @@ makeElementDraggable("incognito-icon-group", function() {
     }
     openConverterWindow(origin);
 });
-// Opens GRIFF SKI CO., toggling it shut on a second click like dino and
+// Opens the merch shop, toggling it shut on a second click like dino and
 // sneaky links do. The iframe is pointed at the shop the first time it's
 // opened rather than on every page load - same reasoning as the dino game.
+// SHOP_VERSION goes on its address: bump it whenever the shop changes, or a
+// browser that's seen it before keeps showing the old one.
+var SHOP_VERSION = 8;
+
+// The window is as tall as the shop's content, not a fixed 640px with empty
+// space under it - measured once the shop loads, and again if the window
+// is resized (the shop reflows with width). .shop-viewer's max-height still
+// caps it on short screens.
+function fitShopFrame() {
+    var frame = document.getElementById("shop-frame");
+    var doc = frame.contentDocument;
+    var main = doc && doc.querySelector(".shop-main");
+    if (!main) return;
+    frame.style.height = Math.ceil(main.getBoundingClientRect().bottom) + "px";
+}
+document.getElementById("shop-frame").addEventListener("load", fitShopFrame);
+var shopFitTimer = null;
+window.addEventListener("resize", function() {
+    clearTimeout(shopFitTimer);
+    shopFitTimer = setTimeout(fitShopFrame, 200);
+});
+
 makeElementDraggable("shop-icon-group", function() {
     var win = document.getElementById("shop-window");
     var frame = document.getElementById("shop-frame");
@@ -829,7 +847,7 @@ makeElementDraggable("shop-icon-group", function() {
         return;
     }
 
-    if (!frame.getAttribute("src")) frame.src = "shop/index.html";
+    if (!frame.getAttribute("src")) frame.src = "shop/index.html?v=" + SHOP_VERSION;
 
     showPopup("shop-window", origin);
 });
@@ -1009,28 +1027,17 @@ var arcadeGames = [
     { id: "vinyl-xmas",        size: [450, 600], name: "vinyl xmas",       title: "VINYL ROOM: CHRISTMAS",  src: "games/vinyl-room/xmas.html",
       icon: "arcade-art-vinyl-xmas.png" },
     { id: "yeat",              size: [400, 480], name: "yeat.exe",         title: "YEAT.EXE",               src: "games/yeat/index.html",
-      icon: "arcade-art-yeat.png" }
+      icon: "arcade-art-yeat.png" },
+    // A pocket-sized mocial from the Bond project: its own desktop with a
+    // Where's West? CD player, film roll, dino, notes and dance
+    { id: "mini-mocial",       size: [400, 640], name: "mini mocial",      title: "MINI MOCIAL",            src: "games/mocial/index.html",
+      icon: "computer-icon.png" }
 ];
 
 // Desktop folders that open a window listing their contents as folder icons.
 // Clicking the icon opens just that window; its contents open individually
-// from the grid inside. Add more folders here with the same shape -
-// toggleDesktopFolder/renderDesktopFolder are not random-specific.
+// from the grid inside. Add more folders here with the same shape.
 var desktopFolders = {
-    random: {
-        iconId: "files-icon-group",
-        windowId: "random-window",
-        gridId: "random-grid",
-        items: [
-            { name: "techcrunch",    popup: "snapmap-wrapper" },
-            { name: "patent",        popup: "patent-figures-window" },
-            { name: "application",   popup: "ambient-streaming-window" },
-            { name: "ww",            popup: "canary-yellow-wrapper" },
-            { name: "warmleche",     popup: "postmodern-wrapper" },
-            { name: "undertheghost", popup: "under-ghost-wrapper" },
-            { name: "dsresearch",    popup: "s13688-window" }
-        ]
-    },
     college: {
         iconId: "college-icon-group",
         windowId: "college-window",
@@ -1038,8 +1045,8 @@ var desktopFolders = {
         items: [
             { name: "letter_of_intent", popup: "letter-of-intent-window" },
             { name: "phd_acceptance",  popup: "phd-acceptance-window" },
-            // Same window the random folder's "dsresearch" opens - one file
-            // showing up in two folders, not two copies of it
+            // Same window not-a-virus.exe throws up as "dsresearch" - one
+            // file in two places, not two copies of it
             { name: "ds research", popup: "s13688-window" }
         ]
     },
@@ -1089,9 +1096,154 @@ function toggleDesktopFolder(folderKey) {
     showPopup(folder.windowId, origin);
 }
 
-renderDesktopFolder("random");
 renderDesktopFolder("college");
 renderDesktopFolder("arcade");
+
+// ===== not-a-virus.exe =======================================================
+// Where the random folder used to be. Opening it sets off everything that
+// was in the folder at once, scattered across the screen like a virus took
+// over - the same joke as griffinland's not-a-virus.exe. Once they're all
+// out, mocial AntiVirus turns up with a button that pulls every one back into
+// the icon; Escape does the same. Each window goes back to its usual spot
+// afterwards, so opening it later some other way finds it where it lives.
+var NOT_A_VIRUS_POPUPS = [
+    "snapmap-wrapper",          // techcrunch
+    "patent-figures-window",    // patent
+    "ambient-streaming-window", // application
+    "canary-yellow-wrapper",    // ww
+    "postmodern-wrapper",       // warmleche
+    "under-ghost-wrapper",      // undertheghost
+    "s13688-window"             // dsresearch
+];
+var STORM_STAGGER_MS = 170;
+var stormWindows = [];
+var stormTimers = [];   // windows still on their way, and AntiVirus's arrival
+var stormTopZ = 10200;
+
+windowIcons["antivirus-window"] = "not-a-virus-icon.svg";
+
+var antivirus = document.createElement("div");
+antivirus.id = "antivirus-window";
+antivirus.className = "popup-window";
+antivirus.appendChild(buildWindowChrome(antivirus, "mocial AntiVirus"));
+var antivirusBody = document.createElement("div");
+antivirusBody.className = "popup-inner-wrapper antivirus-inner";
+antivirusBody.innerHTML =
+    '<svg class="antivirus-shield" viewBox="0 0 40 46" aria-hidden="true">' +
+        '<path d="M20 2 L37 8 V22 C37 34 29 41 20 44 C11 41 3 34 3 22 V8 Z" fill="#2a8a3e" stroke="#000" stroke-width="2"/>' +
+        '<path d="M12 23 L18 29 L29 16" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="square"/>' +
+    '</svg>' +
+    '<div class="antivirus-text">' +
+        '<div class="antivirus-head"></div>' +
+        '<div class="antivirus-detail"></div>' +
+    '</div>' +
+    '<div class="antivirus-buttons"></div>';
+antivirus.appendChild(antivirusBody);
+document.body.insertBefore(antivirus, document.querySelector("footer"));
+$(antivirus).draggable();
+
+var antivirusHead = antivirusBody.querySelector(".antivirus-head");
+var antivirusDetail = antivirusBody.querySelector(".antivirus-detail");
+var antivirusButtons = antivirusBody.querySelector(".antivirus-buttons");
+
+function randomBetween(min, max) {
+    return min + Math.random() * (max - min);
+}
+
+// The Strokes-style call to action:  ╔══════╗ / ║ LABEL ║ / ╚══════╝
+function asciiButton(label, onClick) {
+    var inner = "  " + label + "  ";
+    var bar = new Array(inner.length + 1).join("═");
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ascii-btn";
+    btn.textContent = "╔" + bar + "╗\n║" + inner + "║\n╚" + bar + "╝";
+    btn.setAttribute("aria-label", label);
+    btn.addEventListener("click", onClick);
+    return btn;
+}
+
+function showAntivirus() {
+    antivirusHead.textContent = "Scan complete.";
+    antivirusDetail.innerHTML = "<b>" + stormWindows.length + " threats</b> found on this PC.<br>Threat level: <b>vibes</b>.";
+    antivirusButtons.textContent = "";
+    antivirusButtons.appendChild(asciiButton("REMOVE ALL THREATS", clearVirusStorm));
+    if (!isMobileLayout()) {
+        antivirus.style.left = Math.max(12, (window.innerWidth - 340) / 2) + "px";
+        antivirus.style.top = (window.scrollY + 110) + "px";
+        antivirus.style.zIndex = ++stormTopZ;
+    }
+    showPopup("antivirus-window", document.getElementById("files-icon-group"));
+}
+
+function startVirusStorm() {
+    if (stormWindows.length) return;
+    var origin = document.getElementById("files-icon-group");
+
+    NOT_A_VIRUS_POPUPS.forEach(function(id, i) {
+        var win = document.getElementById(id);
+        if (!win) return;
+        stormWindows.push(win);
+        stormTimers.push(setTimeout(function() {
+            // Phones stack windows in the page, so there they just open
+            if (isMobileLayout()) {
+                showPopup(id, origin);
+                return;
+            }
+            // Remember where it lives, then fling it somewhere random
+            win.setAttribute("data-home", JSON.stringify({ left: win.style.left, top: win.style.top, z: win.style.zIndex }));
+            $(win).show();
+            var r = win.getBoundingClientRect();
+            win.style.left = randomBetween(8, Math.max(8, window.innerWidth - r.width - 8)) + "px";
+            win.style.top = (window.scrollY + randomBetween(70, Math.max(70, window.innerHeight - r.height - 50))) + "px";
+            win.style.zIndex = ++stormTopZ;
+            flyPopupIn(win, origin);
+        }, i * STORM_STAGGER_MS));
+    });
+
+    stormTimers.push(setTimeout(showAntivirus, stormWindows.length * STORM_STAGGER_MS + 600));
+}
+
+function clearVirusStorm() {
+    var origin = document.getElementById("files-icon-group");
+    var wins = stormWindows.slice();
+    stormWindows = [];
+    // Cleared early: stop anything still due to fly out, AntiVirus included
+    stormTimers.forEach(clearTimeout);
+    stormTimers = [];
+
+    wins.reverse().forEach(function(win, i) {
+        setTimeout(function() {
+            hidePopup(win.id, origin);
+            // Back to its usual spot once it's flown home
+            setTimeout(function() {
+                var home = win.getAttribute("data-home");
+                if (!home) return;
+                home = JSON.parse(home);
+                win.style.left = home.left;
+                win.style.top = home.top;
+                win.style.zIndex = home.z;
+                win.removeAttribute("data-home");
+            }, 350);
+        }, i * 60);
+    });
+
+    setTimeout(function() {
+        antivirusHead.textContent = "All clear.";
+        antivirusDetail.innerHTML = "Your PC is clean.*<br><small>*ish</small>";
+        antivirusButtons.textContent = "";
+        var ok = document.createElement("button");
+        ok.type = "button";
+        ok.className = "antivirus-ok";
+        ok.textContent = "OK";
+        ok.addEventListener("click", function() { hidePopup("antivirus-window", origin); });
+        antivirusButtons.appendChild(ok);
+    }, wins.length * 60 + 100);
+}
+
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && stormWindows.length) clearVirusStorm();
+});
 
 // Settings: pointer color
 function setPointerColor(color) {

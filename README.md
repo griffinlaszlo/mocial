@@ -9,7 +9,7 @@ No build step, no framework. Three files do the work:
 | File | What's in it |
 |---|---|
 | `index.html` | Page structure. Every popup window is static markup that starts hidden; JS only shows/hides and positions them. |
-| `main.css` | All styling. Per-window position blocks live near the bottom (`#files-window`, `#random-window`, …). |
+| `main.css` | All styling. Per-window position blocks live near the bottom (`#files-window`, `#college-window`, …). |
 | `main.js` | Everything behavioral. |
 
 Dependencies are two CDN script tags: jQuery and jQuery UI (used only for
@@ -61,38 +61,47 @@ toggles. With it off, windows snap open and shut with no animation.
 ### Desktop folders
 
 `desktopFolders` in `main.js` drives folder icons that open a window listing
-their contents as more folder icons. Currently just `random`:
+their contents as more folder icons - `college` and the `arcade`.
+`renderDesktopFolder` and `toggleDesktopFolder` take a folder key, so a new
+folder is just a new entry in the same object.
 
-```js
-random: {
-    iconId: "files-icon-group",
-    windowId: "random-window",
-    gridId: "random-grid",
-    spilled: false,
-    items: [
-        { name: "techcrunch", popup: "snapmap-wrapper", spill: true },
-        …
-    ]
-}
-```
+### mocial fm
 
-Items marked `spill: true` also fly out on their own **the first time the
-folder is ever opened** — the "here's everything at once" moment for a new
-visitor. After that the folder only opens its own window, so someone coming
-back gets the index instead of a screenful of windows, and opens what they
-want from the grid. Clicking the desktop icon while the window is up pulls it
-and everything it spilled back into the icon.
+The desktop radio, in `radio.js` (loaded after `main.js`, built on its window
+shell). A simplified Win95 mixer: a navy LCD showing the station, song and
+time over a live spectrum analyser; station buttons with red LEDs, plus
+shuffle; previous / play / next and a seek bar; and four faders - volume,
+bass, treble and pan - wired through Web Audio, so they really change the
+sound. Double-click a fader to reset it. Closing the window stops the music;
+minimising keeps it playing.
 
-`renderDesktopFolder` and `toggleDesktopFolder` take a folder key and aren't
-random-specific — other desktop folders can become entries in the same object.
+The stations are `STATIONS` at the top of `radio.js`: Where's West? (the seven
+previews that came with mini mocial, in `arcade/games/mocial/songs/`), plus
+WARMLECHE, katseye, migos, Neil Young and Yeat - the tracks the arcade's games
+use, in `arcade/songs/`. A new station is a new entry; its LED button joins the
+row under the LCD.
+
+### not-a-virus.exe
+
+Where the random folder used to be (it keeps the `files-icon*` ids so the
+stack-layout setting still finds it). Opening it throws every window that was
+in the folder - techcrunch, patent, application, ww, warmleche,
+undertheghost, dsresearch, listed in `NOT_A_VIRUS_POPUPS` - across the screen
+at once, scattered, like a virus took over. Once they're out, mocial
+AntiVirus turns up with a `REMOVE ALL THREATS` button that pulls them all
+back into the icon; Escape does the same, even mid-storm. Each window goes
+back to its usual spot afterwards. It's the same joke as griffinland's
+not-a-virus.exe.
 
 ### The arcade
 
 The `arcade` icon (a joystick, `arcade-icon.png`, drawn for the site) opens a
-folder of 12 mini games and music experiences brought over from the Bond
+folder of 13 mini games and music experiences brought over from the Bond
 project (`~/Desktop/bond/dist/games`). They're listed in `arcadeGames` in
 `main.js`, and `buildGameWindows` gives each one its own window with an
-iframe, sized to that game's shape.
+iframe, sized to that game's shape. One of them is **mini mocial**
+(`arcade/games/mocial/`), a pocket-sized mocial from Bond with its own
+Where's West? CD player, film roll, dino, notes and dance.
 
 `arcade/` copies the layout of Bond's `public/` folder — `games/`, `songs/`,
 `vinyl/`, `f/` — because Shiloh's Play Pen, YEAT.EXE, the vinyl rooms and the
@@ -197,21 +206,11 @@ over the bar — is untouched the rest of the time.
 
 **Mobile is broken.** Under 960px, `main.css` forces
 `.popup-window { position: inherit !important }`, so windows stack in document
-flow instead of floating. Tapping `random` opens its window roughly 1,270px
+flow instead of floating. Tapping a folder opens its window roughly 1,270px
 below the icon you tapped — well off-screen, so the tap reads as doing
 nothing. The absolutely-positioned desktop icons stay put and overlay the
 stacked windows. This predates the folder work and affects Now Playing and
 settings identically. Fixing it is the blocker before any real launch.
-
-**The first-open spill resets on refresh.** `spilled` is an in-memory flag, so
-a reload gives the same visitor the full spill again. Moving it to
-`localStorage` (as the home icon position already does) would make it survive
-across visits.
-
-**Two controls over the same windows.** The "Popups on open" setting and the
-random folder both decide when the same seven popups appear. They don't
-conflict — the spill skips anything already visible — but it's worth
-collapsing to one.
 
 **The `college` icon has no click handler.** It drags but does nothing.
 

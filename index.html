@@ -52,7 +52,7 @@
         }
     </script>
 
-    <link rel="stylesheet" href="main.css?v=49">
+    <link rel="stylesheet" href="main.css?v=57">
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
@@ -93,9 +93,12 @@
             <img src="folder-icon.png" id="college-icon" alt="College Icon" draggable="false">
             <div id="college-icon-label"><a href="#">college</a></div>
         </div>
+        <!-- not-a-virus.exe, where the random folder was: opens everything
+             that was in it at once (main.js, "not-a-virus.exe"). The ids
+             stay files-icon* so the stack-layout setting still finds it. -->
         <div id="files-icon-group" class="desktop-icon-group">
-            <img src="folder-icon.png" id="files-icon" alt="Files Icon" draggable="false">
-            <div id="files-icon-label"><a href="#">random</a></div>
+            <img src="not-a-virus-icon.svg" id="files-icon" alt="not-a-virus.exe" draggable="false">
+            <div id="files-icon-label"><a href="#">not-a-virus.exe</a></div>
         </div>
         <div id="folder-icon-group" class="desktop-icon-group">
             <img src="cd1.png" id="folder-icon" alt="Now Playing Icon" draggable="false">
@@ -153,6 +156,11 @@
         <div id="griffinland-icon-group" class="desktop-icon-group">
             <img src="world_spinning.gif" id="griffinland-icon" alt="Griffinland Icon" draggable="false">
             <div id="griffinland-icon-label"><a href="#">griffinland</a></div>
+        </div>
+        <!-- mocial fm: the desktop radio (radio.js) -->
+        <div id="radio-icon-group" class="desktop-icon-group">
+            <img src="mocial-fm-icon.svg" id="radio-icon" alt="mocial fm" draggable="false">
+            <div id="radio-icon-label"><a href="#">mocial fm</a></div>
         </div>
         <div id="arcade-icon-group" class="desktop-icon-group">
             <img src="arcade-icon.png" id="arcade-icon" alt="Arcade Icon" draggable="false">
@@ -420,17 +428,6 @@
         </div>
     </div>
 
-    <div id="random-window" class="popup-window files-window">
-        <div class="windows-header-wrapper clearafter">
-            <div class="window-title">RANDOM</div>
-            <div class="window-icons"><span class="win-btn" onclick="$('#random-window').toggleClass('iconize'); $('#random-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#random-window').toggleClass('resize'); $('#random-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#random-window').hide();">&#10005;</span></div>
-        </div>
-
-        <div class="popup-inner-wrapper files-inner">
-            <div class="files-grid" id="random-grid"></div>
-        </div>
-    </div>
-
     <div id="arcade-window" class="popup-window files-window">
         <div class="windows-header-wrapper clearafter">
             <div class="window-title">ARCADE</div>
@@ -678,12 +675,12 @@
          ========================================================== -->
     <div id="shop-window" class="popup-window">
         <div class="windows-header-wrapper clearafter">
-            <div class="window-title">GRIFF SKI CO.</div>
+            <div class="window-title">MERCH</div>
             <div class="window-icons"><span class="win-btn" onclick="$('#shop-window').toggleClass('iconize'); $('#shop-window').removeClass('resize');"><span class="glyph glyph-min"></span></span><span class="win-btn" onclick="$('#shop-window').toggleClass('resize'); $('#shop-window').removeClass('iconize');"><span class="glyph glyph-max"></span></span><span class="win-btn" onclick="$('#shop-window').hide();">&#10005;</span></div>
         </div>
 
         <div class="popup-inner-wrapper">
-            <iframe id="shop-frame" class="shop-viewer" title="Griff Ski Co. shop"></iframe>
+            <iframe id="shop-frame" class="shop-viewer" title="mocial merch"></iframe>
         </div>
     </div>
 
@@ -695,7 +692,49 @@
             </div>
 
             <div class="popup-inner-wrapper password-inner">
-                <img src="music_note_spinning.gif" class="password-icon" alt="" draggable="false">
+                <!-- Good-luck computer: a little guy hops onto a 90s PC and the
+                     screen wishes you luck with the password. Our own redraw
+                     of the old GeoCities gif; it all plays from main.css. -->
+                <div class="good-luck-pc" aria-hidden="true">
+                    <svg class="glp-machine" viewBox="0 0 104 104" shape-rendering="crispEdges">
+                        <!-- desktop case, under the monitor -->
+                        <rect x="12" y="76" width="82" height="20" fill="#d9d2bd" stroke="#4a4436" stroke-width="2"/>
+                        <rect x="14" y="78" width="78" height="3" fill="#efe9d8"/>
+                        <rect x="20" y="85" width="24" height="3" fill="#4a4436"/>
+                        <rect x="20" y="90" width="24" height="2" fill="#9b937d"/>
+                        <rect x="70" y="85" width="4" height="4" fill="#3f9b3f"/>
+                        <rect x="78" y="85" width="10" height="5" fill="#9b937d"/>
+                        <!-- neck -->
+                        <rect x="44" y="70" width="18" height="6" fill="#bdb59e" stroke="#4a4436" stroke-width="2"/>
+                        <!-- monitor -->
+                        <rect x="20" y="14" width="66" height="58" rx="3" fill="#d9d2bd" stroke="#4a4436" stroke-width="2"/>
+                        <rect x="22" y="16" width="62" height="3" fill="#efe9d8"/>
+                        <rect x="26" y="20" width="54" height="44" fill="#4a4436"/>
+                        <rect x="28" y="22" width="50" height="40" class="glp-screen"/>
+                        <rect x="72" y="66" width="6" height="2" fill="#3f9b3f"/>
+                    </svg>
+
+                    <div class="glp-words">
+                        <span class="glp-word glp-word-1">Good</span>
+                        <span class="glp-word glp-word-2">Luck</span>
+                        <span class="glp-word glp-word-3">to you</span>
+                    </div>
+
+                    <!-- the little guy, in pixels: green hair, blue shirt -->
+                    <svg class="glp-guy" viewBox="0 0 9 16" shape-rendering="crispEdges">
+                        <rect x="2" y="0" width="5" height="2" fill="#2fb84a"/>
+                        <rect x="1" y="1" width="2" height="2" fill="#2fb84a"/>
+                        <rect x="2" y="2" width="5" height="3" fill="#f2c39b"/>
+                        <rect x="5" y="3" width="1" height="1" fill="#222"/>
+                        <rect x="1" y="5" width="7" height="5" fill="#2850d8"/>
+                        <rect x="0" y="6" width="1" height="3" fill="#f2c39b"/>
+                        <rect x="8" y="6" width="1" height="3" fill="#f2c39b"/>
+                        <rect x="2" y="10" width="2" height="5" fill="#333"/>
+                        <rect x="5" y="10" width="2" height="5" fill="#333"/>
+                        <rect x="1" y="15" width="3" height="1" fill="#111"/>
+                        <rect x="5" y="15" width="3" height="1" fill="#111"/>
+                    </svg>
+                </div>
 
                 <div class="password-body">
                     <div class="password-message">Enter your network password for mocial.</div>
@@ -713,7 +752,8 @@
             </div>
         </div>
     </div>
-    <script src="main.js?v=57"></script> <!-- Link to your JavaScript file -->
+    <script src="main.js?v=63"></script> <!-- Link to your JavaScript file -->
+    <script src="radio.js?v=3"></script>
 
 </body>
 </html>

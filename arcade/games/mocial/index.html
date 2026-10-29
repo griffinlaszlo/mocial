@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>mocial</title>
+<!--
+  mocial (mini) — a stripped-down mocial.org desktop, made by griffin with Where's West? media.
+  Runs as a Bond creation inside an iframe. Square tiles (< 380px) show just the desktop; the opened
+  view is fully interactive: tap icons to open windows (they open maximised), Start menu, tray clock.
+  window.Mocial = { mute(bool) } lets the host silence it (feed tiles).
+-->
+<link href="https://fonts.cdnfonts.com/css/w95fa" rel="stylesheet">
+<style>
+  :root{--teal:#008080;--face:#c0c0c0;--hi:#fff;--lo:#808080;--dk:#000;--bar1:#334ea5;--bar2:#4c7fc1;--top:8px}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  body{font-family:'W95FA','MS Sans Serif',Tahoma,sans-serif;background:var(--teal);color:#000;display:flex;flex-direction:column;transition:background .4s}
+  body.dark{background:#000}
+  body.big{--top:58px}
+  body.big .win{top:104px}   /* clear the host app's close button */
+  img{image-rendering:pixelated}
+  #desk{flex:1;position:relative;padding:calc(var(--top) + 4px) 14px 8px}
+  h1{margin:0 0 14px;text-align:center;color:#fff;font-weight:400;font-size:44px;letter-spacing:1px;text-shadow:2px 2px 0 rgba(0,0,0,.25)}
+  .icons{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 6px;justify-items:center}
+  .ic{display:flex;flex-direction:column;align-items:center;gap:4px;width:86px;background:none;border:0;padding:4px;font:inherit;color:#fff;cursor:pointer}
+  .ic img{width:52px;height:52px;object-fit:contain}
+  .ic span{font-size:15px;line-height:1.1;padding:1px 3px}
+  .ic:active span,.ic.sel span{background:#000080;outline:1px dotted #fff}
+  /* tile mode: just the desktop */
+  body.tile #desk{padding-top:22%}
+  body.tile h1{font-size:34px;margin-bottom:6px}
+  body.tile .icons{gap:6px 0}
+  body.tile .ic{width:80px}.tile .ic img{width:44px;height:44px}.tile .ic span{font-size:13px}
+  body.tile #bar{display:none}
+  @media (max-width:230px){ body.tile #desk{padding:28% 4px 0} body.tile h1{font-size:24px;margin-bottom:2px} body.tile .ic{width:54px;padding:2px} .tile .ic img{width:28px;height:28px} .tile .ic span{font-size:10px} }
+
+  /* windows (always maximised on a phone) */
+  .win{position:absolute;left:6px;right:6px;top:calc(var(--top) + 2px);bottom:6px;display:none;flex-direction:column;background:var(--face);
+    border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);box-shadow:inset -1px -1px var(--lo),inset 1px 1px #dfdfdf;padding:3px;z-index:5}
+  .win.open{display:flex;animation:pop .14s steps(3)}
+  @keyframes pop{from{transform:scale(.85);opacity:.4}}
+  .tb{display:flex;align-items:center;gap:6px;height:26px;padding:0 3px 0 6px;color:#fff;font-weight:700;font-size:15px;background:linear-gradient(90deg,var(--bar1),var(--bar2))}
+  .tb img{width:16px;height:16px}
+  .tb b{flex:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wb{width:22px;height:20px;display:flex;align-items:center;justify-content:center;background:var(--face);color:#000;font:700 14px/1 inherit;font-family:inherit;
+    border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);padding:0;cursor:pointer}
+  .wb:active,.btn:active,.start.on{border-color:var(--dk) var(--hi) var(--hi) var(--dk)}
+  .body{flex:1;min-height:0;margin-top:3px;background:#fff;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo);overflow:auto}
+  .body.grey{background:var(--face);border:0}
+  .btn{background:var(--face);border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);font:inherit;font-size:15px;padding:4px 10px;cursor:pointer;color:#000}
+
+  /* now playing */
+  .np{display:flex;flex-direction:column;height:100%;gap:8px;padding:8px}
+  .lcd{background:#000;color:#00e000;padding:10px;display:flex;gap:10px;align-items:center;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+  .cdw{position:relative;width:56px;height:56px;flex:none}
+  .cdw .note{position:absolute;inset:0;width:100%;height:100%}
+  #disc{position:absolute;left:11.46%;top:16.67%;width:83.33%;height:83.33%}
+  .lcd .t{flex:1;min-width:0;overflow:hidden;white-space:nowrap}
+  .lcd .t i{display:block;font-style:normal;font-size:17px;overflow:hidden;text-overflow:ellipsis}
+  #disc{transition:none}#disc.spin{animation:spin 1.6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .lcd small{display:block;color:#7cfc7c;font-size:13px;margin-top:4px}
+  .prog{height:12px;background:#fff;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}.prog i{display:block;height:100%;width:0;background:#000080}
+  .ctl{display:flex;gap:6px}.ctl .btn{flex:1;font-size:18px;padding:6px 0}
+  .list{flex:1;min-height:0;overflow:auto;background:#fff;border:2px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+  .list button{display:flex;width:100%;gap:8px;text-align:left;background:none;border:0;font:inherit;font-size:16px;padding:6px 8px;cursor:pointer;color:#000}
+  .list button.on{background:#000080;color:#fff}
+  .list button em{font-style:normal;opacity:.6;width:18px}
+
+  /* film roll */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:6px}
+  .grid button{padding:0;border:0;background:#000;aspect-ratio:1;cursor:pointer}
+  .grid img{width:100%;height:100%;object-fit:cover;image-rendering:auto;display:block}
+  .photo{position:absolute;inset:0;background:#000;display:none;flex-direction:column}
+  .photo.open{display:flex}
+  .photo img{flex:1;min-height:0;width:100%;object-fit:contain;image-rendering:auto}
+  .photo .row{display:flex;gap:6px;padding:6px;background:var(--face)}.photo .row .btn{flex:1}
+  .fbody{position:relative}
+
+  /* notepad */
+  textarea{width:100%;height:100%;border:0;outline:0;resize:none;padding:8px;font:inherit;font-size:17px;line-height:1.35;background:#fff;color:#000;-webkit-user-select:text;user-select:text}
+  .menu{display:flex;gap:14px;padding:2px 6px;font-size:15px}
+  iframe{width:100%;height:100%;border:0;display:block;background:#fff}
+  .dance{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#000;color:#fff}
+  .dance img{width:70%;max-width:260px}
+
+  /* taskbar */
+  #bar{height:34px;flex:none;display:flex;align-items:center;gap:4px;padding:2px 3px;background:var(--face);border-top:2px solid var(--hi);position:relative;z-index:9}
+  .start{display:flex;align-items:center;gap:5px;font-weight:700;font-size:16px;height:28px;padding:0 8px}
+  .start img{width:18px;height:18px}
+  .tabs{flex:1;display:flex;gap:3px;min-width:0;overflow:hidden}
+  .tabs .btn{font-size:13px;padding:2px 6px;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:26px}
+  .tabs .btn.on{border-color:var(--dk) var(--hi) var(--hi) var(--dk);background:#dcdcdc}
+  .tray{height:26px;display:flex;align-items:center;padding:0 8px;font-size:15px;border:1px solid;border-color:var(--lo) var(--hi) var(--hi) var(--lo)}
+  #smenu{position:absolute;left:3px;bottom:36px;width:210px;display:none;background:var(--face);border:2px solid;border-color:var(--hi) var(--dk) var(--dk) var(--hi);z-index:10}
+  #smenu.open{display:flex}
+  #smenu .side{width:26px;background:linear-gradient(0deg,#000080,#1084d0);color:#c0c0c0;writing-mode:vertical-rl;transform:rotate(180deg);font-weight:700;font-size:17px;padding:6px 3px}
+  #smenu .items{flex:1;padding:2px}
+  #smenu button{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;font:inherit;font-size:16px;padding:7px 6px;cursor:pointer;color:#000;text-align:left}
+  #smenu button:active{background:#000080;color:#fff}
+  #smenu img{width:22px;height:22px}
+  #smenu hr{border:0;border-top:1px solid var(--lo);border-bottom:1px solid var(--hi);margin:2px 0}
+</style>
+</head>
+<body>
+<div id="desk">
+  <h1>mocial</h1>
+  <div class="icons">
+    <button class="ic" data-open="np"><img src="cd1.png" alt=""><span>now playing</span></button>
+    <button class="ic" data-open="film"><img src="folder-icon.png" alt=""><span>film roll</span></button>
+    <button class="ic" data-open="dino"><img src="dino.png" alt=""><span>dino</span></button>
+    <button class="ic" data-open="notes"><img src="tips.png" alt=""><span>notes</span></button>
+    <button class="ic" data-open="dance"><img src="dancing.png" alt=""><span>dance</span></button>
+    <button class="ic" id="dark"><img src="moon.gif" alt=""><span>darkness</span></button>
+  </div>
+
+  <section class="win" id="w-np" data-title="now playing" data-icon="cd1.png">
+    <div class="body grey"><div class="np">
+      <div class="lcd"><span class="cdw"><img id="disc" src="disc.png" alt=""><img class="note" src="note.png" alt=""></span><div class="t"><i id="np-title">Where's West? — Wave to Come</i><small id="np-time">press play</small></div></div>
+      <div class="prog"><i id="np-prog"></i></div>
+      <div class="ctl"><button class="btn" id="prev">⏮</button><button class="btn" id="play">▶</button><button class="btn" id="next">⏭</button></div>
+      <div class="list" id="np-list"></div>
+    </div></div>
+  </section>
+
+  <section class="win" id="w-film" data-title="film roll" data-icon="folder-icon.png">
+    <div class="body fbody"><div class="grid" id="grid"></div>
+      <div class="photo" id="photo"><img id="photo-img" alt=""><div class="row"><button class="btn" id="ph-prev">◀ prev</button><button class="btn" id="ph-back">grid</button><button class="btn" id="ph-next">next ▶</button></div></div>
+    </div>
+  </section>
+
+  <section class="win" id="w-dino" data-title="our competition" data-icon="dino.png">
+    <div class="body"><iframe id="dino-frame" title="dino" data-src="dino.html"></iframe></div>
+  </section>
+
+  <section class="win" id="w-notes" data-title="notes.txt - Notepad" data-icon="tips.png">
+    <div class="menu"><span>File</span><span>Edit</span><span>Help</span></div>
+    <div class="body"><textarea spellcheck="false">made this little corner of the internet for Where's West?.
+
+now playing → 7 songs, tap one.
+film roll → shot on film, in the studio and at a show.
+dino → still undefeated.
+dance → you know what to do.
+
+leave a note below 👇
+
+— griffin
+</textarea></div>
+  </section>
+
+  <section class="win" id="w-dance" data-title="dance.exe" data-icon="dancing.png">
+    <div class="body"><div class="dance"><img src="dancing.gif" alt=""><span id="dance-cap">dancing to FREE</span></div></div>
+  </section>
+</div>
+
+<div id="smenu"><div class="side">mocial 95</div><div class="items">
+  <button data-open="np"><img src="cd1.png" alt="">now playing</button>
+  <button data-open="film"><img src="folder-icon.png" alt="">film roll</button>
+  <button data-open="notes"><img src="tips.png" alt="">notes</button>
+  <hr><button id="shut"><img src="computer-icon.png" alt="">close everything</button>
+</div></div>
+<div id="bar"><button class="btn start" id="start"><img src="computer-icon.png" alt="">Start</button><div class="tabs" id="tabs"></div><div class="tray" id="clock">--:--</div></div>
+
+<script>
+(function(){
+  var $=function(s){return document.querySelector(s)}, $$=function(s){return [].slice.call(document.querySelectorAll(s))};
+  function layout(){ var w=innerWidth,h=innerHeight; var tile=w<380&&h<380&&Math.abs(w-h)<40;
+    document.body.classList.toggle('tile',tile); document.body.classList.toggle('big',!tile&&h>380); }
+  layout(); addEventListener('resize',layout);
+
+  // ---------- music (Where's West? previews) ----------
+  var SONGS=[['Wave to Come','wave-to-come'],['CLOUDS','clouds'],['Cast Out a Line','cast-out-a-line'],['FREE','free'],['Kitchen','kitchen'],['Light On','light-on'],['STAY','stay']];
+  var audio=new Audio(); audio.preload='none'; var cur=0, muted=false;
+  function load(i){ cur=(i+SONGS.length)%SONGS.length; audio.src='songs/'+SONGS[cur][1]+'.mp3';
+    $('#np-title').textContent="Where's West? — "+SONGS[cur][0]; $$('#np-list button').forEach(function(b,k){b.classList.toggle('on',k===cur);}); }
+  function play(i){ if(i!=null) load(i); audio.muted=muted; audio.play().catch(function(){}); }
+  function sync(){ var on=!audio.paused; $('#play').textContent=on?'❚❚':'▶'; $('#disc').classList.toggle('spin',on); }
+  audio.addEventListener('play',sync); audio.addEventListener('pause',sync);
+  audio.addEventListener('ended',function(){ play(cur+1); });
+  audio.addEventListener('timeupdate',function(){ var d=audio.duration||40, t=audio.currentTime;
+    $('#np-prog').style.width=(t/d*100)+'%'; $('#np-time').textContent='0:'+String(Math.floor(t)).padStart(2,'0')+' / 0:'+String(Math.floor(d)).padStart(2,'0'); });
+  SONGS.forEach(function(s,i){ var b=document.createElement('button'); b.innerHTML='<em>'+(i+1)+'.</em>'+s[0]; b.onclick=function(){ play(i); }; $('#np-list').appendChild(b); });
+  load(0);
+  $('#play').onclick=function(){ audio.paused?play():audio.pause(); };
+  $('#next').onclick=function(){ play(cur+1); }; $('#prev').onclick=function(){ play(cur-1); };
+
+  // ---------- film roll ----------
+  var N=15, ph=0;
+  for(var i=1;i<=N;i++){ (function(i){ var b=document.createElement('button'); b.innerHTML='<img loading="lazy" src="film/'+String(i).padStart(2,'0')+'.jpg" alt="">'; b.onclick=function(){ show(i-1); }; $('#grid').appendChild(b); })(i); }
+  function show(i){ ph=(i+N)%N; $('#photo-img').src='film/'+String(ph+1).padStart(2,'0')+'.jpg'; $('#photo').classList.add('open'); }
+  $('#ph-prev').onclick=function(){ show(ph-1); }; $('#ph-next').onclick=function(){ show(ph+1); };
+  $('#ph-back').onclick=function(){ $('#photo').classList.remove('open'); };
+
+  // ---------- windows + taskbar ----------
+  var open=[], active=null;
+  function drawTabs(){ var t=$('#tabs'); t.innerHTML=''; open.forEach(function(id){ var w=$('#w-'+id), b=document.createElement('button');
+    b.className='btn'+(id===active?' on':''); b.textContent=w.dataset.title; b.onclick=function(){ id===active?minimise(id):focus(id); }; t.appendChild(b); }); }
+  function chrome(w){ if(w.querySelector('.tb')) return; var id=w.id.slice(2), tb=document.createElement('div'); tb.className='tb';
+    tb.innerHTML='<img src="'+w.dataset.icon+'" alt=""><b>'+w.dataset.title+'</b><button class="wb" data-a="min">_</button><button class="wb" data-a="close">✕</button>';
+    tb.querySelector('[data-a=min]').onclick=function(){ minimise(id); }; tb.querySelector('[data-a=close]').onclick=function(){ close(id); };
+    w.insertBefore(tb,w.firstChild); }
+  function focus(id){ $$('.win').forEach(function(w){ w.classList.remove('open'); }); var w=$('#w-'+id); chrome(w); w.classList.add('open'); active=id;
+    if(open.indexOf(id)<0) open.push(id);
+    if(id==='dino'){ var f=$('#dino-frame'); if(!f.src) f.src=f.dataset.src; }
+    if(id==='dance'){ var k=SONGS.findIndex(function(s){return s[0]==='FREE';}); if(audio.paused||cur!==k) play(k); }
+    drawTabs(); }
+  function minimise(id){ $('#w-'+id).classList.remove('open'); active=null; drawTabs(); }
+  function close(id){ minimise(id); open=open.filter(function(x){return x!==id;});
+    if(id==='dino'){ var f=$('#dino-frame'); f.removeAttribute('src'); }
+    if(id==='np'||id==='dance'){ if(open.indexOf('np')<0&&open.indexOf('dance')<0) audio.pause(); }
+    if(id==='film') $('#photo').classList.remove('open');
+    drawTabs(); }
+  $$('[data-open]').forEach(function(b){ b.addEventListener('click',function(){ $('#smenu').classList.remove('open'); $('#start').classList.remove('on'); focus(b.dataset.open); }); });
+  $('#dark').onclick=function(){ document.body.classList.toggle('dark'); };
+  $('#start').onclick=function(e){ e.stopPropagation(); $('#smenu').classList.toggle('open'); this.classList.toggle('on'); };
+  $('#shut').onclick=function(){ open.slice().forEach(close); $('#smenu').classList.remove('open'); $('#start').classList.remove('on'); };
+  document.addEventListener('click',function(e){ if(!e.target.closest('#smenu')&&!e.target.closest('#start')){ $('#smenu').classList.remove('open'); $('#start').classList.remove('on'); } });
+
+  // ---------- tray clock (24h, like mocial.org) ----------
+  function tick(){ var d=new Date(); $('#clock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+  tick(); setInterval(tick,10000);
+  document.addEventListener('visibilitychange',function(){ if(document.hidden) audio.pause(); });
+
+  window.Mocial={ mute:function(m){ muted=!!m; audio.muted=muted; if(m) audio.pause(); }, open:focus, close:close, play:play,
+    getState:function(){ return {open:open.slice(),active:active,playing:!audio.paused,song:SONGS[cur][0]}; } };
+})();
+</script>
+</body>
+</html>
