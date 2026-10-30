@@ -1,84 +1,3 @@
-
-// Function to close the popup
-function closePopup() {
-    document.getElementById("popup").style.display = "none";
-}
-
-// Function to open the popup
-function openPopup() {
-    document.getElementById("popup").style.display = "block";
-}
-
-// Open the popup automatically after 3 seconds (3000 milliseconds)
-window.onload = function() {
-    setTimeout(function() {
-        openPopup();
-    }, 3000);
-};
-
-// Function to position the popup randomly
-function positionPopupRandomly() {
-    const popup = document.getElementById("popup-content");
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const popupWidth = popup.offsetWidth;
-    const popupHeight = popup.offsetHeight;
-
-    // Ensuring the popup stays within the horizontal bounds of the viewport
-    const maxX = viewportWidth - popupWidth;
-    const randomX = Math.random() * maxX;
-
-    // Ensuring the popup stays within the vertical bounds of the viewport
-    const maxY = viewportHeight - popupHeight;
-    const randomY = Math.random() * maxY;
-
-    // Apply the random position
-    popup.style.left = randomX + 'px';
-    popup.style.top = randomY + 'px';
-}
-
-
-function makePopupDraggable() {
-    const popup = document.getElementById("popup-content");
-    let isDragging = false;
-    let dragStartX, dragStartY;
-
-
-    function onMouseMove(e) {
-        if (!isDragging) return;
-
-        let newX = popup.offsetLeft + (e.clientX - dragStartX);
-        let newY = popup.offsetTop + (e.clientY - dragStartY);
-
-        popup.style.left = newX + 'px';
-        popup.style.top = newY + 'px';
-
-        dragStartX = e.clientX;
-        dragStartY = e.clientY;
-    }
-
-    function onMouseUp() {
-        isDragging = false;
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
-    }
-
-    popup.addEventListener('dragstart', function(e) {
-        e.preventDefault(); // Prevent default drag behavior
-    });
-}
-
-// Open the popup and make it draggable
-window.onload = function() {
-    setTimeout(function() {
-        openPopup();
-        positionPopupRandomly();
-        makePopupDraggable();
-    }, 3000);
-};
-
-
-
 $(document).ready(function() {
     $("#canary-yellow-wrapper").draggable();
 });
@@ -161,6 +80,18 @@ function makeElementDraggable(elementId, onClick, onDragEnd, onDragMove) {
     var startX = 0, startY = 0, dragged = false;
 
     element.onmousedown = dragMouseDown;
+
+    // The icon's label link is its tab stop; anything without one gets its own
+    if (!element.querySelector("a[href], button")) {
+        element.tabIndex = 0;
+        element.setAttribute("role", "button");
+    }
+    element.addEventListener("keydown", function(e) {
+        if ((e.key === "Enter" || e.key === " ") && typeof onClick === 'function') {
+            e.preventDefault();
+            onClick();
+        }
+    });
 
     function dragMouseDown(e) {
         e.preventDefault();
@@ -390,9 +321,18 @@ function isWindowOnScreen(el) {
     return el.id !== "password-dialog" && el.getClientRects().length > 0;
 }
 
+// Windows on screen as of the last check. Anything new since then has just
+// been opened - by showPopup or any of the paths that show a window directly -
+// and goes on top.
+var windowsOnScreen = [];
+
 function syncOpenWindowClass() {
-    var anyOpen = [].some.call(document.querySelectorAll(".popup-window"), isWindowOnScreen);
-    document.body.classList.toggle("has-open-window", anyOpen);
+    var open = [].filter.call(document.querySelectorAll(".popup-window"), isWindowOnScreen);
+    open.forEach(function(win) {
+        if (windowsOnScreen.indexOf(win) === -1) bringToFront(win);
+    });
+    windowsOnScreen = open;
+    document.body.classList.toggle("has-open-window", open.length > 0);
     renderTaskbar();
 }
 
@@ -420,7 +360,8 @@ function renderTaskbar() {
         var btn = document.createElement("button");
         btn.type = "button";
         btn.className = "task-button task-button-window" +
-                        (win.classList.contains("iconize") ? " is-minimised" : "");
+                        (win.classList.contains("iconize") ? " is-minimised" :
+                         isFrontWindow(win) ? " is-front" : "");
 
         var img = document.createElement("img");
         img.src = windowIcons[win.id] || TASKBAR_FALLBACK_ICON;
@@ -432,8 +373,17 @@ function renderTaskbar() {
         label.textContent = titleEl.textContent.trim();
         btn.appendChild(label);
 
+        // Taskbar buttons work like Windows': a minimised window comes back on
+        // top, a buried one is raised, and only the front one minimises
         btn.addEventListener("click", function() {
-            $(win).toggleClass("iconize").removeClass("resize");
+            if (win.classList.contains("iconize")) {
+                $(win).removeClass("iconize");
+                bringToFront(win);
+            } else if (isFrontWindow(win)) {
+                $(win).addClass("iconize").removeClass("resize");
+            } else {
+                bringToFront(win);
+            }
         });
 
         tasks.appendChild(btn);
@@ -611,14 +561,29 @@ function flyPopupOut(popupEl, originEl) {
     }, 300);
 }
 
+// Some windows' home spots sit below the fold (the "popups on open" layout
+// spreads them down the page), so opening one from a folder could put it
+// off the bottom of the screen. Anything that would open out of view is
+// pulled back in, near the top left of what's showing; a window that's
+// already in view stays where it is.
+function keepOnScreen(win) {
+    var r = win.getBoundingClientRect();
+    var footer = document.querySelector("footer");
+    var bottom = window.innerHeight - (footer ? footer.offsetHeight : 0);
+    if (r.top >= 0 && r.top < bottom - 60 && r.left >= 0 && r.left < window.innerWidth - 60) return;
+    win.style.left = (window.scrollX + Math.max(12, Math.min(r.left, window.innerWidth - r.width - 12))) + "px";
+    win.style.top = (window.scrollY + Math.max(12, Math.min(60, bottom - r.height - 12))) + "px";
+}
+
 // Show a popup by id, flying it in from originEl (an icon element) if enabled
 function showPopup(popupId, originEl) {
     var popup = document.getElementById(popupId);
     if (!popup) return;
     $(popup).show();
 
+    bringToFront(popup);
+
     if (isMobileLayout() && MOBILE_TREATMENT === "fullscreen") {
-        popup.style.zIndex = ++mobileTopZ;
         flyPopupIn(popup, originEl);
         return;
     }
@@ -628,6 +593,8 @@ function showPopup(popupId, originEl) {
     // already on screen and the page doesn't lurch under you.
     if (isMobileLayout()) {
         popup.style.order = ++stackedOrder;
+    } else {
+        keepOnScreen(popup);
     }
 
     flyPopupIn(popup, originEl);
@@ -645,6 +612,144 @@ document.getElementById("fly-in-on").addEventListener("change", function() {
 });
 document.getElementById("fly-in-off").addEventListener("change", function() {
     if (this.checked) POPUP_FLY_IN = false;
+});
+
+// ===== Window stacking ======================================================
+//
+// main.css puts every window at z-index 10000 (a couple at 10001/10002), so on
+// their own the last one in index.html always wins, whatever you clicked.
+// Whichever window is opened, clicked, focused or picked from the taskbar
+// takes the next number up instead. The count stays under the clock flyout's
+// 30000 (and the phone fullscreen stack's 20000) by renumbering everything
+// in its current order once it gets high.
+var WINDOW_BASE_Z = 10010;
+var WINDOW_MAX_Z = 19000;
+var windowTopZ = WINDOW_BASE_Z;
+
+function usesMobileStack() {
+    return isMobileLayout() && MOBILE_TREATMENT === "fullscreen";
+}
+
+function renumberWindows() {
+    var stacked = [].filter.call(document.querySelectorAll(".popup-window"), function(win) {
+        return +win.style.zIndex > WINDOW_BASE_Z && +win.style.zIndex < 20000;
+    }).sort(function(a, b) { return a.style.zIndex - b.style.zIndex; });
+    windowTopZ = WINDOW_BASE_Z;
+    stacked.forEach(function(win) { win.style.zIndex = ++windowTopZ; });
+}
+
+function isFrontWindow(win) {
+    return +win.style.zIndex === (usesMobileStack() ? mobileTopZ : windowTopZ);
+}
+
+function bringToFront(win) {
+    // The password dialog has its own layer above the whole desktop
+    if (!win || win.id === "password-dialog" || isFrontWindow(win)) return;
+    if (usesMobileStack()) {
+        win.style.zIndex = ++mobileTopZ;
+        return;
+    }
+    if (windowTopZ >= WINDOW_MAX_Z) renumberWindows();
+    win.style.zIndex = ++windowTopZ;
+}
+
+function windowFor(el) {
+    return el && el.closest ? el.closest(".popup-window") : null;
+}
+
+// Capture phase, so a window's own handlers can't swallow the click first
+document.addEventListener("mousedown", function(e) {
+    bringToFront(windowFor(e.target));
+}, true);
+document.addEventListener("focusin", function(e) {
+    bringToFront(windowFor(e.target));
+});
+
+// Clicks inside an iframe (the games, the shop, the PDFs) never reach this
+// document. What does is the page losing focus to the frame, so check which
+// frame has it - and keep checking while focus stays in frames, because
+// moving from one frame to another doesn't blur the page a second time.
+var framePollTimer = null;
+var lastFocusedFrame = null;
+function checkFocusedFrame() {
+    var el = document.activeElement;
+    if (el && el.tagName === "IFRAME") {
+        if (el !== lastFocusedFrame) bringToFront(windowFor(el));
+        lastFocusedFrame = el;
+        return;
+    }
+    // Focus is back in the page itself (or the tab is in the background)
+    clearInterval(framePollTimer);
+    framePollTimer = null;
+    lastFocusedFrame = null;
+}
+window.addEventListener("blur", function() {
+    setTimeout(checkFocusedFrame, 0);
+    if (!framePollTimer) framePollTimer = setInterval(checkFocusedFrame, 250);
+});
+
+// ===== Window buttons and maximise ==========================================
+//
+// One listener for every window's minimise/maximise/close, whether the
+// buttons are written in index.html or built by buildWindowChrome - each
+// carries a data-win-action instead of its own inline onclick.
+//
+// Maximised windows fill the screen above the taskbar (.resize in main.css).
+// The title bar and taskbar heights are measured when it's maximised rather
+// than hardcoded, since the title bar is sized in vw on some screens.
+function toggleMaximised(win) {
+    var header = win.querySelector(".windows-header-wrapper");
+    var footer = document.querySelector("footer");
+    win.style.setProperty("--win-header-h", (header ? header.offsetHeight : 0) + "px");
+    document.documentElement.style.setProperty("--taskbar-h", (footer ? footer.offsetHeight : 0) + "px");
+    $(win).toggleClass("resize").removeClass("iconize");
+
+    var max = win.querySelector('.win-btn[data-win-action="max"]');
+    if (max) max.setAttribute("aria-label", win.classList.contains("resize") ? "Restore" : "Maximize");
+    bringToFront(win);
+    if (win.id === "shop-window") fitShopFrame();
+}
+
+document.addEventListener("click", function(e) {
+    var btn = e.target.closest && e.target.closest(".win-btn[data-win-action]");
+    var win = windowFor(btn);
+    if (!win) return;
+    var action = btn.getAttribute("data-win-action");
+    if (action === "min") {
+        $(win).toggleClass("iconize").removeClass("resize");
+    } else if (action === "max") {
+        toggleMaximised(win);
+    } else if (action === "close") {
+        $(win).hide();
+    }
+});
+
+// Double-clicking a title bar maximises, the way it does in Windows - but only
+// on windows that have a maximise button to begin with
+document.addEventListener("dblclick", function(e) {
+    var header = e.target.closest && e.target.closest(".windows-header-wrapper");
+    var win = windowFor(header);
+    if (!win || isMobileLayout() || e.target.closest(".win-btn")) return;
+    if (win.querySelector('.win-btn[data-win-action="max"]')) toggleMaximised(win);
+});
+
+// A maximised window stays put: dragging its title bar does nothing until
+// it's restored. jQuery UI cancels the drag when its start event is prevented.
+$(document).on("dragstart", ".popup-window.resize", function(e) {
+    e.preventDefault();
+});
+
+// ===== Keyboard =============================================================
+//
+// The desktop icons and the files in folder windows are divs, so they're
+// given role="button" and a tab stop where they're built, and this makes
+// Enter and Space press them like a real button would.
+document.addEventListener("keydown", function(e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var el = e.target;
+    if (!el.matches || !el.matches('[role="button"]') || el.tagName === "BUTTON") return;
+    e.preventDefault();
+    el.click();
 });
 
 function openSettingsWindow(originEl) {
@@ -886,18 +991,30 @@ var filesData = {
         { type: "file", name: "ceci_linkedin", openPopup: "press-linkedin-window" }
     ],
     patent: [
-        { type: "file", name: "application" },
+        { type: "file", name: "application", openPopup: "ambient-streaming-window" },
         { type: "file", name: "figures", openPopup: "patent-figures-window" }
     ],
+    // The Ski Man videos belong here one by one; until then, the account
     virality: [
-        { type: "file", name: "tiktok1" },
-        { type: "file", name: "tiktok2" },
-        { type: "file", name: "tiktok3" },
-        { type: "file", name: "tiktok4" },
-        { type: "file", name: "tiktok5" }
+        { type: "file", name: "@griffinlaszlo", url: "https://www.tiktok.com/@griffinlaszlo" }
     ],
     png: []
 };
+
+// Folder entries are divs; this gives them a tab stop and the button role the
+// keyboard listener presses on Enter and Space
+function makeFileItemFocusable(el) {
+    el.tabIndex = 0;
+    el.setAttribute("role", "button");
+}
+
+// What an empty folder shows, the way Explorer says so instead of a blank pane
+function emptyFolderNote() {
+    var note = document.createElement("p");
+    note.className = "files-empty";
+    note.textContent = "This folder is empty.";
+    return note;
+}
 
 function renderFilesGrid(folderKey) {
     var grid = document.getElementById("files-grid");
@@ -906,18 +1023,21 @@ function renderFilesGrid(folderKey) {
     if (FILES_TREATMENT === "inline" && folderKey !== "root") {
         var back = document.createElement("div");
         back.className = "file-item";
+        makeFileItemFocusable(back);
         back.innerHTML = '<img src="tomato.gif" class="back-icon" draggable="false"><span>back</span>';
         back.onclick = function() { renderFilesGrid("root"); };
         grid.appendChild(back);
     }
 
     var items = filesData[folderKey] || [];
+    if (!items.length) grid.appendChild(emptyFolderNote());
     items.forEach(function(item) {
         var el = document.createElement("div");
         el.className = "file-item";
         var icon = item.type === "folder" ? "folder-icon.png" : "fileicon.png";
         var iconClass = item.type === "folder" ? "" : " file-type-icon";
         el.innerHTML = '<img src="' + icon + '" class="' + iconClass.trim() + '" draggable="false"><span>' + item.name + "</span>";
+        makeFileItemFocusable(el);
         if (item.type === "folder") {
             el.onclick = function() {
                 if (FILES_TREATMENT === "popup") {
@@ -942,10 +1062,12 @@ function openFolderContents(folderKey) {
     grid.innerHTML = "";
 
     var items = filesData[folderKey] || [];
+    if (!items.length) grid.appendChild(emptyFolderNote());
     items.forEach(function(item) {
         var el = document.createElement("div");
         el.className = "file-item";
         el.innerHTML = '<img src="fileicon.png" class="file-type-icon" draggable="false"><span>' + item.name + "</span>";
+        makeFileItemFocusable(el);
         if (item.openPopup) {
             el.onclick = function() { showPopup(item.openPopup, el); };
         } else if (item.url) {
@@ -1073,6 +1195,7 @@ function renderDesktopFolder(folderKey) {
         el.innerHTML = item.icon
             ? '<img src="' + item.icon + '" class="app-type-icon" draggable="false"><span>' + item.name + "</span>"
             : '<img src="fileicon.png" class="file-type-icon" draggable="false"><span>' + item.name + "</span>";
+        makeFileItemFocusable(el);
         el.onclick = function() {
             var popup = document.getElementById(item.popup);
             if (popup && $(popup).is(":hidden")) showPopup(item.popup, el);
@@ -1118,7 +1241,6 @@ var NOT_A_VIRUS_POPUPS = [
 var STORM_STAGGER_MS = 170;
 var stormWindows = [];
 var stormTimers = [];   // windows still on their way, and AntiVirus's arrival
-var stormTopZ = 10200;
 
 windowIcons["antivirus-window"] = "not-a-virus-icon.svg";
 
@@ -1171,7 +1293,7 @@ function showAntivirus() {
     if (!isMobileLayout()) {
         antivirus.style.left = Math.max(12, (window.innerWidth - 340) / 2) + "px";
         antivirus.style.top = (window.scrollY + 110) + "px";
-        antivirus.style.zIndex = ++stormTopZ;
+        bringToFront(antivirus);
     }
     showPopup("antivirus-window", document.getElementById("files-icon-group"));
 }
@@ -1196,7 +1318,7 @@ function startVirusStorm() {
             var r = win.getBoundingClientRect();
             win.style.left = randomBetween(8, Math.max(8, window.innerWidth - r.width - 8)) + "px";
             win.style.top = (window.scrollY + randomBetween(70, Math.max(70, window.innerHeight - r.height - 50))) + "px";
-            win.style.zIndex = ++stormTopZ;
+            bringToFront(win);
             flyPopupIn(win, origin);
         }, i * STORM_STAGGER_MS));
     });
@@ -2224,9 +2346,14 @@ function buildWindowChrome(win, titleText) {
     var icons = document.createElement("div");
     icons.className = "window-icons";
 
-    function button(glyphClass, onClick) {
-        var btn = document.createElement("span");
+    // Real buttons, so they take keyboard focus; the click itself is handled
+    // for every window at once by the data-win-action listener
+    function button(action, label, glyphClass) {
+        var btn = document.createElement("button");
+        btn.type = "button";
         btn.className = "win-btn";
+        btn.setAttribute("data-win-action", action);
+        btn.setAttribute("aria-label", label);
         if (glyphClass) {
             var glyph = document.createElement("span");
             glyph.className = "glyph " + glyphClass;
@@ -2234,17 +2361,12 @@ function buildWindowChrome(win, titleText) {
         } else {
             btn.innerHTML = "&#10005;";
         }
-        btn.addEventListener("click", onClick);
         return btn;
     }
 
-    icons.appendChild(button("glyph-min", function() {
-        $(win).toggleClass("iconize").removeClass("resize");
-    }));
-    icons.appendChild(button("glyph-max", function() {
-        $(win).toggleClass("resize").removeClass("iconize");
-    }));
-    icons.appendChild(button(null, function() { $(win).hide(); }));
+    icons.appendChild(button("min", "Minimize", "glyph-min"));
+    icons.appendChild(button("max", "Maximize", "glyph-max"));
+    icons.appendChild(button("close", "Close", null));
 
     header.appendChild(icons);
     return header;
