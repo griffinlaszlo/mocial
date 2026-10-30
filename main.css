@@ -17,49 +17,6 @@
     height: 100%; /* Take full height of the viewport */
 }
 
-.popup {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top of other content */
-    left: 0;
-    top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.4); /* Black with opacity */
-    border-width: 20ch;
-}
-
-
-.popup-content {
-    position: absolute; /* Changed from 'margin' to 'position' */
-    background-color: #fefefe;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 300px; /* Fixed width */
-    /* Remove margin and add initial top and left values */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-
-.close-btn {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close-btn:hover,
-.close-btn:focus {
-    color: red;
-    text-decoration: none;
-    cursor: url('cursor-pointer.png') 8 0, pointer;
-}
-
-
-
 html {
     min-height: 100%;
     /* cursor: url('cursor-arrow.png') 1 0, auto; */
@@ -467,6 +424,14 @@ footer {
     text-decoration: none;
 }
 
+/* Tabbing onto an icon rings its label in dots, the way the desktop marks
+   the focused icon in Windows. Enter or Space then opens it (main.js). */
+.desktop-icon-group a:focus-visible,
+.desktop-icon-group[role="button"]:focus-visible {
+    outline: 1px dotted currentColor;
+    outline-offset: 1px;
+}
+
 #computer-icon-label {
     top: 78px; /* 118px original - 40px group top */
 }
@@ -680,6 +645,12 @@ body.bottom-bar-classic .taskbar {
 .window-icons .win-btn:active {
     border-style: inset;
 }
+/* These are <button>s now, so clear what browsers add to buttons */
+.window-icons .win-btn {
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 0;
+}
 .win-btn .glyph {
     display: block;
 }
@@ -696,6 +667,36 @@ body.bottom-bar-classic .taskbar {
     border: 2px solid #000;
     border-top-width: 3px;
     box-sizing: border-box;
+}
+/* Once maximised the button restores, so it shows Windows' restore glyph:
+   two small windows, one in front of the other */
+.popup-window.resize .win-btn .glyph-max {
+    position: relative;
+    border: 0;
+}
+.popup-window.resize .win-btn .glyph-max::before,
+.popup-window.resize .win-btn .glyph-max::after {
+    content: "";
+    position: absolute;
+    width: 72%;
+    height: 72%;
+    border: 1px solid #000;
+    border-top-width: 2px;
+    box-sizing: border-box;
+    background: #d8d8d8;
+}
+.popup-window.resize .win-btn .glyph-max::before {
+    top: 0;
+    right: 0;
+}
+.popup-window.resize .win-btn .glyph-max::after {
+    bottom: 0;
+    left: 0;
+}
+/* The Win95 focus ring: a dotted line just inside the button */
+.window-icons .win-btn:focus-visible {
+    outline: 1px dotted #000;
+    outline-offset: -4px;
 }
 
 
@@ -714,19 +715,45 @@ body.bottom-bar-classic .taskbar {
 .popup-window.iconize .popup-inner-wrapper {
     display: none;
 }
-/*
-.popup-window.resize {
-    width: 50vw;
-    left: 50vw;
-    top: 0;
-    margin-top: 0;
-    height: calc(100vh);
-    background-color: #fff;
+/* Maximised: the window fills the screen above the taskbar. Fixed rather than
+   absolute so it covers the viewport wherever the page is scrolled, and
+   !important because dragging and the windows' own rules set their size and
+   position inline. --win-header-h and --taskbar-h are measured by
+   toggleMaximised in main.js. Desktop only - on phones every window already
+   has the whole width. */
+@media screen and (min-width: 961px) {
+    .popup-window.resize {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        right: auto !important;
+        bottom: auto !important;
+        width: 100vw !important;
+        max-width: none !important;
+        height: calc(100vh - var(--taskbar-h, 0px)) !important;
+        max-height: none !important;
+        margin: 0 !important;
+        transform: none !important;
+        box-sizing: border-box;
+        overflow: hidden;
+    }
+    .popup-window.resize .popup-inner-wrapper {
+        height: calc(100% - var(--win-header-h, 0px)) !important;
+        max-height: none !important;
+        box-sizing: border-box;
+        overflow: auto;
+    }
+    /* Frames (PDFs, games, the shop) stretch to the window instead of
+       keeping the size they're drawn at normally */
+    .popup-window.resize .popup-inner-wrapper > iframe,
+    .popup-window.resize .popup-inner-wrapper .pdf-viewer,
+    .popup-window.resize .popup-inner-wrapper .game-viewer {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+    }
 }
-.popup-window.resize .popup-inner-wrapper {
-    margin-top: 14vh;
-}
-*/
 
 
 .popup-window .windows-header-wrapper {
@@ -1385,6 +1412,18 @@ body.dark-mode .notepad-status {
     cursor: url('cursor-pointer.png') 8 0, pointer;
 }
 
+/* Folder entries take keyboard focus; dotted ring like Explorer's */
+.file-item:focus-visible {
+    outline: 1px dotted #000;
+    outline-offset: 2px;
+}
+.files-empty {
+    margin: 0;
+    font-family: 'W95FA', sans-serif;
+    font-size: 12px;
+    color: #555;
+}
+
 .file-item img {
     width: 48px;
     height: auto;
@@ -1606,6 +1645,10 @@ body.mobile-fullscreen .popup-window.iconize .popup-inner-wrapper {
 }
 .task-button-window {
     font-weight: bold;
+}
+/* The window in front is the pressed task, like the page's own button */
+.task-button-window.is-front {
+    border-style: inset;
 }
 
 .taskbar-tray {

@@ -38,6 +38,24 @@ Each popup is a `.popup-window` div with a title bar carrying minimize
 draggable; each new window needs a `$("#id").draggable()` call in `main.js`
 and a position block in `main.css`.
 
+The title-bar buttons are `<button>`s with a `data-win-action` of `min`,
+`max` or `close`, and one listener in `main.js` handles them for every
+window. Use the same markup in new windows instead of an inline `onclick`
+(`buildWindowChrome` already does). Maximize fills the screen above the
+taskbar, and so does double-clicking a title bar. A maximized window can't
+be dragged until it's restored.
+
+Whichever window is opened, clicked, focused or picked from the taskbar comes
+to the front (`bringToFront`). This includes clicks inside a window's iframe.
+The front window's taskbar button shows as pressed. Clicking a buried
+window's taskbar button raises it, and clicking the front one minimizes it.
+A window that would open off-screen is moved into view (`keepOnScreen`).
+
+Keyboard: Tab reaches the desktop icons, folder entries and title-bar
+buttons, and Enter or Space opens or presses them. Folder entries get this
+from `makeFileItemFocusable`. Windows themselves can't be moved with the
+keyboard yet.
+
 Corner-resizing is deliberately off. The border and content visibly detached
 from the resize handle mid-drag and it couldn't be verified live, so the
 `.resizable()` call is commented out rather than left half-working.
@@ -212,13 +230,13 @@ nothing. The absolutely-positioned desktop icons stay put and overlay the
 stacked windows. This predates the folder work and affects Now Playing and
 settings identically. Fixing it is the blocker before any real launch.
 
-**The `college` icon has no click handler.** It drags but does nothing.
+**Now Playing's `virality` folder only links to the TikTok account.** The
+five `tiktok1`–`tiktok5` placeholders did nothing, so they were replaced by
+one `@griffinlaszlo` link until the real videos are picked. `png` is empty
+and says so.
 
-**HTTPS on the custom domain is broken.** `https://mocial.org` fails
-certificate validation — only `http://` serves the site. DNS is correct (the
-four GitHub Pages IPs), so it's the Pages TLS certificate for the custom
-domain: re-provision by toggling the domain off and on in the repo's Pages
-settings, then enable "Enforce HTTPS".
+**The shop empties the cart as soon as the order email opens.** Cancelling
+the email loses the order. Left for when merch is actually set up.
 
 **The icon column overflows on a short viewport.** At around 375×500 the lower
 desktop icons run past the bottom of the screen and sit behind the taskbar,
