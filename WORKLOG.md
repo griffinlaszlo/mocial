@@ -2,8 +2,7 @@
 
 Running record of work sessions on mocial. Newest first.
 
-Note: this file is in a public repo. Never write the gate password here — see
-the note in the README's Deploying section.
+Never write the gate password here.
 
 ---
 

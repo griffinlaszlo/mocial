@@ -60,12 +60,3 @@ label have to match), then re-run:
 ```bash
 python3 build_colorways.py
 ```
-
-## Running it standalone
-
-```bash
-python3 -m http.server 8899
-```
-
-Then open `http://localhost:8899/index.html` from this folder. It doesn't
-need mocial running to work.

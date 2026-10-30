@@ -15,15 +15,7 @@ No build step, no framework. Three files do the work:
 Dependencies are two CDN script tags: jQuery and jQuery UI (used only for
 `.draggable()` on the popup windows).
 
-## Running it locally
-
-```bash
-python3 -m http.server 8899
-```
-
-Then open `http://localhost:8899`. Use a server rather than opening
-`index.html` directly — several windows embed PDFs in iframes, which browsers
-block over `file://`.
+## Cache-busting
 
 `index.html` links its assets with cache-busting query strings
 (`main.css?v=9`, `main.js?v=13`). Bump those when you change either file, or
@@ -241,18 +233,3 @@ the email loses the order. Left for when merch is actually set up.
 **The icon column overflows on a short viewport.** At around 375×500 the lower
 desktop icons run past the bottom of the screen and sit behind the taskbar,
 needing a scroll to reach.
-
-## Deploying
-
-GitHub Pages serves the `main` branch, and `CNAME` points it at mocial.org.
-Merging to `main` and pushing puts changes live immediately — there is no
-staging step. Work on a branch until you actually want it public.
-
-The site is published, and `REQUIRE_PASSWORD` is `true`, so every visitor meets
-the gate rather than the desktop. To change the password, open the console on
-the site, run `hashPassword("the new one")`, and paste the result into
-`SITE_PASSWORD_HASH` in `index.html`. Don't write the password itself into this
-repo — it's public.
-
-Remember the gate is a doorman, not a lock: the page is a static file, so its
-full markup ships to every visitor whether or not they get past the dialog.

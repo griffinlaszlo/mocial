@@ -7,36 +7,6 @@ so the conversion can't happen "on the site" in the literal sense. This is the
 piece that does the work, running on your own machine. The popup talks to it
 over localhost.
 
-## Setup
-
-```bash
-brew install yt-dlp ffmpeg
-```
-
-That's the whole dependency list. `server.py` is stdlib-only — nothing to pip
-install, no virtualenv.
-
-## Running
-
-```bash
-python3 converter/server.py
-```
-
-It listens on `http://127.0.0.1:8770` and prints which of `yt-dlp` / `ffmpeg`
-it found. Leave it running in a terminal while you use the site.
-
-To keep the files somewhere other than `/tmp`, or to move the port:
-
-```bash
-MOCIAL_CONVERTER_PORT=9000 MOCIAL_CONVERTER_DIR=~/Music/mocial python3 converter/server.py
-```
-
-If you move the port, tell the site where to look — from the browser console:
-
-```js
-localStorage.setItem("mocial-converter-api", "http://127.0.0.1:9000")
-```
-
 ## Adding a format
 
 Everything format-specific lives in the `FORMATS` table at the top of
