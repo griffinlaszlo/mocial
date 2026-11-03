@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>clouds</title>
+<!--
+  clouds — flying low over an endless cloud bank. A from-scratch rebuild of
+  the idea behind mr.doob's "Clouds" (mrdoob.com/#/131/clouds): thousands of
+  flat cloud sprites strung out ahead of the camera, faded into a blue fog.
+
+  No libraries and no image files. Plain WebGL, and the cloud sprite is
+  painted onto a canvas at load. Move the mouse (or drag a finger) to steer.
+
+  Two identical strips of clouds sit end to end; the camera flies down the
+  first and, as it reaches the end, jumps back to the matching spot in it,
+  so the flight never ends and never visibly loops.
+-->
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#326697}
+  canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}
+</style>
+</head>
+<body>
+<canvas id="sky"></canvas>
+<script>
+(function(){
+  var COUNT = 8000;          // clouds per strip; a strip is COUNT units long
+  var SPEED = 0.03;          // units per millisecond
+  var FOG_NEAR = -100, FOG_FAR = 3000;
+  var SKY_TOP = [0x1e/255, 0x48/255, 0x77/255];
+  var FOG = [0x45/255, 0x84/255, 0xb4/255];
+
+  var canvas = document.getElementById("sky");
+  var gl = canvas.getContext("webgl", { antialias: false, alpha: false });
+  if (!gl) {
+    document.body.style.background = "linear-gradient(#1e4877, #4584b4 50%)";
+    return;
+  }
+
+  // Seeded, so the cloud bank is the same every time it's opened
+  var seed = 131;
+  function rand() {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  }
+
+  // ---------- the cloud sprite ----------
+  // A cluster of soft white puffs, wider than tall with a flatter base,
+  // then shaded blue-grey toward the bottom so the bank has some weight.
+  function paintCloud() {
+    var S = 256, c = document.createElement("canvas");
+    c.width = c.height = S;
+    var g = c.getContext("2d");
+    for (var k = 0; k < 46; k++) {
+      var a = rand() * Math.PI * 2, d = Math.sqrt(rand());
+      var x = S / 2 + Math.cos(a) * d * 62;
+      var y = S / 2 + 10 + Math.sin(a) * d * 26 - rand() * 20;
+      var r = 22 + rand() * 34;
+      var grad = g.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, "rgba(255,255,255,0.32)");
+      grad.addColorStop(0.55, "rgba(255,255,255,0.14)");
+      grad.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = grad;
+      g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    }
+    g.globalCompositeOperation = "source-atop";
+    var shade = g.createLinearGradient(0, S * 0.3, 0, S * 0.75);
+    shade.addColorStop(0, "rgba(255,255,255,0)");
+    shade.addColorStop(1, "rgba(150,172,200,0.55)");
+    g.fillStyle = shade;
+    g.fillRect(0, 0, S, S);
+    return c;
+  }
+
+  var tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, paintCloud());
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+  // ---------- the cloud bank ----------
+  // One quad per cloud, baked into a single buffer. They're laid down in
+  // order of z, far to near, so drawing them in buffer order paints back to
+  // front and the transparency comes out right without any sorting.
+  var verts = new Float32Array(COUNT * 4 * 5);
+  var index = new Uint16Array(COUNT * 6);
+  var CORNERS = [[-1, -1, 0, 1], [1, -1, 1, 1], [1, 1, 1, 0], [-1, 1, 0, 0]];
+  for (var i = 0, v = 0; i < COUNT; i++) {
+    var cx = rand() * 1000 - 500;
+    var cy = -rand() * rand() * 200 - 15;
+    var spin = rand() * Math.PI, cos = Math.cos(spin), sin = Math.sin(spin);
+    var half = 32 * (rand() * rand() * 1.5 + 0.5);
+    for (var k = 0; k < 4; k++) {
+      var px = CORNERS[k][0] * half, py = CORNERS[k][1] * half;
+      verts[v++] = cx + px * cos - py * sin;
+      verts[v++] = cy + px * sin + py * cos;
+      verts[v++] = i;
+      verts[v++] = CORNERS[k][2];
+      verts[v++] = CORNERS[k][3];
+    }
+    var q = i * 4, n = i * 6;
+    index[n] = q; index[n + 1] = q + 1; index[n + 2] = q + 2;
+    index[n + 3] = q; index[n + 4] = q + 2; index[n + 5] = q + 3;
+  }
+  var cloudBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, cloudBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+  var indexBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuf);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, index, gl.STATIC_DRAW);
+
+  var skyBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, skyBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+
+  // ---------- shaders ----------
+  function program(vs, fs) {
+    function shader(type, src) {
+      var s = gl.createShader(type);
+      gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw gl.getShaderInfoLog(s);
+      return s;
+    }
+    var p = gl.createProgram();
+    gl.attachShader(p, shader(gl.VERTEX_SHADER, vs));
+    gl.attachShader(p, shader(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    return p;
+  }
+
+  // Sky: top colour fading into the fog colour by the middle of the screen,
+  // so the far clouds melt into the horizon
+  var skyProg = program(
+    "attribute vec2 pos; varying float h;" +
+    "void main(){ h = pos.y * 0.5 + 0.5; gl_Position = vec4(pos, 0.0, 1.0); }",
+    "precision mediump float; varying float h; uniform vec3 top, fog;" +
+    "void main(){ gl_FragColor = vec4(mix(fog, top, smoothstep(0.5, 1.0, h)), 1.0); }"
+  );
+
+  // Clouds: every cloud faces the camera (it never turns), so the view is
+  // just an offset. Distance comes back out of gl_FragCoord for the fog,
+  // and clouds right on top of the camera fade out instead of filling the
+  // window as it passes through them.
+  var cloudProg = program(
+    "attribute vec3 pos; attribute vec2 uv; uniform mat4 proj; uniform vec3 eye;" +
+    "varying vec2 vUv;" +
+    "void main(){ vUv = uv; gl_Position = proj * vec4(pos - eye, 1.0); }",
+    "precision mediump float; varying vec2 vUv; uniform sampler2D tex;" +
+    "uniform vec3 fog; uniform vec2 fogRange;" +
+    "void main(){" +
+    "  float depth = gl_FragCoord.z / gl_FragCoord.w;" +
+    "  vec4 c = texture2D(tex, vUv);" +
+    "  c.a *= smoothstep(0.0, 120.0, depth);" +
+    "  gl_FragColor = vec4(mix(c.rgb, fog, smoothstep(fogRange.x, fogRange.y, depth)), c.a);" +
+    "}"
+  );
+
+  var skyPos = gl.getAttribLocation(skyProg, "pos");
+  var cPos = gl.getAttribLocation(cloudProg, "pos");
+  var cUv = gl.getAttribLocation(cloudProg, "uv");
+  var uProj = gl.getUniformLocation(cloudProg, "proj");
+  var uEye = gl.getUniformLocation(cloudProg, "eye");
+
+  gl.useProgram(skyProg);
+  gl.uniform3fv(gl.getUniformLocation(skyProg, "top"), SKY_TOP);
+  gl.uniform3fv(gl.getUniformLocation(skyProg, "fog"), FOG);
+  gl.useProgram(cloudProg);
+  gl.uniform3fv(gl.getUniformLocation(cloudProg, "fog"), FOG);
+  gl.uniform2f(gl.getUniformLocation(cloudProg, "fogRange"), FOG_NEAR, FOG_FAR);
+  gl.uniform1i(gl.getUniformLocation(cloudProg, "tex"), 0);
+
+  gl.disable(gl.DEPTH_TEST);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+  // ---------- size ----------
+  var W = 1, H = 1;
+  function perspective(fovDeg, aspect, near, far) {
+    var f = 1 / Math.tan(fovDeg * Math.PI / 360), nf = 1 / (near - far);
+    return new Float32Array([
+      f / aspect, 0, 0, 0,
+      0, f, 0, 0,
+      0, 0, (far + near) * nf, -1,
+      0, 0, 2 * far * near * nf, 0
+    ]);
+  }
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.useProgram(cloudProg);
+    gl.uniformMatrix4fv(uProj, false, perspective(30, W / H, 1, 3000));
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  // ---------- steering ----------
+  var aimX = 0, aimY = 0, eyeX = 0, eyeY = 0;
+  function aim(x, y) {
+    aimX = (x - W / 2) * 0.25;
+    aimY = (y - H / 2) * 0.15;
+  }
+  window.addEventListener("pointermove", function(e) { aim(e.clientX, e.clientY); });
+  window.addEventListener("pointerdown", function(e) { aim(e.clientX, e.clientY); });
+
+  // ---------- fly ----------
+  // Only time spent on screen counts, so coming back to the tab carries on
+  // from where it was instead of lurching forward
+  var travelled = 0, last = 0;
+  function frame(now) {
+    if (last) travelled += Math.min(now - last, 100) * SPEED;
+    last = now;
+
+    eyeX += (aimX - eyeX) * 0.01;
+    eyeY += (-aimY - eyeY) * 0.01;
+    var eyeZ = COUNT - travelled % COUNT;
+
+    gl.disable(gl.BLEND);
+    gl.useProgram(skyProg);
+    gl.bindBuffer(gl.ARRAY_BUFFER, skyBuf);
+    gl.enableVertexAttribArray(skyPos);
+    gl.vertexAttribPointer(skyPos, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.disableVertexAttribArray(skyPos);
+
+    gl.enable(gl.BLEND);
+    gl.useProgram(cloudProg);
+    gl.bindBuffer(gl.ARRAY_BUFFER, cloudBuf);
+    gl.enableVertexAttribArray(cPos);
+    gl.enableVertexAttribArray(cUv);
+    gl.vertexAttribPointer(cPos, 3, gl.FLOAT, false, 20, 0);
+    gl.vertexAttribPointer(cUv, 2, gl.FLOAT, false, 20, 12);
+    // The strip ahead (one strip further on) first, then the one we're in
+    gl.uniform3f(uEye, eyeX, eyeY, eyeZ + COUNT);
+    gl.drawElements(gl.TRIANGLES, COUNT * 6, gl.UNSIGNED_SHORT, 0);
+    gl.uniform3f(uEye, eyeX, eyeY, eyeZ);
+    gl.drawElements(gl.TRIANGLES, COUNT * 6, gl.UNSIGNED_SHORT, 0);
+    gl.disableVertexAttribArray(cPos);
+    gl.disableVertexAttribArray(cUv);
+
+    requestAnimationFrame(frame);
+  }
+  document.addEventListener("visibilitychange", function() { last = 0; });
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -813,6 +813,17 @@ makeElementDraggable("college-icon-group", function() {
 makeElementDraggable("arcade-icon-group", function() {
     toggleDesktopFolder("arcade");
 });
+// Opens CLOUDS, toggling it shut on a second click like dino does. Shutting
+// it unloads the page (see buildGameWindows), so it isn't left rendering
+// thousands of clouds behind a hidden window.
+makeElementDraggable("clouds-icon-group", function() {
+    var origin = document.getElementById("clouds-icon-group");
+    if (!$("#game-clouds-window").is(":hidden")) {
+        hidePopup("game-clouds-window", origin);
+        return;
+    }
+    showPopup("game-clouds-window", origin);
+});
 // griffinland leaves mocial for griffinlaszlo.com, its sister desktop. Same
 // tab, not a popup - the point is that it feels like the desktop changed
 // under you rather than that you opened somewhere else. griffinland has its
@@ -1155,6 +1166,13 @@ var arcadeGames = [
     { id: "mini-mocial",       size: [400, 640], name: "mini mocial",      title: "MINI MOCIAL",            src: "games/mocial/index.html",
       icon: "computer-icon.png" }
 ];
+
+// clouds: an endless flight over a cloud bank, rebuilt from scratch after
+// mr.doob's Clouds. Not in the arcade folder - it has its own desktop icon -
+// but its window is built and unloaded exactly like the games' are. at is
+// where it opens, in place of the arcade's cascade beside the folder.
+var cloudsGame = { id: "clouds", size: [640, 400], name: "clouds", title: "CLOUDS", src: "games/clouds.html",
+    icon: "clouds-icon.svg", at: ["22vw", "6vw"] };
 
 // Desktop folders that open a window listing their contents as folder icons.
 // Clicking the icon opens just that window; its contents open individually
@@ -2436,7 +2454,7 @@ var ARCADE_VERSION = 2;
 var arcadeCascade = 0;
 
 (function buildGameWindows() {
-    arcadeGames.forEach(function(game) {
+    arcadeGames.concat([cloudsGame]).forEach(function(game) {
         var win = document.createElement("div");
         win.id = "game-" + game.id + "-window";
         win.className = "popup-window game-window";
@@ -2467,7 +2485,10 @@ var arcadeCascade = 0;
                 // Cascade each newly opened game down and to the right of the
                 // last, so two open games don't land exactly on top of each
                 // other. Only until it's dragged - then it stays where it was put.
-                if (!win.dataset.dragged) {
+                if (!win.dataset.dragged && game.at) {
+                    win.style.left = game.at[0];
+                    win.style.top = game.at[1];
+                } else if (!win.dataset.dragged) {
                     var step = (arcadeCascade++ % 5) * 28;
                     // 46vw clears the arcade folder (14vw + 30vw wide)
                     win.style.left = "calc(46vw + " + step + "px)";

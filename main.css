@@ -285,6 +285,40 @@ footer {
     text-decoration: none;
 }
 
+/* Third column, starting level with mocial fm - both others are full */
+#clouds-icon-group {
+    top: 74px;
+    right: 152px;
+}
+
+#clouds-icon {
+    -webkit-user-drag: none;
+    user-drag: none;
+    user-select: none;
+    position: absolute;
+    top: 0;
+    right: 28px; /* centers the 44px icon within the 100px group */
+    width: 44px;
+    height: auto;
+    image-rendering: pixelated;
+}
+
+#clouds-icon-label {
+    position: absolute;
+    right: 0;
+    width: 100px;
+    text-align: center;
+    font-family: 'W95FA', sans-serif;
+    font-size: 13px;
+    line-height: 1.2;
+    top: 48px;
+}
+
+#clouds-icon-label a {
+    color: #fff;
+    text-decoration: none;
+}
+
 #computer-icon,
 #folder-icon,
 #files-icon,
