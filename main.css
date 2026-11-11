@@ -2651,3 +2651,632 @@ body.dark-mode .converter-substatus {
 .pill-postmodern:hover {
     color: #f00;
 }
+
+/* ===== cam ===================================================================
+   The desktop webcam (cam.js), after mr.doob's Slit Scan: a small CAM window
+   with the picture and a toolbar, and CAM SETTINGS, its own little window
+   docked to the left of it, laid out like a Win95 property sheet. */
+#cam-icon-group {
+    top: 181px;
+    right: 152px;
+}
+#cam-icon {
+    -webkit-user-drag: none;
+    user-drag: none;
+    user-select: none;
+    position: absolute;
+    top: 0;
+    right: 26px; /* centers the 48px icon within the 100px group */
+    width: 48px;
+    height: auto;
+    image-rendering: pixelated;
+}
+#cam-icon-label {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 100px;
+    text-align: center;
+    font-family: 'W95FA', sans-serif;
+    font-size: 13px;
+    line-height: 1.2;
+}
+#cam-icon-label a {
+    color: #fff;
+    text-decoration: none;
+}
+
+#cam-window {
+    display: none;
+    width: 380px;
+    left: 46vw;
+    top: 6vw;
+    text-align: left;
+}
+#cam-settings-window {
+    display: none;
+    width: 330px;
+    left: 20vw;
+    top: 6vw;
+    text-align: left;
+}
+#cam-window:focus {
+    outline: none;
+}
+
+.cam-inner,
+.cam-set-inner {
+    background: #c0c0c0;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 12px;
+    color: #000;
+    user-select: none;
+}
+body.dark-mode .cam-inner,
+body.dark-mode .cam-set-inner {
+    background: #b4b4b4;
+}
+.cam-inner {
+    padding: 6px;
+}
+
+/* Win95 bevels, shared by every button in both windows */
+.cam-btn {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border: 0;
+    border-radius: 0;
+    background: #c0c0c0;
+    color: #000;
+    font-family: 'W95FA', Tahoma, sans-serif;
+    font-size: 12px;
+    line-height: 1.1;
+    text-decoration: none;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+.cam-btn:active,
+.cam-btn.on {
+    box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+    background: #b8b8b8;
+}
+.cam-btn.on {
+    background-image: repeating-conic-gradient(#c0c0c0 0 25%, #d8d8d8 0 50%);
+    background-size: 2px 2px;
+}
+.cam-btn:focus-visible {
+    outline: 1px dotted #000;
+    outline-offset: -5px;
+}
+
+/* ----- the picture ----- */
+.cam-stage {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: #000;
+    box-shadow: inset -1px -1px #fff, inset 1px 1px #808080, inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a;
+    padding: 2px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.cam-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+    cursor: crosshair;
+    touch-action: none;
+}
+.cam-splash {
+    position: absolute;
+    inset: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px;
+    text-align: center;
+    color: #9fd8ff;
+    background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 3px),
+        radial-gradient(ellipse at center, #0c1f6e 0%, #050b2a 80%);
+    font-family: 'W95FA', monospace;
+}
+.cam-splash[hidden] {
+    display: none;
+}
+#cam-window .popup-inner-wrapper img.cam-splash-icon {
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+    animation: cam-bob 2.4s ease-in-out infinite;
+}
+@keyframes cam-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+.cam-splash-text {
+    font-size: 16px;
+    color: #d8f2ff;
+}
+.cam-splash-note {
+    font-size: 12px;
+    opacity: 0.75;
+    max-width: 260px;
+}
+.cam-splash .cam-btn[hidden] {
+    display: none;
+}
+.cam-rec-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 7px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    font-family: 'W95FA', monospace;
+    font-size: 12px;
+    pointer-events: none;
+}
+.cam-rec-badge[hidden] {
+    display: none;
+}
+.cam-rec-badge i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff2a2a;
+    animation: cam-blink 1s steps(1) infinite;
+}
+@keyframes cam-blink {
+    50% { opacity: 0; }
+}
+.cam-flash {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+}
+.cam-flash.go {
+    animation: cam-flash 0.35s ease-out;
+}
+@keyframes cam-flash {
+    0% { opacity: 0.85; }
+    100% { opacity: 0; }
+}
+.cam-stage.is-frozen::after {
+    content: "FROZEN";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 3px 7px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #9fd8ff;
+    font-family: 'W95FA', monospace;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+/* ----- toolbar and status line ----- */
+.cam-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-top: 6px;
+}
+.cam-tool {
+    padding: 6px 4px;
+}
+.cam-glyph {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    flex: 0 0 auto;
+}
+.cam-glyph-gear {
+    border-radius: 50%;
+    border: 3px dotted #000;
+    box-sizing: border-box;
+}
+.cam-glyph-snap {
+    border: 2px solid #000;
+    border-radius: 2px;
+    box-sizing: border-box;
+    background: radial-gradient(circle, #000 0 2px, transparent 2.5px);
+}
+.cam-glyph-rec {
+    border-radius: 50%;
+    background: #d40000;
+    box-shadow: inset -1px -1px rgba(0, 0, 0, 0.35);
+}
+.cam-tool.on .cam-glyph-rec {
+    animation: cam-blink 1s steps(1) infinite;
+}
+.cam-glyph-freeze {
+    background: linear-gradient(90deg, #000 0 35%, transparent 35% 65%, #000 65%);
+}
+.cam-status {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 2px 6px;
+    font-size: 11px;
+    color: #222;
+    box-shadow: inset -1px -1px #fff, inset 1px 1px #808080;
+    min-height: 15px;
+}
+
+/* ----- settings: tabs ----- */
+.cam-set-inner {
+    padding: 8px 8px 6px;
+}
+.cam-tabs {
+    display: flex;
+    gap: 0;
+    padding-left: 2px;
+    position: relative;
+    z-index: 1;
+}
+.cam-tab {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 0;
+    border-radius: 3px 3px 0 0;
+    background: #c0c0c0;
+    padding: 4px 7px 3px;
+    margin-top: 2px;
+    font-family: 'W95FA', Tahoma, sans-serif;
+    font-size: 12px;
+    color: #000;
+    box-shadow: inset 1px 1px #fff, inset -1px 0 #0a0a0a, inset -2px 0 #808080, inset 2px 2px #dfdfdf;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+.cam-tab.on {
+    margin-top: 0;
+    padding: 5px 9px 5px;
+    margin-left: -2px;
+    margin-right: -2px;
+    margin-bottom: -2px;
+    position: relative;
+    z-index: 2;
+    background: #c0c0c0;
+}
+.cam-tab:focus-visible {
+    outline: 1px dotted #000;
+    outline-offset: -4px;
+}
+.cam-sheet {
+    padding: 10px 8px 8px;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+    max-height: min(470px, 62vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.cam-pane[hidden] {
+    display: none;
+}
+.cam-hint {
+    margin-top: 6px;
+    padding: 3px 6px;
+    font-size: 11px;
+    line-height: 1.3;
+    min-height: 2.6em;
+    color: #222;
+    box-shadow: inset -1px -1px #fff, inset 1px 1px #808080;
+}
+.cam-lede {
+    margin: 0 0 8px;
+    font-size: 12px;
+}
+.cam-legend {
+    margin: 6px 0 0;
+    font-size: 11px;
+    color: #333;
+}
+
+.cam-group {
+    margin: 0 0 10px;
+    padding: 8px 8px 6px;
+    border: 0;
+    box-shadow: inset -1px -1px #fff, inset 1px 1px #808080, inset -2px -2px #808080, inset 2px 2px #fff;
+}
+.cam-group:last-child {
+    margin-bottom: 0;
+}
+.cam-group legend {
+    padding: 0 4px;
+    font-family: 'W95FA', Tahoma, sans-serif;
+    font-size: 12px;
+}
+
+/* ----- vibes ----- */
+.cam-vibes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+}
+.cam-vibe {
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 4px 7px;
+    min-height: 44px;
+}
+.cam-vibe b {
+    font-weight: normal;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+}
+.cam-vibe span {
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 10px;
+    color: #333;
+}
+.cam-vibe-actions {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 5px;
+    margin-top: 8px;
+}
+.cam-vibe-actions .cam-btn {
+    padding: 8px;
+}
+.cam-surprise {
+    background: linear-gradient(90deg, #ffd1f0, #d1e9ff, #d8ffd1, #fff6c9);
+}
+.cam-surprise:active {
+    background: linear-gradient(90deg, #f7b6e2, #b6d8f7, #c2f7b6, #f7ebb0);
+}
+
+/* ----- time map picker ----- */
+.cam-patterns {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+}
+.cam-pattern {
+    -webkit-appearance: none;
+    appearance: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 2px 3px;
+    border: 0;
+    border-radius: 0;
+    background: #c0c0c0;
+    font-family: 'W95FA', Tahoma, sans-serif;
+    font-size: 11px;
+    color: #000;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+.cam-pattern canvas {
+    display: block;
+    width: 100%;
+    max-width: 48px;
+    aspect-ratio: 4 / 3;
+    image-rendering: pixelated;
+    box-shadow: 0 0 0 1px #000;
+}
+.cam-pattern.on {
+    background: #000080;
+    color: #fff;
+    box-shadow: inset -1px -1px #fff, inset 1px 1px #0a0a0a, inset -2px -2px #dfdfdf, inset 2px 2px #808080;
+}
+.cam-pattern:focus-visible {
+    outline: 1px dotted #000;
+    outline-offset: -4px;
+}
+
+/* ----- sliders ----- */
+.cam-slider {
+    display: block;
+    margin: 2px 0 6px;
+}
+.cam-slider-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    line-height: 1.2;
+}
+.cam-slider-value {
+    font-family: 'W95FA', monospace;
+    color: #000080;
+}
+.cam-slider input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 20px;
+    margin: 1px 0 0;
+    background: transparent;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+.cam-slider input[type="range"]:focus {
+    outline: none;
+}
+.cam-slider input[type="range"]:focus-visible {
+    outline: 1px dotted #000;
+}
+/* the groove, sunk in and filled navy up to the thumb */
+.cam-slider input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px;
+    background: linear-gradient(90deg, #000080 0 var(--fill, 0%), #fff var(--fill, 0%));
+    box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf, 0 0 0 1px #0a0a0a;
+}
+.cam-slider input[type="range"]::-moz-range-track {
+    height: 6px;
+    background: linear-gradient(90deg, #000080 0 var(--fill, 0%), #fff var(--fill, 0%));
+    box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf, 0 0 0 1px #0a0a0a;
+}
+.cam-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 11px;
+    height: 20px;
+    margin-top: -7px;
+    border: 0;
+    border-radius: 0;
+    background: #c0c0c0;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+}
+.cam-slider input[type="range"]::-moz-range-thumb {
+    width: 11px;
+    height: 20px;
+    border: 0;
+    border-radius: 0;
+    background: #c0c0c0;
+    box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+}
+
+/* ----- checkboxes, chips, select ----- */
+.cam-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin-top: 4px;
+}
+.cam-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    cursor: url('cursor-pointer.png') 8 0, pointer;
+}
+.cam-check input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+.cam-check-box {
+    width: 13px;
+    height: 13px;
+    background: #fff;
+    box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf, inset 2px 2px #0a0a0a;
+    position: relative;
+    flex: 0 0 auto;
+}
+.cam-check input:checked + .cam-check-box::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 3px;
+    height: 7px;
+    border: solid #000;
+    border-width: 0 2px 2px 0;
+    transform: rotate(40deg);
+}
+.cam-check input:focus-visible + .cam-check-box {
+    outline: 1px dotted #000;
+    outline-offset: 2px;
+}
+.cam-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.cam-chip {
+    padding: 5px 8px;
+}
+.cam-field-label {
+    display: block;
+    margin: 2px 0 4px;
+    font-size: 11px;
+}
+.cam-select-row {
+    display: block;
+    margin-top: 8px;
+}
+.cam-select {
+    width: 100%;
+    padding: 2px;
+    font-family: Tahoma, Geneva, sans-serif;
+    font-size: 12px;
+    background: #fff;
+    border: 0;
+    border-radius: 0;
+    box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf, inset 2px 2px #0a0a0a;
+}
+
+/* ----- inspiration ----- */
+.cam-inspo {
+    padding: 12px;
+    background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 3px),
+        linear-gradient(180deg, #0c1f6e 0%, #071447 100%);
+    color: #9fd8ff;
+    box-shadow: inset 1px 1px #808080, inset -1px -1px #fff, inset 2px 2px #0a0a0a;
+}
+.cam-inspo-kicker {
+    font-family: 'W95FA', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    opacity: 0.8;
+}
+.cam-inspo-title {
+    margin-top: 4px;
+    font-family: 'W95FA', monospace;
+    font-size: 24px;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 0 8px rgba(120, 200, 255, 0.6);
+}
+.cam-inspo-by {
+    margin-top: 2px;
+    font-family: 'W95FA', monospace;
+    font-size: 14px;
+    color: #d8f2ff;
+}
+.cam-inspo-text {
+    margin: 10px 0 12px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #cfe7ff;
+}
+.cam-inspo-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.cam-inspo-link {
+    padding: 6px 10px;
+}
+.cam-inspo-link:hover {
+    color: #000080;
+}
+
+/* Maximised, the picture fills the window and keeps its shape */
+@media screen and (min-width: 961px) {
+    #cam-window.resize .cam-inner {
+        display: flex;
+        flex-direction: column;
+    }
+    #cam-window.resize .cam-stage {
+        flex: 1 1 auto;
+        aspect-ratio: auto;
+        min-height: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #cam-window .popup-inner-wrapper img.cam-splash-icon,
+    .cam-rec-badge i,
+    .cam-tool.on .cam-glyph-rec {
+        animation: none;
+    }
+}
