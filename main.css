@@ -2906,6 +2906,16 @@ body.dark-mode .cam-set-inner {
 .cam-glyph-freeze {
     background: linear-gradient(90deg, #000 0 35%, transparent 35% 65%, #000 65%);
 }
+.cam-glyph-dice {
+    border: 1px solid #000;
+    border-radius: 2px;
+    box-sizing: border-box;
+    background:
+        radial-gradient(circle, #000 0 1px, transparent 1.5px) 1px 1px / 4px 4px no-repeat,
+        radial-gradient(circle, #000 0 1px, transparent 1.5px) 50% 50% / 4px 4px no-repeat,
+        radial-gradient(circle, #000 0 1px, transparent 1.5px) 100% 100% / 4px 4px no-repeat,
+        #fff;
+}
 .cam-status {
     display: flex;
     justify-content: space-between;

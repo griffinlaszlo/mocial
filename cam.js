@@ -24,6 +24,9 @@ var INSPIRATION = {
 };
 
 var STORE_KEY = "mocial-cam-settings";
+// Visitors get one button, RANDOMIZER. The full CAM SETTINGS window only
+// opens with ?camsettings in the address.
+var FULL = /[?&]camsettings\b/.test(location.search);
 var OUT_W = 640, OUT_H = 480;          // what the picture is drawn at
 // Capture size and how many frames the ring holds. Hi keeps fewer frames so
 // the buffer stays under ~90MB of video memory.
@@ -168,7 +171,9 @@ body.innerHTML =
         '<div class="cam-flash"></div>' +
     '</div>' +
     '<div class="cam-bar">' +
-        '<button type="button" class="cam-btn cam-tool" data-cam="settings" aria-pressed="true" title="Settings"><i class="cam-glyph cam-glyph-gear"></i>SETTINGS</button>' +
+        (FULL
+            ? '<button type="button" class="cam-btn cam-tool" data-cam="settings" aria-pressed="true" title="Settings"><i class="cam-glyph cam-glyph-gear"></i>SETTINGS</button>'
+            : '<button type="button" class="cam-btn cam-tool" data-cam="random" title="Roll the dice on every setting"><i class="cam-glyph cam-glyph-dice"></i>RANDOMIZER</button>') +
         '<button type="button" class="cam-btn cam-tool" data-cam="snap" title="Save a picture"><i class="cam-glyph cam-glyph-snap"></i>SNAP</button>' +
         '<button type="button" class="cam-btn cam-tool" data-cam="rec" aria-pressed="false" title="Record a clip"><i class="cam-glyph cam-glyph-rec"></i>REC</button>' +
         '<button type="button" class="cam-btn cam-tool" data-cam="freeze" aria-pressed="false" title="Freeze time"><i class="cam-glyph cam-glyph-freeze"></i>FREEZE</button>' +
@@ -212,7 +217,9 @@ setBody.appendChild(tabRow);
 setBody.appendChild(sheet);
 setBody.appendChild(hintBar);
 setWin.appendChild(setBody);
-document.body.insertBefore(setWin, document.querySelector("footer"));
+// Built either way (the controls keep the status line current), but only put
+// on the page with ?camsettings
+if (FULL) document.body.insertBefore(setWin, document.querySelector("footer"));
 
 var DEFAULT_HINT = "Point at anything to see what it does.";
 hintBar.textContent = DEFAULT_HINT;
@@ -337,7 +344,7 @@ function surpriseMe() {
     settings.pixel = chance(0.75) ? 1 : Math.round(rand(2, 10));
     settings.kaleido = chance(0.7) ? 0 : pick([3, 4, 6, 8]);
     settings.stretch = chance(0.8) ? 1 : pick([2, 3, 4]);
-    changed("surprise");
+    changed("random");
 }
 
 // ----- Controls -----
@@ -1120,13 +1127,17 @@ function toggleFreeze() {
 toolBtns.snap.addEventListener("click", snap);
 toolBtns.rec.addEventListener("click", toggleRec);
 toolBtns.freeze.addEventListener("click", toggleFreeze);
-toolBtns.settings.addEventListener("click", function() {
-    if (!$(setWin).is(":hidden")) {
-        hidePopup("cam-settings-window", toolBtns.settings);
-    } else {
-        openSettings();
-    }
-});
+if (FULL) {
+    toolBtns.settings.addEventListener("click", function() {
+        if (!$(setWin).is(":hidden")) {
+            hidePopup("cam-settings-window", toolBtns.settings);
+        } else {
+            openSettings();
+        }
+    });
+} else {
+    toolBtns.random.addEventListener("click", surpriseMe);
+}
 
 // Keyboard, while the CAM window has focus: space freezes, S snaps, R records
 win.tabIndex = -1;
@@ -1190,6 +1201,7 @@ function dockSettings() {
 }
 
 function openSettings() {
+    if (!FULL) return;
     showPopup("cam-settings-window", toolBtns.settings);
     // showPopup may have pulled it on screen somewhere else first
     dockSettings();
@@ -1219,7 +1231,7 @@ new MutationObserver(function() {
     }
 }).observe(win, { attributes: true, attributeFilter: ["style"] });
 
-new MutationObserver(function() {
+if (FULL) new MutationObserver(function() {
     var open = setWin.getClientRects().length > 0;
     toolBtns.settings.setAttribute("aria-pressed", open ? "true" : "false");
     toolBtns.settings.classList.toggle("on", open);
